@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.points.mapper.SignRecordMapper">
+
+    <resultMap id="SignRecordResult" type="com.ruoyi.points.domain.SignRecord">
+        <id     property="recordId"       column="record_id"/>
+        <result property="userId"         column="user_id"/>
+        <result property="signDate"       column="sign_date"/>
+        <result property="points"         column="points"/>
+        <result property="continuousDays" column="continuous_days"/>
+        <result property="isRepair"       column="is_repair"/>
+        <result property="createTime"     column="create_time"/>
+    </resultMap>
+
+    <select id="selectByUserAndDate" resultMap="SignRecordResult">
+        select * from t_sign_record where user_id=#{userId} and sign_date=#{signDate} limit 1
+    </select>
+
+    <select id="selectMonthRecords" resultMap="SignRecordResult">
+        select * from t_sign_record
+        where user_id=#{userId}
+          and year(sign_date)=#{year}
+          and month(sign_date)=#{month}
+        order by sign_date
+    </select>
+
+    <select id="selectLastRecord" parameterType="Long" resultMap="SignRecordResult">
+        select * from t_sign_record where user_id=#{userId} order by sign_date desc limit 1
+    </select>
+
+    <insert id="insert" parameterType="com.ruoyi.points.domain.SignRecord" useGeneratedKeys="true" keyProperty="recordId">
+        insert into t_sign_record(user_id, sign_date, points, continuous_days, is_repair, create_time)
+        values(#{userId}, #{signDate}, #{points}, #{continuousDays}, coalesce(#{isRepair},'0'), sysdate())
+    </insert>
+</mapper>

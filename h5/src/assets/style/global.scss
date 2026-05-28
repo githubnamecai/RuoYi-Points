@@ -1,0 +1,51 @@
+// 全局变量
+:root {
+  --primary-color: #ff8c00;
+  --primary-light: #ffb84d;
+  --primary-dark: #e57a00;
+  --bg-color: #f7f7f7;
+  --card-radius: 12px;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+  font-size: 14px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+* { box-sizing: border-box; }
+
+#app { min-height: 100vh; }
+
+// Vant 主题覆盖
+.van-button--primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.van-tab--active { color: var(--primary-color) !important; }
+.van-tabs__line { background-color: var(--primary-color) !important; }
+.van-nav-bar { background-color: #fff; }
+.van-nav-bar .van-nav-bar__title { font-weight: 600; }
+
+// 通用卡片
+.card {
+  background: #fff;
+  border-radius: var(--card-radius);
+  margin: 12px;
+  overflow: hidden;
+}
+
+.points-text {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.page-content {
+  padding-top: 12px;
+  padding-bottom: 60px; // tabbar
+}

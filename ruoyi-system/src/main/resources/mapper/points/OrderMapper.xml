@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.points.mapper.OrderMapper">
+
+    <resultMap id="OrderResult" type="com.ruoyi.points.domain.Order">
+        <id     property="orderId"        column="order_id"/>
+        <result property="orderNo"        column="order_no"/>
+        <result property="userId"         column="user_id"/>
+        <result property="userPhone"      column="user_phone"/>
+        <result property="goodsId"        column="goods_id"/>
+        <result property="goodsName"      column="goods_name"/>
+        <result property="goodsCover"     column="goods_cover"/>
+        <result property="goodsType"      column="goods_type"/>
+        <result property="quantity"       column="quantity"/>
+        <result property="pointsUsed"     column="points_used"/>
+        <result property="status"         column="status"/>
+        <result property="consignee"      column="consignee"/>
+        <result property="phone"          column="phone"/>
+        <result property="address"        column="address"/>
+        <result property="expressCompany" column="express_company"/>
+        <result property="expressNo"      column="express_no"/>
+        <result property="shipTime"       column="ship_time"/>
+        <result property="finishTime"     column="finish_time"/>
+        <result property="closeReason"    column="close_reason"/>
+        <result property="closeTime"      column="close_time"/>
+        <result property="createBy"       column="create_by"/>
+        <result property="createTime"     column="create_time"/>
+        <result property="updateBy"       column="update_by"/>
+        <result property="updateTime"     column="update_time"/>
+        <result property="remark"         column="remark"/>
+    </resultMap>
+
+    <sql id="orderVo">
+        select order_id, order_no, user_id, user_phone, goods_id, goods_name, goods_cover, goods_type,
+               quantity, points_used, status, consignee, phone, address, express_company, express_no,
+               ship_time, finish_time, close_reason, close_time, create_by, create_time, update_by, update_time, remark
+        from t_order
+    </sql>
+
+    <select id="selectOrderList" parameterType="com.ruoyi.points.domain.Order" resultMap="OrderResult">
+        <include refid="orderVo"/>
+        <where>
+            <if test="orderNo != null and orderNo != ''">and order_no like concat('%', #{orderNo}, '%')</if>
+            <if test="userPhone != null and userPhone != ''">and user_phone like concat('%', #{userPhone}, '%')</if>
+            <if test="goodsName != null and goodsName != ''">and goods_name like concat('%', #{goodsName}, '%')</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="goodsType != null and goodsType != ''">and goods_type = #{goodsType}</if>
+            <if test="params.beginTime != null and params.beginTime != ''">and create_time &gt;= #{params.beginTime}</if>
+            <if test="params.endTime != null and params.endTime != ''">and create_time &lt;= #{params.endTime}</if>
+        </where>
+        order by order_id desc
+    </select>
+
+    <select id="selectOrderById" parameterType="Long" resultMap="OrderResult">
+        <include refid="orderVo"/> where order_id=#{orderId}
+    </select>
+
+    <select id="selectOrderByNo" parameterType="String" resultMap="OrderResult">
+        <include refid="orderVo"/> where order_no=#{orderNo}
+    </select>
+
+    <select id="selectUserOrders" resultMap="OrderResult">
+        <include refid="orderVo"/>
+        <where>
+            user_id=#{userId}
+            <if test="status != null and status != ''">and status=#{status}</if>
+        </where>
+        order by order_id desc
+    </select>
+
+    <insert id="insertOrder" parameterType="com.ruoyi.points.domain.Order" useGeneratedKeys="true" keyProperty="orderId">
+        insert into t_order(order_no, user_id, user_phone, goods_id, goods_name, goods_cover, goods_type,
+                            quantity, points_used, status, consignee, phone, address, create_by, create_time, remark)
+        values(#{orderNo}, #{userId}, #{userPhone}, #{goodsId}, #{goodsName}, #{goodsCover}, #{goodsType},
+               #{quantity}, #{pointsUsed}, '0', #{consignee}, #{phone}, #{address}, #{createBy}, sysdate(), #{remark})
+    </insert>
+
+    <update id="updateOrder" parameterType="com.ruoyi.points.domain.Order">
+        update t_order
+        <set>
+            <if test="status != null">status=#{status},</if>
+            <if test="consignee != null">consignee=#{consignee},</if>
+            <if test="phone != null">phone=#{phone},</if>
+            <if test="address != null">address=#{address},</if>
+            <if test="expressCompany != null">express_company=#{expressCompany},</if>
+            <if test="expressNo != null">express_no=#{expressNo},</if>
+            <if test="updateBy != null">update_by=#{updateBy},</if>
+            <if test="remark != null">remark=#{remark},</if>
+            update_time = sysdate()
+        </set>
+        where order_id=#{orderId}
+    </update>
+
+    <update id="shipOrder" parameterType="com.ruoyi.points.domain.Order">
+        update t_order set status='1', express_company=#{expressCompany},
+            express_no=#{expressNo}, ship_time=sysdate(), update_by=#{updateBy}, update_time=sysdate()
+        where order_id=#{orderId} and status='0'
+    </update>
+
+    <update id="closeOrder">
+        update t_order set status='3', close_reason=#{reason}, close_time=sysdate(),
+            update_time=sysdate()
+        where order_id=#{orderId} and status in ('0','1')
+    </update>
+
+    <update id="confirmReceipt">
+        update t_order set status='2', finish_time=sysdate(), update_time=sysdate()
+        where order_id=#{orderId} and user_id=#{userId} and status='1'
+    </update>
+
+</mapper>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.points.mapper.SignConfigMapper">
+
+    <resultMap id="SignConfigResult" type="com.ruoyi.points.domain.SignConfig">
+        <id     property="configId"        column="config_id"/>
+        <result property="enabled"         column="enabled"/>
+        <result property="basePoints"      column="base_points"/>
+        <result property="continuousReward" column="continuous_reward"/>
+        <result property="repairEnabled"   column="repair_enabled"/>
+        <result property="repairCost"      column="repair_cost"/>
+        <result property="repairMaxDays"   column="repair_max_days"/>
+        <result property="updateBy"        column="update_by"/>
+        <result property="updateTime"      column="update_time"/>
+    </resultMap>
+
+    <select id="selectConfig" resultMap="SignConfigResult">
+        select config_id, enabled, base_points, continuous_reward, repair_enabled, repair_cost,
+               repair_max_days, update_by, update_time
+        from t_sign_config where config_id=1
+    </select>
+
+    <update id="updateConfig" parameterType="com.ruoyi.points.domain.SignConfig">
+        update t_sign_config
+        <set>
+            <if test="enabled != null">enabled=#{enabled},</if>
+            <if test="basePoints != null">base_points=#{basePoints},</if>
+            <if test="continuousReward != null">continuous_reward=#{continuousReward},</if>
+            <if test="repairEnabled != null">repair_enabled=#{repairEnabled},</if>
+            <if test="repairCost != null">repair_cost=#{repairCost},</if>
+            <if test="repairMaxDays != null">repair_max_days=#{repairMaxDays},</if>
+            <if test="updateBy != null">update_by=#{updateBy},</if>
+            update_time=sysdate()
+        </set>
+        where config_id=1
+    </update>
+</mapper>

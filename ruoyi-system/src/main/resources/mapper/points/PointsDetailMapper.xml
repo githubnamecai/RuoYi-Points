@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.points.mapper.PointsDetailMapper">
+
+    <resultMap id="PointsDetailResult" type="com.ruoyi.points.domain.PointsDetail">
+        <id     property="detailId"     column="detail_id"/>
+        <result property="userId"       column="user_id"/>
+        <result property="nickname"     column="nickname"/>
+        <result property="phone"        column="phone"/>
+        <result property="changeType"   column="change_type"/>
+        <result property="sourceType"   column="source_type"/>
+        <result property="sourceId"     column="source_id"/>
+        <result property="changePoints" column="change_points"/>
+        <result property="balance"      column="balance"/>
+        <result property="description"  column="description"/>
+        <result property="createBy"     column="create_by"/>
+        <result property="createTime"   column="create_time"/>
+    </resultMap>
+
+    <sql id="detailVo">
+        select d.detail_id, d.user_id, u.nickname, u.phone, d.change_type, d.source_type, d.source_id,
+               d.change_points, d.balance, d.description, d.create_by, d.create_time
+        from t_points_detail d
+        left join t_user u on u.user_id = d.user_id
+    </sql>
+
+    <select id="selectDetailList" parameterType="com.ruoyi.points.domain.PointsDetail" resultMap="PointsDetailResult">
+        <include refid="detailVo"/>
+        <where>
+            <if test="userId != null">and d.user_id=#{userId}</if>
+            <if test="phone != null and phone != ''">and u.phone like concat('%', #{phone}, '%')</if>
+            <if test="changeType != null and changeType != ''">and d.change_type=#{changeType}</if>
+            <if test="sourceType != null and sourceType != ''">and d.source_type=#{sourceType}</if>
+            <if test="params.beginTime != null and params.beginTime != ''">and d.create_time &gt;= #{params.beginTime}</if>
+            <if test="params.endTime != null and params.endTime != ''">and d.create_time &lt;= #{params.endTime}</if>
+        </where>
+        order by d.detail_id desc
+    </select>
+
+    <select id="selectUserDetailList" resultMap="PointsDetailResult">
+        <include refid="detailVo"/> where d.user_id=#{userId} order by d.detail_id desc
+    </select>
+
+    <insert id="insert" parameterType="com.ruoyi.points.domain.PointsDetail" useGeneratedKeys="true" keyProperty="detailId">
+        insert into t_points_detail(user_id, change_type, source_type, source_id, change_points,
+                                    balance, description, create_by, create_time)
+        values(#{userId}, #{changeType}, #{sourceType}, #{sourceId}, #{changePoints},
+               #{balance}, #{description}, #{createBy}, sysdate())
+    </insert>
+
+    <select id="sumByChangeType" resultType="Long">
+        select coalesce(sum(change_points),0) from t_points_detail where change_type=#{changeType}
+    </select>
+
+    <select id="sumTodayByChangeType" resultType="Long">
+        select coalesce(sum(change_points),0) from t_points_detail
+        where change_type=#{changeType}
+          and date(create_time) = curdate()
+    </select>
+</mapper>
