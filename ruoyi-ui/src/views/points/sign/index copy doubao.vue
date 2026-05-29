@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <el-card shadow="never">
-      <div slot="header">签到配置</div>
+      <template slot="header">签到配置</template>
       <el-form ref="formRef" :model="form" label-width="140px" style="max-width:680px">
         <el-form-item label="签到开关">
           <el-switch v-model="form.enabled" active-value="1" inactive-value="0" />
@@ -23,7 +23,7 @@
             </el-table-column>
             <el-table-column width="80">
               <template slot-scope="scope">
-                <el-button size="mini" type="text" @click="removeRow(scope.$index)">删除</el-button>
+                <el-button link type="danger" @click="removeRow(scope.$index)">删除</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -63,7 +63,7 @@ export default {
       }
     }
   },
-  created() {
+  mounted() {
     this.load()
   },
   methods: {
@@ -71,7 +71,9 @@ export default {
       getSignConfig().then(res => {
         const d = res.data
         let list = []
-        try { list = d.continuousReward ? JSON.parse(d.continuousReward) : [] } catch (e) {}
+        try {
+          list = d.continuousReward ? JSON.parse(d.continuousReward) : []
+        } catch (e) {}
         this.form = { ...d, continuousRewardList: list }
       })
     },
@@ -84,10 +86,13 @@ export default {
     save() {
       const payload = { ...this.form, continuousReward: JSON.stringify(this.form.continuousRewardList) }
       delete payload.continuousRewardList
-      updateSignConfig(payload).then(() => {
-        this.$modal.msgSuccess('保存成功')
-        this.load()
-      })
+      updateSignConfig(payload)
+        .then(() => {
+          this.$modal.msgSuccess('保存成功')
+        })
+        .then(() => {
+          this.load()
+        })
     }
   }
 }

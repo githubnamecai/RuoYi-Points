@@ -1,13 +1,10 @@
 <template>
   <div class="app-container">
-    <el-form :inline="true" :model="q" ref="queryForm" size="small">
-      <el-form-item label="规则编码" prop="ruleCode">
-        <el-input v-model="q.ruleCode" clearable @keyup.enter.native="getList" />
-      </el-form-item>
-      <el-form-item label="规则名称" prop="ruleName">
-        <el-input v-model="q.ruleName" clearable />
-      </el-form-item>
-      <el-form-item label="类型" prop="ruleType">
+    <!-- 搜索表单 -->
+    <el-form :inline="true" :model="q">
+      <el-form-item label="规则编码"><el-input v-model="q.ruleCode" clearable @keyup.enter="getList" /></el-form-item>
+      <el-form-item label="规则名称"><el-input v-model="q.ruleName" clearable /></el-form-item>
+      <el-form-item label="类型">
         <el-select v-model="q.ruleType" clearable placeholder="全部" style="width:120px">
           <el-option label="签到" value="0" />
           <el-option label="任务" value="1" />
@@ -21,6 +18,7 @@
       </el-form-item>
     </el-form>
 
+    <!-- 表格 -->
     <el-table v-loading="loading" :data="list">
       <el-table-column label="ID" prop="ruleId" width="80" />
       <el-table-column label="规则编码" prop="ruleCode" width="160" />
@@ -42,18 +40,20 @@
       <el-table-column label="备注" prop="remark" show-overflow-tooltip />
       <el-table-column label="操作" width="180" fixed="right">
         <template slot-scope="scope">
-          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleEdit(scope.row)"
+          <el-button link type="primary" icon="el-icon-edit" @click="handleEdit(scope.row)"
                      v-hasPermi="['points:rule:edit']">修改</el-button>
-          <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)"
+          <el-button link type="danger" icon="el-icon-delete" @click="handleDelete(scope.row)"
                      v-hasPermi="['points:rule:edit']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
+    <!-- 分页（Vue 2 版本用 .sync 修饰符） -->
     <pagination v-show="total>0" :total="total" :page.sync="q.pageNum"
                 :limit.sync="q.pageSize" @pagination="getList" />
 
-    <el-dialog :title="title" :visible.sync="open" width="560px" append-to-body>
+    <!-- 弹窗表单 -->
+    <el-dialog :title="title" :visible.sync="open" width="560px">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="120px">
         <el-form-item label="规则编码" prop="ruleCode">
           <el-input v-model="form.ruleCode" :disabled="!!form.ruleId" placeholder="如 SIGN_IN" />
@@ -89,7 +89,7 @@
           <el-input v-model="form.remark" type="textarea" :rows="2" />
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
+      <div slot="footer">
         <el-button type="primary" @click="submit">确 定</el-button>
         <el-button @click="open=false">取 消</el-button>
       </div>
@@ -129,20 +129,27 @@ export default {
     this.getList()
   },
   methods: {
+    // 获取列表
     getList() {
       this.loading = true
       listRule(this.q).then(res => {
         this.list = res.rows
         this.total = res.total
+      }).catch(err => {
+        console.error('获取规则列表失败：', err)
+      }).finally(() => {
         this.loading = false
       })
     },
+    // 类型文本转换
     typeText(t) {
-      return { '0': '签到', '1': '任务', '2': '其他' }[t] || t
+      return { '0':'签到','1':'任务','2':'其他' }[t] || t
     },
+    // 类型标签颜色
     typeColor(t) {
-      return { '0': 'success', '1': 'primary', '2': 'info' }[t] || ''
+      return { '0':'success','1':'primary','2':'info' }[t] || ''
     },
+    // 重置表单
     reset() {
       this.form = {
         ruleId: undefined,
@@ -155,20 +162,28 @@ export default {
         configJson: '',
         remark: ''
       }
+      // 重置表单验证
+      this.$refs.formRef && this.$refs.formRef.resetFields()
     },
+    // 新增
     handleAdd() {
       this.reset()
       this.open = true
       this.title = '新增规则'
     },
+    // 编辑
     handleEdit(row) {
       this.reset()
       getRule(row.ruleId).then(res => {
         this.form = res.data
         this.open = true
         this.title = '修改规则'
+      }).catch(err => {
+        this.$modal.msgError('获取规则详情失败')
+        console.error(err)
       })
     },
+    // 提交保存
     submit() {
       this.$refs.formRef.validate(valid => {
         if (!valid) return
@@ -177,9 +192,13 @@ export default {
           this.$modal.msgSuccess('保存成功')
           this.open = false
           this.getList()
+        }).catch(err => {
+          this.$modal.msgError('保存失败')
+          console.error(err)
         })
       })
     },
+    // 删除
     handleDelete(row) {
       this.$modal.confirm(`确定删除规则 "${row.ruleName}"？`).then(() => {
         return delRule(row.ruleId)

@@ -9,29 +9,23 @@
       <el-col :span="4"><el-card><div class="stat-label">今日消耗</div><div class="stat-num">{{ stat.todayConsumed || 0 }}</div></el-card></el-col>
     </el-row>
 
-    <el-form :inline="true" :model="q" size="small">
-      <el-form-item label="手机号">
-        <el-input v-model="q.phone" clearable @keyup.enter.native="getList" />
-      </el-form-item>
+    <el-form :inline="true" :model="q">
+      <el-form-item label="手机号"><el-input v-model="q.phone" clearable @keyup.enter="getList" /></el-form-item>
       <el-form-item label="变动类型">
         <el-select v-model="q.changeType" clearable placeholder="全部" style="width:120px">
-          <el-option label="增加" value="0" />
-          <el-option label="扣减" value="1" />
+          <el-option label="增加" value="0" /><el-option label="扣减" value="1" />
         </el-select>
       </el-form-item>
       <el-form-item label="来源">
         <el-select v-model="q.sourceType" clearable placeholder="全部" style="width:140px">
-          <el-option label="签到" value="SIGN_IN" />
-          <el-option label="兑换" value="EXCHANGE" />
-          <el-option label="退还" value="REFUND" />
-          <el-option label="后台调整" value="ADMIN_ADJUST" />
-          <el-option label="连续奖励" value="CONTINUOUS_BONUS" />
-          <el-option label="补签" value="SIGN_REPAIR" />
+          <el-option label="签到" value="SIGN_IN" /><el-option label="兑换" value="EXCHANGE" />
+          <el-option label="退还" value="REFUND" /><el-option label="后台调整" value="ADMIN_ADJUST" />
+          <el-option label="连续奖励" value="CONTINUOUS_BONUS" /><el-option label="补签" value="SIGN_REPAIR" />
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" @click="getList">搜索</el-button>
-        <el-button type="warning" icon="el-icon-download" @click="handleExport"
+        <el-button type="primary" icon="Search" @click="getList">搜索</el-button>
+        <el-button type="warning" icon="Download" @click="handleExport"
                    v-hasPermi="['points:detail:export']">导出</el-button>
       </el-form-item>
     </el-form>
@@ -41,7 +35,7 @@
       <el-table-column label="用户昵称" prop="nickname" />
       <el-table-column label="手机号" prop="phone" width="130" />
       <el-table-column label="类型" width="80">
-        <template slot-scope="scope">
+        <template #default="scope">
           <el-tag :type="scope.row.changeType==='0' ? 'success' : 'danger'">
             {{ scope.row.changeType === '0' ? '增加' : '扣减' }}
           </el-tag>
@@ -53,55 +47,22 @@
       <el-table-column label="描述" prop="description" show-overflow-tooltip />
       <el-table-column label="时间" prop="createTime" width="160" />
     </el-table>
-
-    <pagination v-show="total>0" :total="total" :page.sync="q.pageNum"
-                :limit.sync="q.pageSize" @pagination="getList" />
+    <pagination v-show="total>0" :total="total" v-model:page="q.pageNum" v-model:limit="q.pageSize" @pagination="getList" />
   </div>
 </template>
 
-<script>
+<script setup name="PointsDetail">
 import { listDetail, statPoints } from '@/api/points/detail'
-
-export default {
-  name: 'PointsDetail',
-  data() {
-    return {
-      list: [],
-      total: 0,
-      loading: false,
-      stat: {},
-      q: {
-        pageNum: 1,
-        pageSize: 10,
-        phone: '',
-        changeType: '',
-        sourceType: ''
-      }
-    }
-  },
-  created() {
-    this.getList()
-    this.getStat()
-  },
-  methods: {
-    getList() {
-      this.loading = true
-      listDetail(this.q).then(res => {
-        this.list = res.rows
-        this.total = res.total
-        this.loading = false
-      })
-    },
-    getStat() {
-      statPoints().then(res => {
-        this.stat = res.data
-      })
-    },
-    handleExport() {
-      this.download('points/detail/export', this.q, `积分明细_${new Date().getTime()}.xlsx`)
-    }
-  }
+const { proxy } = getCurrentInstance()
+const list = ref([]); const total = ref(0); const loading = ref(false); const stat = ref({})
+const q = ref({ pageNum: 1, pageSize: 10, phone: '', changeType: '', sourceType: '' })
+function getList() {
+  loading.value = true
+  listDetail(q.value).then(res => { list.value = res.rows; total.value = res.total; loading.value = false })
 }
+function getStat() { statPoints().then(res => stat.value = res.data) }
+function handleExport() { proxy.download('points/detail/export', q.value, `积分明细_${new Date().getTime()}.xlsx`) }
+getList(); getStat()
 </script>
 
 <style scoped>

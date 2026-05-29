@@ -278,40 +278,41 @@ INSERT INTO sys_menu(menu_id, menu_name, parent_id, order_num, path, component, 
 VALUES (2000, '积分平台', 0, 5, 'points', NULL, 1, 0, 'M', '0', '0', '', 'tree-table', 'admin', NOW(), '积分平台目录');
 
 -- 商品管理
-INSERT INTO sys_menu VALUES (2010, '商品分类', 2000, 1, 'category', 'points/category/index', 1, 0, 'C', '0', '0', 'points:category:list', 'tree', 'admin', NOW(), '', NULL, '商品分类菜单');
-INSERT INTO sys_menu VALUES (2011, '分类查询', 2010, 1, '', '', 1, 0, 'F', '0', '0', 'points:category:query', '#', 'admin', NOW(), '', NULL, '');
-INSERT INTO sys_menu VALUES (2012, '分类新增', 2010, 2, '', '', 1, 0, 'F', '0', '0', 'points:category:add', '#', 'admin', NOW(), '', NULL, '');
-INSERT INTO sys_menu VALUES (2013, '分类修改', 2010, 3, '', '', 1, 0, 'F', '0', '0', 'points:category:edit', '#', 'admin', NOW(), '', NULL, '');
-INSERT INTO sys_menu VALUES (2014, '分类删除', 2010, 4, '', '', 1, 0, 'F', '0', '0', 'points:category:remove', '#', 'admin', NOW(), '', NULL, '');
+-- INSERT INTO sys_menu VALUES (2010, '商品分类', 2000, 1, 'category', 'points/category/index', 1, 0, 'C', '0', '0', 'points:category:list', 'tree', 'admin', NOW(), '', NULL, '商品分类菜单');
+INSERT INTO sys_menu VALUES (2010, '商品分类', 2000, 1, 'category', 'points/category/index', '', '', 1, 0, 'C', '0', '0', 'points:category:list', 'tree', 'admin', NOW(), '', NULL, '商品分类菜单');
+INSERT INTO sys_menu VALUES (2011, '分类查询', 2010, 1, '', '','', '', 1, 0, 'F', '0', '0', 'points:category:query', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2012, '分类新增', 2010, 2, '', '','', '', 1, 0, 'F', '0', '0', 'points:category:add', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2013, '分类修改', 2010, 3, '', '','', '', 1, 0, 'F', '0', '0', 'points:category:edit', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2014, '分类删除', 2010, 4, '', '','', '', 1, 0, 'F', '0', '0', 'points:category:remove', '#', 'admin', NOW(), '', NULL, '');
 
-INSERT INTO sys_menu VALUES (2020, '商品管理', 2000, 2, 'goods', 'points/goods/index', 1, 0, 'C', '0', '0', 'points:goods:list', 'shopping', 'admin', NOW(), '', NULL, '商品管理菜单');
-INSERT INTO sys_menu VALUES (2021, '商品查询', 2020, 1, '', '', 1, 0, 'F', '0', '0', 'points:goods:query', '#', 'admin', NOW(), '', NULL, '');
-INSERT INTO sys_menu VALUES (2022, '商品新增', 2020, 2, '', '', 1, 0, 'F', '0', '0', 'points:goods:add', '#', 'admin', NOW(), '', NULL, '');
-INSERT INTO sys_menu VALUES (2023, '商品修改', 2020, 3, '', '', 1, 0, 'F', '0', '0', 'points:goods:edit', '#', 'admin', NOW(), '', NULL, '');
-INSERT INTO sys_menu VALUES (2024, '商品删除', 2020, 4, '', '', 1, 0, 'F', '0', '0', 'points:goods:remove', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2020, '商品管理', 2000, 2, 'goods', 'points/goods/index','', '', 1, 0, 'C', '0', '0', 'points:goods:list', 'shopping', 'admin', NOW(), '', NULL, '商品管理菜单');
+INSERT INTO sys_menu VALUES (2021, '商品查询', 2020, 1, '', '','', '', 1, 0, 'F', '0', '0', 'points:goods:query', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2022, '商品新增', 2020, 2, '', '','', '', 1, 0, 'F', '0', '0', 'points:goods:add', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2023, '商品修改', 2020, 3, '', '', '', '',1, 0, 'F', '0', '0', 'points:goods:edit', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2024, '商品删除', 2020, 4, '', '','', '', 1, 0, 'F', '0', '0', 'points:goods:remove', '#', 'admin', NOW(), '', NULL, '');
 
 -- 订单管理
-INSERT INTO sys_menu VALUES (2030, '订单管理', 2000, 3, 'order', 'points/order/index', 1, 0, 'C', '0', '0', 'points:order:list', 'documentation', 'admin', NOW(), '', NULL, '订单管理菜单');
-INSERT INTO sys_menu VALUES (2031, '订单查询', 2030, 1, '', '', 1, 0, 'F', '0', '0', 'points:order:query', '#', 'admin', NOW(), '', NULL, '');
-INSERT INTO sys_menu VALUES (2032, '订单发货', 2030, 2, '', '', 1, 0, 'F', '0', '0', 'points:order:ship', '#', 'admin', NOW(), '', NULL, '');
-INSERT INTO sys_menu VALUES (2033, '订单关闭', 2030, 3, '', '', 1, 0, 'F', '0', '0', 'points:order:close', '#', 'admin', NOW(), '', NULL, '');
-INSERT INTO sys_menu VALUES (2034, '订单导出', 2030, 4, '', '', 1, 0, 'F', '0', '0', 'points:order:export', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2030, '订单管理', 2000, 3, 'order', 'points/order/index', '', '',1, 0, 'C', '0', '0', 'points:order:list', 'documentation', 'admin', NOW(), '', NULL, '订单管理菜单');
+INSERT INTO sys_menu VALUES (2031, '订单查询', 2030, 1, '', '','', '', 1, 0, 'F', '0', '0', 'points:order:query', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2032, '订单发货', 2030, 2, '', '', '', '',1, 0, 'F', '0', '0', 'points:order:ship', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2033, '订单关闭', 2030, 3, '', '','', '', 1, 0, 'F', '0', '0', 'points:order:close', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2034, '订单导出', 2030, 4, '', '', '', '',1, 0, 'F', '0', '0', 'points:order:export', '#', 'admin', NOW(), '', NULL, '');
 
 -- 积分管理
-INSERT INTO sys_menu VALUES (2040, '积分规则', 2000, 4, 'rule', 'points/rule/index', 1, 0, 'C', '0', '0', 'points:rule:list', 'rate', 'admin', NOW(), '', NULL, '积分规则菜单');
-INSERT INTO sys_menu VALUES (2041, '规则查询', 2040, 1, '', '', 1, 0, 'F', '0', '0', 'points:rule:query', '#', 'admin', NOW(), '', NULL, '');
-INSERT INTO sys_menu VALUES (2042, '规则编辑', 2040, 2, '', '', 1, 0, 'F', '0', '0', 'points:rule:edit', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2040, '积分规则', 2000, 4, 'rule', 'points/rule/index', '', '',1, 0, 'C', '0', '0', 'points:rule:list', 'rate', 'admin', NOW(), '', NULL, '积分规则菜单');
+INSERT INTO sys_menu VALUES (2041, '规则查询', 2040, 1, '', '','', '', 1, 0, 'F', '0', '0', 'points:rule:query', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2042, '规则编辑', 2040, 2, '', '', '', '',1, 0, 'F', '0', '0', 'points:rule:edit', '#', 'admin', NOW(), '', NULL, '');
 
-INSERT INTO sys_menu VALUES (2050, '签到配置', 2000, 5, 'sign', 'points/sign/index', 1, 0, 'C', '0', '0', 'points:sign:edit', 'date', 'admin', NOW(), '', NULL, '签到配置菜单');
-INSERT INTO sys_menu VALUES (2060, '积分明细', 2000, 6, 'detail', 'points/detail/index', 1, 0, 'C', '0', '0', 'points:detail:list', 'log', 'admin', NOW(), '', NULL, '积分明细菜单');
-INSERT INTO sys_menu VALUES (2061, '明细查询', 2060, 1, '', '', 1, 0, 'F', '0', '0', 'points:detail:query', '#', 'admin', NOW(), '', NULL, '');
-INSERT INTO sys_menu VALUES (2062, '明细导出', 2060, 2, '', '', 1, 0, 'F', '0', '0', 'points:detail:export', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2050, '签到配置', 2000, 5, 'sign', 'points/sign/index', '', '',1, 0, 'C', '0', '0', 'points:sign:edit', 'date', 'admin', NOW(), '', NULL, '签到配置菜单');
+INSERT INTO sys_menu VALUES (2060, '积分明细', 2000, 6, 'detail', 'points/detail/index','', '',1, 0, 'C', '0', '0', 'points:detail:list', 'log', 'admin', NOW(), '', NULL, '积分明细菜单');
+INSERT INTO sys_menu VALUES (2061, '明细查询', 2060, 1, '', '', '', '',1, 0, 'F', '0', '0', 'points:detail:query', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2062, '明细导出', 2060, 2, '', '', '', '',1, 0, 'F', '0', '0', 'points:detail:export', '#', 'admin', NOW(), '', NULL, '');
 
 -- H5用户管理
-INSERT INTO sys_menu VALUES (2070, 'H5用户', 2000, 7, 'h5user', 'points/h5user/index', 1, 0, 'C', '0', '0', 'points:h5user:list', 'user', 'admin', NOW(), '', NULL, 'H5用户菜单');
-INSERT INTO sys_menu VALUES (2071, '用户查询', 2070, 1, '', '', 1, 0, 'F', '0', '0', 'points:h5user:query', '#', 'admin', NOW(), '', NULL, '');
-INSERT INTO sys_menu VALUES (2072, '用户冻结', 2070, 2, '', '', 1, 0, 'F', '0', '0', 'points:h5user:freeze', '#', 'admin', NOW(), '', NULL, '');
-INSERT INTO sys_menu VALUES (2073, '积分调整', 2070, 3, '', '', 1, 0, 'F', '0', '0', 'points:h5user:adjust', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2070, 'H5用户', 2000, 7, 'h5user', 'points/h5user/index', '', '',1, 0, 'C', '0', '0', 'points:h5user:list', 'user', 'admin', NOW(), '', NULL, 'H5用户菜单');
+INSERT INTO sys_menu VALUES (2071, '用户查询', 2070, 1, '', '', '', '',1, 0, 'F', '0', '0', 'points:h5user:query', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2072, '用户冻结', 2070, 2, '', '', '', '',1, 0, 'F', '0', '0', 'points:h5user:freeze', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2073, '积分调整', 2070, 3, '', '', '', '',1, 0, 'F', '0', '0', 'points:h5user:adjust', '#', 'admin', NOW(), '', NULL, '');
 
 -- 给 admin 角色（role_id=1）授权 (RuoYi 默认 admin 拥有所有菜单，无需插入)
 -- 给普通角色 role_id=2 也授权，方便测试

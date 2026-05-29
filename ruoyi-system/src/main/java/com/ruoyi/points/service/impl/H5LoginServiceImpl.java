@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +23,7 @@ import com.ruoyi.points.service.IH5LoginService;
 import com.ruoyi.points.service.IH5UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+//import io.jsonwebtoken.security.Keys;
 
 /**
  * H5 登录/Token 服务
@@ -72,10 +75,11 @@ public class H5LoginServiceImpl implements IH5LoginService
         Map<String, Object> claims = new HashMap<>();
         claims.put(UUID_CLAIM, uuid);
         claims.put(USER_ID_CLAIM, user.getUserId());
+        // 替换成这个（0.9.1 标准写法）
         String jwt = Jwts.builder()
-            .setClaims(claims)
-            .signWith(buildKey())
-            .compact();
+                .setClaims(claims)
+                .signWith(SignatureAlgorithm.HS256, buildKey()) // 这里加算法
+                .compact();
 
         // 缓存用户信息
         redisTemplate.opsForValue().set(PointsConstants.H5_TOKEN_PREFIX + uuid,
@@ -90,8 +94,9 @@ public class H5LoginServiceImpl implements IH5LoginService
         if (StringUtils.isEmpty(token)) return null;
         try
         {
-            Claims c = Jwts.parserBuilder().setSigningKey(buildKey()).build()
-                .parseClaimsJws(token).getBody();
+            Claims c = Jwts.parser()
+                    .setSigningKey(buildKey())
+                    .parseClaimsJws(token).getBody();
             String uuid = (String) c.get(UUID_CLAIM);
             String userIdStr = redisTemplate.opsForValue().get(PointsConstants.H5_TOKEN_PREFIX + uuid);
             if (StringUtils.isEmpty(userIdStr)) return null;
@@ -110,8 +115,9 @@ public class H5LoginServiceImpl implements IH5LoginService
         if (StringUtils.isEmpty(token)) return;
         try
         {
-            Claims c = Jwts.parserBuilder().setSigningKey(buildKey()).build()
-                .parseClaimsJws(token).getBody();
+            // 解析（parser）替换0.91版本语法
+
+            Claims c = Jwts.parser().setSigningKey(buildKey()).parseClaimsJws(token).getBody();
             String uuid = (String) c.get(UUID_CLAIM);
             if (uuid != null) redisTemplate.delete(PointsConstants.H5_TOKEN_PREFIX + uuid);
         }
@@ -129,6 +135,8 @@ public class H5LoginServiceImpl implements IH5LoginService
             System.arraycopy(bytes, 0, padded, 0, bytes.length);
             bytes = padded;
         }
-        return Keys.hmacShaKeyFor(bytes);
+        // 用字符串 / 字节数组当密钥替换0.91版本
+        SecretKey key = new SecretKeySpec(bytes, SignatureAlgorithm.HS256.getJcaName());
+        return key;
     }
 }

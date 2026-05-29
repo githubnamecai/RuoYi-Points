@@ -2,7 +2,7 @@
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="商品名称" prop="goodsName">
-        <el-input v-model="queryParams.goodsName" placeholder="请输入" clearable @keyup.enter="handleQuery" />
+        <el-input v-model="queryParams.goodsName" placeholder="请输入" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="全部" clearable style="width: 140px">
@@ -17,35 +17,43 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button type="primary" plain icon="Plus" @click="handleAdd" v-hasPermi="['points:goods:add']">新增</el-button>
+        <el-button type="primary" plain icon="el-icon-plus" @click="handleAdd"
+          v-hasPermi="['points:goods:add']">新增</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button type="danger" plain icon="Delete" :disabled="multiple"
-          @click="handleDelete()" v-hasPermi="['points:goods:remove']">删除</el-button>
+        <el-button type="danger" plain icon="el-icon-delete" :disabled="multiple" @click="handleDelete()"
+          v-hasPermi="['points:goods:remove']">删除</el-button>
       </el-col>
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" />
+      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" />
     </el-row>
 
     <el-table v-loading="loading" :data="list" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" />
       <el-table-column label="ID" prop="goodsId" width="80" />
-      <el-table-column label="封面" width="80">
-        <template #default="scope">
-          <el-image v-if="scope.row.coverImg" :src="scope.row.coverImg" style="width:48px;height:48px;border-radius:4px"/>
+      <!-- <el-table-column label="封面" width="80">
+        <template slot-scope="scope">
+          <el-image v-if="scope.row.coverImg" :src="scope.row.coverImg"
+            style="width:48px;height:48px;border-radius:4px" />
+        </template>
+      </el-table-column> -->
+      <el-table-column label="封面图" align="center" prop="coverImg" width="100">
+        <template slot-scope="scope">
+          <image-preview :src="scope.row.coverImg" :width="50" :height="50" :border-radius="4" />
         </template>
       </el-table-column>
+
       <el-table-column label="商品名称" prop="goodsName" min-width="180" show-overflow-tooltip />
       <el-table-column label="分类" prop="categoryName" width="120" />
       <el-table-column label="类型" width="80">
-        <template #default="scope">
-          <el-tag :type="scope.row.goodsType==='1' ? 'success' : ''">
+        <template slot-scope="scope">
+          <el-tag :type="scope.row.goodsType === '1' ? 'success' : ''">
             {{ scope.row.goodsType === '1' ? '虚拟' : '实物' }}
           </el-tag>
         </template>
@@ -54,33 +62,34 @@
       <el-table-column label="库存" prop="stock" width="90" />
       <el-table-column label="销量" prop="sales" width="90" />
       <el-table-column label="状态" width="100">
-        <template #default="scope">
+        <template slot-scope="scope">
           <el-switch v-model="scope.row.status" active-value="1" inactive-value="0"
-                     @change="handleStatusChange(scope.row)" />
+            @change="handleStatusChange(scope.row)" />
         </template>
       </el-table-column>
       <el-table-column label="创建时间" prop="createTime" width="160" />
       <el-table-column label="操作" width="180" fixed="right">
-        <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)"
-                     v-hasPermi="['points:goods:edit']">修改</el-button>
-          <el-button link type="danger" icon="Delete" @click="handleDelete(scope.row)"
-                     v-hasPermi="['points:goods:remove']">删除</el-button>
+        <template slot-scope="scope">
+          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)"
+            v-hasPermi="['points:goods:edit']">修改</el-button>
+          <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)"
+            v-hasPermi="['points:goods:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" v-model:page="queryParams.pageNum"
-                v-model:limit="queryParams.pageSize" @pagination="getList" />
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
+      @pagination="getList" />
 
-    <el-dialog :title="title" v-model="open" width="700px" append-to-body>
+    <el-dialog :title="title" :visible.sync="open" width="700px" append-to-body>
       <el-form ref="goodsRef" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="商品名称" prop="goodsName">
           <el-input v-model="form.goodsName" />
         </el-form-item>
         <el-form-item label="分类" prop="categoryId">
-          <el-tree-select v-model="form.categoryId" :data="categoryOptions" :props="{ value: 'id', label: 'label', children: 'children' }"
-                          value-key="id" placeholder="选择分类" check-strictly />
+          <el-cascader v-model="form.categoryId" :options="categoryOptions"
+            :props="{ value: 'id', label: 'label', children: 'children', checkStrictly: true, emitPath: false }"
+            placeholder="选择分类" clearable style="width: 100%" />
         </el-form-item>
         <el-form-item label="类型" prop="goodsType">
           <el-radio-group v-model="form.goodsType">
@@ -113,87 +122,136 @@
           <editor v-model="form.description" :min-height="200" />
         </el-form-item>
       </el-form>
-      <template #footer>
+      <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
-      </template>
+      </div>
     </el-dialog>
   </div>
 </template>
 
-<script setup name="Goods">
+<script>
 import { listGoods, getGoods, addGoods, updateGoods, delGoods, changeGoodsStatus } from '@/api/points/goods'
 import { treeselect as listCategoryTreeselect } from '@/api/points/category'
 
-const { proxy } = getCurrentInstance()
-
-const list = ref([])
-const open = ref(false)
-const loading = ref(true)
-const showSearch = ref(true)
-const ids = ref([])
-const multiple = ref(true)
-const total = ref(0)
-const title = ref('')
-const categoryOptions = ref([])
-
-const data = reactive({
-  form: {},
-  queryParams: { pageNum: 1, pageSize: 10, goodsName: '', status: '', goodsType: '' },
-  rules: {
-    goodsName: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
-    categoryId: [{ required: true, message: '请选择分类', trigger: 'change' }],
-    points: [{ required: true, message: '请输入积分', trigger: 'blur' }]
+export default {
+  name: 'Goods',
+  data() {
+    return {
+      list: [],
+      open: false,
+      loading: true,
+      showSearch: true,
+      ids: [],
+      multiple: true,
+      total: 0,
+      title: '',
+      categoryOptions: [],
+      queryParams: {
+        pageNum: 1,
+        pageSize: 10,
+        goodsName: '',
+        status: '',
+        goodsType: ''
+      },
+      form: {},
+      rules: {
+        goodsName: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
+        categoryId: [{ required: true, message: '请选择分类', trigger: 'change' }],
+        points: [{ required: true, message: '请输入积分', trigger: 'blur' }]
+      }
+    }
+  },
+  created() {
+    this.getList()
+    this.getCategories()
+  },
+  methods: {
+    getList() {
+      this.loading = true
+      listGoods(this.queryParams).then(res => {
+        this.list = res.rows
+        this.total = res.total
+        this.loading = false
+      })
+    },
+    getCategories() {
+      listCategoryTreeselect().then(res => {
+        this.categoryOptions = res.data
+      })
+    },
+    reset() {
+      this.form = {
+        goodsId: undefined,
+        goodsName: '',
+        categoryId: undefined,
+        goodsType: '0',
+        coverImg: '',
+        points: 0,
+        stock: 0,
+        sort: 0,
+        status: '1',
+        description: '',
+        limitPerUser: 0
+      }
+      this.resetForm('goodsRef')
+    },
+    handleQuery() {
+      this.queryParams.pageNum = 1
+      this.getList()
+    },
+    resetQuery() {
+      this.resetForm('queryForm')
+      this.handleQuery()
+    },
+    handleSelectionChange(sel) {
+      this.ids = sel.map(s => s.goodsId)
+      this.multiple = !sel.length
+    },
+    handleAdd() {
+      this.reset()
+      this.open = true
+      this.title = '新增商品'
+    },
+    handleUpdate(row) {
+      this.reset()
+      getGoods(row.goodsId).then(res => {
+        this.form = res.data
+        this.open = true
+        this.title = '修改商品'
+      })
+    },
+    submitForm() {
+      this.$refs.goodsRef.validate(valid => {
+        if (!valid) return
+        const op = this.form.goodsId ? updateGoods : addGoods
+        op(this.form).then(() => {
+          this.$modal.msgSuccess('保存成功')
+          this.open = false
+          this.getList()
+        })
+      })
+    },
+    cancel() {
+      this.open = false
+      this.reset()
+    },
+    handleDelete(row) {
+      const delIds = row ? [row.goodsId] : this.ids
+      this.$modal.confirm('确定删除选中商品？').then(() => {
+        return delGoods(delIds)
+      }).then(() => {
+        this.getList()
+        this.$modal.msgSuccess('删除成功')
+      }).catch(() => { })
+    },
+    handleStatusChange(row) {
+      changeGoodsStatus(row.goodsId, row.status).then(() => {
+        this.$modal.msgSuccess('状态已更新')
+      }).catch(() => {
+        row.status = row.status === '1' ? '0' : '1'
+      })
+    }
   }
-})
-const { queryParams, form, rules } = toRefs(data)
-
-function getList() {
-  loading.value = true
-  listGoods(queryParams.value).then(res => {
-    list.value = res.rows
-    total.value = res.total
-    loading.value = false
-  })
 }
-
-function getCategories() {
-  listCategoryTreeselect().then(res => { categoryOptions.value = res.data })
-}
-
-function reset() {
-  form.value = { goodsId: undefined, goodsName: '', categoryId: undefined, goodsType: '0',
-    coverImg: '', points: 0, stock: 0, sort: 0, status: '1', description: '', limitPerUser: 0 }
-  proxy.resetForm('goodsRef')
-}
-function handleQuery() { queryParams.value.pageNum = 1; getList() }
-function resetQuery() { proxy.resetForm('queryForm'); handleQuery() }
-function handleSelectionChange(sel) { ids.value = sel.map(s => s.goodsId); multiple.value = !sel.length }
-function handleAdd() { reset(); open.value = true; title.value = '新增商品' }
-function handleUpdate(row) {
-  reset()
-  getGoods(row.goodsId).then(res => { form.value = res.data; open.value = true; title.value = '修改商品' })
-}
-function submitForm() {
-  proxy.$refs.goodsRef.validate(valid => {
-    if (!valid) return
-    const op = form.value.goodsId ? updateGoods : addGoods
-    op(form.value).then(() => {
-      proxy.$modal.msgSuccess('保存成功'); open.value = false; getList()
-    })
-  })
-}
-function cancel() { open.value = false; reset() }
-function handleDelete(row) {
-  const delIds = row ? [row.goodsId] : ids.value
-  proxy.$modal.confirm('确定删除选中商品？').then(() => delGoods(delIds))
-    .then(() => { getList(); proxy.$modal.msgSuccess('删除成功') }).catch(() => {})
-}
-function handleStatusChange(row) {
-  changeGoodsStatus(row.goodsId, row.status).then(() => proxy.$modal.msgSuccess('状态已更新')).catch(() => {
-    row.status = row.status === '1' ? '0' : '1'
-  })
-}
-
-getList(); getCategories()
 </script>

@@ -2,7 +2,7 @@
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true">
       <el-form-item label="订单号" prop="orderNo">
-        <el-input v-model="queryParams.orderNo" clearable @keyup.enter.native="handleQuery" />
+        <el-input v-model="queryParams.orderNo" clearable @keyup.enter="handleQuery" />
       </el-form-item>
       <el-form-item label="手机号" prop="userPhone">
         <el-input v-model="queryParams.userPhone" clearable />
@@ -46,20 +46,19 @@
       <el-table-column label="创建时间" prop="createTime" width="160" />
       <el-table-column label="操作" width="200" fixed="right">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.status==='0' && scope.row.goodsType==='0'" size="mini" type="text"
-                     icon="el-icon-s-promotion" @click="openShip(scope.row)"
+          <el-button v-if="scope.row.status==='0' && scope.row.goodsType==='0'" link type="primary"
+                     icon="el-icon-truck" @click="openShip(scope.row)"
                      v-hasPermi="['points:order:ship']">发货</el-button>
-          <el-button v-if="scope.row.status==='0' || scope.row.status==='1'" size="mini" type="text"
+          <el-button v-if="scope.row.status==='0' || scope.row.status==='1'" link type="danger"
                      icon="el-icon-close" @click="handleClose(scope.row)"
                      v-hasPermi="['points:order:close']">关闭</el-button>
         </template>
       </el-table-column>
     </el-table>
+    <pagination v-show="total>0" :total="total" :page="queryParams.pageNum"
+                :limit="queryParams.pageSize" @pagination="getList" />
 
-    <pagination v-show="total>0" :total="total" :page.sync="queryParams.pageNum"
-                :limit.sync="queryParams.pageSize" @pagination="getList" />
-
-    <el-dialog title="订单发货" :visible.sync="shipOpen" width="480px" append-to-body>
+    <el-dialog title="订单发货" :visible.sync="shipOpen" width="480px">
       <el-form ref="shipRef" :model="shipForm" :rules="shipRules" label-width="100px">
         <el-form-item label="物流公司" prop="expressCompany">
           <el-input v-model="shipForm.expressCompany" placeholder="如：顺丰速运" />
@@ -68,7 +67,7 @@
           <el-input v-model="shipForm.expressNo" />
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
+      <div slot="footer">
         <el-button type="primary" @click="submitShip">确认发货</el-button>
         <el-button @click="shipOpen=false">取 消</el-button>
       </div>
@@ -105,6 +104,7 @@ export default {
     this.getList()
   },
   methods: {
+    // 获取订单列表
     getList() {
       this.loading = true
       listOrder(this.queryParams).then(res => {
@@ -113,24 +113,42 @@ export default {
         this.loading = false
       })
     },
+    // 搜索
     handleQuery() {
       this.queryParams.pageNum = 1
       this.getList()
     },
+    // 重置搜索条件
     resetQuery() {
-      this.resetForm('queryForm')
+      this.$refs.queryForm.resetFields()
       this.handleQuery()
     },
+    // 状态对应的标签类型
     statusType(s) {
-      return { '0': 'warning', '1': 'primary', '2': 'success', '3': 'danger' }[s] || ''
+      const typeMap = {
+        '0': 'warning',
+        '1': 'primary',
+        '2': 'success',
+        '3': 'danger'
+      }
+      return typeMap[s] || ''
     },
+    // 状态对应的文本
     statusText(s) {
-      return { '0': '待发货', '1': '已发货', '2': '已完成', '3': '已关闭' }[s] || s
+      const textMap = {
+        '0': '待发货',
+        '1': '已发货',
+        '2': '已完成',
+        '3': '已关闭'
+      }
+      return textMap[s] || s
     },
+    // 打开发货弹窗
     openShip(row) {
       this.shipForm = { orderId: row.orderId }
       this.shipOpen = true
     },
+    // 提交发货
     submitShip() {
       this.$refs.shipRef.validate(valid => {
         if (!valid) return
@@ -141,6 +159,7 @@ export default {
         })
       })
     },
+    // 关闭订单
     handleClose(row) {
       this.$prompt('请输入关闭原因', '关闭订单', {
         confirmButtonText: '确认',
@@ -154,6 +173,7 @@ export default {
         })
       }).catch(() => {})
     },
+    // 导出订单
     handleExport() {
       this.download('points/order/export', this.queryParams, `订单_${new Date().getTime()}.xlsx`)
     }

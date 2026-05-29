@@ -35,6 +35,9 @@ import ImagePreview from "@/components/ImagePreview"
 import DictTag from '@/components/DictTag'
 // 字典数据组件
 import DictData from '@/components/DictData'
+// 新增vue的树选择组件
+// import ElTreeSelect from 'el-tree-select'
+// Vue.use(ElTreeSelect)
 
 // 全局方法挂载
 Vue.prototype.getDicts = getDicts

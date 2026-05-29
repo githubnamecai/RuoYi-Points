@@ -13,6 +13,12 @@ npm install
 # 建议不要直接使用 cnpm 安装依赖，会有各种诡异的 bug。可以通过如下操作解决 npm 下载速度慢的问题
 npm install --registry=https://registry.npmmirror.com
 
+#用 <el-tree-select> 这种样式，执行安装
+npm install el-tree-select --save
+# 然后在 main.js 全局引入：
+
+import ElTreeSelect from 'el-tree-select'
+Vue.use(ElTreeSelect)
 # 启动服务
 npm run dev
 ```
