@@ -27,4 +27,21 @@
 4. 优化 H5 页面对应的接口逻辑
 
 - 前端补充了搜索关键词变量 keyword ，与后端的 goodsName 字段直接打通；
+
 - 去除了前端路由由于意外跳转导致的异常加载流程，减少了后端的并发脏查询，使得整个 H5 的商品获取和订单读取的性能及逻辑更加稳定。
+
+  ## 问题2
+
+   **Vant `van-list` 组件在路由返回后不再触发 `load` 事件**的问题
+
+- **场景一：没有使用 `keep-alive`** 组件被销毁重建，`onMounted` 里没有主动调用加载逻辑，`van-list` 初始状态 `loading=false`、`finished=false`，但由于数据为空列表高度为 0，`van-list` 的滚动检测可能未正确触发。
+
+  **场景二：使用了 `keep-alive`** 组件被缓存，返回时不再执行 `onMounted`，数据状态保留在之前的状态（如 `finished=true` 或 `loading=true`），导致不再触发加载。
+
+  ------
+
+  ## 解决方案2
+
+  ### 方案一：使用 `onActivated` 配合 `keep-alive`（推荐）
+
+  在路由配置中使用 `keep-alive` 缓存商城页，并在 `onActivated` 中重新触发加载检测：

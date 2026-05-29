@@ -57,7 +57,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+// 商城页已添加组件名称定义
+defineOptions({ name: 'Home' })
+import { ref, onMounted,onActivated  } from 'vue'
 import { listGoods, listCategories } from '@/api/goods'
 import { useUserStore } from '@/stores/user'
 import GoodsCard from '@/components/GoodsCard.vue'
@@ -122,11 +124,20 @@ async function loadCategories() {
     categories.value = (res.data || []).slice(0, 8)
   } catch (e) {}
 }
-
+// 首次加载
 onMounted(async () => {
   loadCategories()
   if (!userStore.userInfo) {
     try { await userStore.fetchUserInfo() } catch (e) {}
+  }
+})
+// 关键：从其他页面返回时（keep-alive 缓存激活），重新检测并加载
+onActivated(() => {
+  // 如果列表为空，重新加载数据
+  if (list.value.length === 0 && !loading.value) {
+    finished.value = false
+    loading.value = true
+    loadMore()
   }
 })
 </script>
