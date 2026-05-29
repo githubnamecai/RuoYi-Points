@@ -20,7 +20,8 @@
             <span class="status" :class="'s' + o.status">{{ statusText(o.status) }}</span>
           </div>
           <div class="goods">
-            <img :src="o.goodsCover" />
+            <!-- <img :src="o.goodsCover" /> -->
+            <img :src="formatImg(o.goodsCover)" />
             <div class="info">
               <div class="name">{{ o.goodsName }}</div>
               <div class="meta">数量: {{ o.quantity }} · {{ o.goodsType === '1' ? '虚拟' : '实物' }}</div>
@@ -48,6 +49,15 @@ const pageSize = 10
 const loading = ref(false)
 const finished = ref(false)
 const refreshing = ref(false)
+const baseApi = import.meta.env.VITE_APP_BASE_API
+
+function formatImg(url) {
+  if (!url) return defaultImg
+  if (url.startsWith('/profile')) {
+    return baseApi + url
+  }
+  return url
+}
 
 function statusText(s) {
   return { '0':'待发货','1':'已发货','2':'已完成','3':'已关闭' }[s] || s

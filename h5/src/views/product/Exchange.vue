@@ -21,7 +21,7 @@
 
       <!-- 商品卡 -->
       <div class="card goods-card">
-        <img :src="goods.coverImg" class="cover" />
+        <img :src="formatImg(goods.coverImg)" class="cover"/>
         <div class="info">
           <div class="name">{{ goods.goodsName }}</div>
           <div class="price"><span>{{ goods.points }}</span> 积分 × {{ qty }}</div>
@@ -83,6 +83,16 @@ const canSubmit = computed(() => {
   if (goods.value.goodsType === '0' && !address.value) return false
   return userStore.points >= totalPoints.value
 })
+
+const baseApi = import.meta.env.VITE_APP_BASE_API
+
+function formatImg(url) {
+  if (!url) return defaultImg
+  if (url.startsWith('/profile')) {
+    return baseApi + url
+  }
+  return url
+}
 
 async function load() {
   const [g, addrs] = await Promise.all([

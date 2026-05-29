@@ -1,9 +1,7 @@
 <template>
   <div class="goods-card" @click="$router.push('/product/' + goods.goodsId)">
     <div class="img-wrap">
-      <!-- <img :src="goods.coverImg || defaultImg" alt="" /> -->
       <img :src="formatImg(goods.coverImg)" alt="" />
-
       <div v-if="goods.goodsType === '1'" class="tag virtual">虚拟</div>
     </div>
     <div class="info">
@@ -26,11 +24,9 @@ defineProps({ goods: { type: Object, required: true } })
 const defaultImg = 'https://via.placeholder.com/300x300?text=Goods'
 const baseApi = import.meta.env.VITE_APP_BASE_API
 
-
 function formatImg(url) {
   if (!url) return defaultImg
   if (url.startsWith('/profile')) {
-    console.log(baseApi)
     return baseApi + url
   }
   return url
@@ -45,19 +41,22 @@ function formatImg(url) {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
+  width: 100%;
+  min-width: 0;
 }
 
 .img-wrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  height: 160px;
   background: #f3f3f3;
+  overflow: hidden;
 }
 
 .img-wrap img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 

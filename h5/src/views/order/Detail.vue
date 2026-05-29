@@ -13,7 +13,8 @@
       </div>
 
       <div class="card goods-card">
-        <img :src="order.goodsCover" />
+        <!-- <img :src="order.goodsCover" /> -->
+        <img :src="formatImg(order.goodsCover)" />
         <div class="info">
           <div class="name">{{ order.goodsName }}</div>
           <div class="qty">数量: {{ order.quantity }}</div>
@@ -47,6 +48,15 @@ import { orderDetail, confirmReceipt } from '@/api/user'
 const route = useRoute()
 const router = useRouter()
 const order = ref(null)
+const baseApi = import.meta.env.VITE_APP_BASE_API
+
+function formatImg(url) {
+  if (!url) return defaultImg
+  if (url.startsWith('/profile')) {
+    return baseApi + url
+  }
+  return url
+}
 
 function statusText(s) { return { '0':'待发货','1':'待收货','2':'已完成','3':'已关闭' }[s] || s }
 function statusSub(o) {
