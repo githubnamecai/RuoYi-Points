@@ -7,6 +7,7 @@
         <id     property="userId"          column="user_id"/>
         <result property="nickname"        column="nickname"/>
         <result property="phone"           column="phone"/>
+        <result property="password"        column="password"/>
         <result property="avatar"          column="avatar"/>
         <result property="pointsBalance"   column="points_balance"/>
         <result property="totalEarned"     column="total_earned"/>
@@ -21,7 +22,7 @@
     </resultMap>
 
     <sql id="selectUserVo">
-        select user_id, nickname, phone, avatar, points_balance, total_earned, total_consumed,
+        select user_id, nickname, phone, password, avatar, points_balance, total_earned, total_consumed,
                continuous_days, last_sign_date, status, register_time, last_login_time, last_login_ip, del_flag
         from t_user
     </sql>
@@ -48,9 +49,9 @@
     </select>
 
     <insert id="insertUser" parameterType="com.ruoyi.points.domain.H5User" useGeneratedKeys="true" keyProperty="userId">
-        insert into t_user(nickname, phone, avatar, points_balance, total_earned, total_consumed,
+        insert into t_user(nickname, phone, password, avatar, points_balance, total_earned, total_consumed,
                            continuous_days, status, register_time, last_login_time, last_login_ip, del_flag)
-        values(#{nickname}, #{phone}, #{avatar}, coalesce(#{pointsBalance},0), 0, 0, 0,
+        values(#{nickname}, #{phone}, #{password}, #{avatar}, coalesce(#{pointsBalance},0), coalesce(#{pointsBalance},0), 0, 0,
                coalesce(#{status},'0'), sysdate(), sysdate(), #{lastLoginIp}, '0')
     </insert>
 
@@ -58,12 +59,20 @@
         update t_user
         <set>
             <if test="nickname != null">nickname=#{nickname},</if>
+            <if test="phone != null">phone=#{phone},</if>
+            <if test="password != null">password=#{password},</if>
             <if test="avatar != null">avatar=#{avatar},</if>
             <if test="status != null">status=#{status},</if>
+            <if test="pointsBalance != null">points_balance=#{pointsBalance},</if>
             <if test="lastLoginTime != null">last_login_time=#{lastLoginTime},</if>
             <if test="lastLoginIp != null">last_login_ip=#{lastLoginIp},</if>
         </set>
         where user_id=#{userId}
+    </update>
+
+    <update id="deleteUserByIds">
+        update t_user set del_flag='2' where user_id in
+        <foreach collection="array" item="userId" open="(" close=")" separator=",">#{userId}</foreach>
     </update>
 
     <!-- 乐观锁扣减积分：在 WHERE 中校验余额，避免负值 -->

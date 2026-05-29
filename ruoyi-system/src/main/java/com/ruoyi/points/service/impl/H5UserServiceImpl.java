@@ -58,7 +58,18 @@ public class H5UserServiceImpl implements IH5UserService
     }
 
     @Override
+    public int insertUser(H5User user)
+    {
+        if (StringUtils.isEmpty(user.getStatus())) user.setStatus("0");
+        if (user.getPointsBalance() == null) user.setPointsBalance(0);
+        return h5UserMapper.insertUser(user);
+    }
+
+    @Override
     public int updateUser(H5User user) { return h5UserMapper.updateUser(user); }
+
+    @Override
+    public int deleteUserByIds(Long[] userIds) { return h5UserMapper.deleteUserByIds(userIds); }
 
     @Override
     public int changeStatus(Long userId, String status) { return h5UserMapper.updateStatus(userId, status); }

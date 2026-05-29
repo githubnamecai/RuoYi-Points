@@ -12,6 +12,7 @@ public interface IH5LoginService
 
     /** 校验验证码 + 自动注册 + 颁发 token */
     String loginByCode(String phone, String code, String loginIp);
+    String loginByPassword(String phone, String password, String loginIp);
 
     /** 解析 token 获取 H5 用户（用于过滤器/拦截器） */
     H5User getLoginUser(String token);

@@ -13,7 +13,9 @@ public interface IH5UserService
     /** 首次登录自动注册 */
     H5User registerOrGet(String phone, String loginIp);
 
+    int insertUser(H5User user);
     int updateUser(H5User user);
+    int deleteUserByIds(Long[] userIds);
     int changeStatus(Long userId, String status);
 
     /** 管理员手动调整积分（增/减） */

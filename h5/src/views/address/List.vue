@@ -34,7 +34,8 @@
               :model-value="item.isDefault === '1'"
               shape="square"
               :disabled="item.isDefault === '1'"
-              @change="(v) => setDefault(item, v)"
+              @update:model-value="(v) => setDefault(item, v)"
+              @click.stop
             >
               设为默认
             </van-checkbox>

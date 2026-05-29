@@ -9,6 +9,9 @@ export function getOrder(id) {
 export function shipOrder(data) {
   return request({ url: '/points/order/ship', method: 'put', data })
 }
+export function updateOrder(data) {
+  return request({ url: '/points/order', method: 'put', data })
+}
 export function closeOrder(id, reason) {
   return request({ url: `/points/order/close/${id}`, method: 'put', params: { reason } })
 }

@@ -41,4 +41,7 @@ public interface H5UserMapper
     /** 平台统计 */
     Long sumPointsBalance();
     Long countUser();
+
+    // 批量删除用户
+    int deleteUserByIds(Long[] ids);
 }

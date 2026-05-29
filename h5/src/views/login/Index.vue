@@ -7,7 +7,12 @@
     </div>
 
     <van-form @submit="onSubmit" class="form">
-      <van-cell-group inset>
+      <van-tabs v-model:active="loginType" title-active-color="#ff8c00" color="#ff8c00" background="transparent">
+        <van-tab title="短信登录" name="sms"></van-tab>
+        <van-tab title="密码登录" name="password"></van-tab>
+      </van-tabs>
+
+      <van-cell-group inset style="margin-top: 20px;">
         <van-field
           v-model="phone"
           type="tel"
@@ -17,6 +22,7 @@
           :rules="[{ pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号' }]"
         />
         <van-field
+          v-if="loginType === 'sms'"
           v-model="code"
           center
           label="验证码"
@@ -30,11 +36,19 @@
             </van-button>
           </template>
         </van-field>
+        <van-field
+          v-if="loginType === 'password'"
+          v-model="password"
+          type="password"
+          label="密码"
+          placeholder="请输入密码"
+          :rules="[{ required: true, message: '请输入密码' }]"
+        />
       </van-cell-group>
-      <div class="tip">未注册手机号将自动注册，开发环境可使用万能码 <b>123456</b></div>
+      <div class="tip" v-if="loginType === 'sms'">未注册手机号将自动注册，开发环境可使用万能码 <b>123456</b></div>
       <div class="submit">
         <van-button block round type="primary" native-type="submit" :loading="loading">
-          登录 / 注册
+          {{ loginType === 'sms' ? '登录 / 注册' : '登 录' }}
         </van-button>
       </div>
     </van-form>
@@ -53,6 +67,8 @@ const router = useRouter()
 const userStore = useUserStore()
 const phone = ref('')
 const code = ref('')
+const password = ref('')
+const loginType = ref('sms')
 const loading = ref(false)
 const counting = ref(false)
 const count = ref(60)
@@ -77,7 +93,12 @@ async function sendCode() {
 async function onSubmit() {
   loading.value = true
   try {
-    const res = await login(phone.value, code.value)
+    const res = await login({
+      loginType: loginType.value,
+      phone: phone.value,
+      code: code.value,
+      password: password.value
+    })
     userStore.setToken(res.token)
     await userStore.fetchUserInfo()
     showToast('登录成功')

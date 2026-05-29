@@ -15,6 +15,7 @@
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" @click="getList">搜索</el-button>
+        <el-button type="primary" plain icon="el-icon-plus" @click="handleAdd" v-hasPermi="['points:h5user:add']">新增</el-button>
       </el-form-item>
     </el-form>
 
@@ -34,8 +35,10 @@
         </template>
       </el-table-column>
       <el-table-column label="注册时间" prop="registerTime" width="160" />
-      <el-table-column label="操作" width="240" fixed="right">
+      <el-table-column label="操作" width="280" fixed="right">
         <template slot-scope="scope">
+          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)" v-hasPermi="['points:h5user:edit']">修改</el-button>
+          <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)" v-hasPermi="['points:h5user:remove']">删除</el-button>
           <el-button size="mini" type="text" @click="openAdjust(scope.row)"
                      v-hasPermi="['points:h5user:adjust']">调整积分</el-button>
           <el-button v-if="scope.row.status==='0'" size="mini" type="text" style="color:#F56C6C"
@@ -73,11 +76,28 @@
         <el-button @click="adjOpen=false">取 消</el-button>
       </div>
     </el-dialog>
+    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
+        <el-form-item label="手机号" prop="phone">
+          <el-input v-model="form.phone" placeholder="请输入手机号" />
+        </el-form-item>
+        <el-form-item label="昵称" prop="nickname">
+          <el-input v-model="form.nickname" placeholder="请输入昵称" />
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="form.password" type="password" placeholder="请输入登录密码" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { listH5User, changeStatus as changeStatusApi, adjustPoints } from '@/api/points/h5user'
+import { listH5User, changeStatus as changeStatusApi, adjustPoints, addH5User, updateH5User, delH5User } from '@/api/points/h5user'
 
 export default {
   name: 'H5User',
@@ -98,6 +118,14 @@ export default {
       adjRules: {
         changeType: [{ required: true, message: '请选择类型', trigger: 'change' }],
         points: [{ required: true, message: '请输入积分', trigger: 'blur' }]
+      },
+      open: false,
+      title: "",
+      form: {},
+      rules: {
+        phone: [
+          { required: true, message: "手机号不能为空", trigger: "blur" }
+        ]
       }
     }
   },
@@ -148,6 +176,49 @@ export default {
           this.getList()
         })
       })
+    },
+    cancel() {
+      this.open = false;
+      this.resetForm("form");
+    },
+    handleAdd() {
+      this.resetForm("form");
+      this.open = true;
+      this.title = "添加H5用户";
+    },
+    handleUpdate(row) {
+      this.resetForm("form");
+      this.form = Object.assign({}, row);
+      this.open = true;
+      this.title = "修改H5用户";
+    },
+    submitForm() {
+      this.$refs["form"].validate(valid => {
+        if (valid) {
+          if (this.form.userId != null) {
+            updateH5User(this.form).then(response => {
+              this.$modal.msgSuccess("修改成功");
+              this.open = false;
+              this.getList();
+            });
+          } else {
+            addH5User(this.form).then(response => {
+              this.$modal.msgSuccess("新增成功");
+              this.open = false;
+              this.getList();
+            });
+          }
+        }
+      });
+    },
+    handleDelete(row) {
+      const userIds = row.userId || this.ids;
+      this.$modal.confirm('是否确认删除该用户？').then(function() {
+        return delH5User(userIds);
+      }).then(() => {
+        this.getList();
+        this.$modal.msgSuccess("删除成功");
+      }).catch(() => {});
     }
   }
 }

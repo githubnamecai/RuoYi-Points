@@ -37,7 +37,12 @@ public class H5AuthController extends BaseController
     public AjaxResult login(@Validated @RequestBody LoginBodyDTO body)
     {
         String ip = IpUtils.getIpAddr(ServletUtils.getRequest());
-        String token = h5LoginService.loginByCode(body.getPhone(), body.getCode(), ip);
+        String token;
+        if ("password".equals(body.getLoginType())) {
+            token = h5LoginService.loginByPassword(body.getPhone(), body.getPassword(), ip);
+        } else {
+            token = h5LoginService.loginByCode(body.getPhone(), body.getCode(), ip);
+        }
         AjaxResult r = AjaxResult.success();
         r.put("token", token);
         return r;

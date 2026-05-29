@@ -46,6 +46,14 @@ public class OrderController extends BaseController
         return toAjax(orderService.shipOrder(order, getUsername()));
     }
 
+    @PreAuthorize("@ss.hasPermi('points:order:edit')")
+    @Log(title = "修改订单", businessType = BusinessType.UPDATE)
+    @PutMapping
+    public AjaxResult edit(@RequestBody Order order)
+    {
+        return toAjax(orderService.updateOrder(order, getUsername()));
+    }
+
     @PreAuthorize("@ss.hasPermi('points:order:close')")
     @Log(title = "关闭订单", businessType = BusinessType.UPDATE)
     @PutMapping("/close/{orderId}")

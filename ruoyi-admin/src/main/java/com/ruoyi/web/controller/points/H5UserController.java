@@ -34,6 +34,30 @@ public class H5UserController extends BaseController
         return success(h5UserService.selectUserById(userId));
     }
 
+    @PreAuthorize("@ss.hasPermi('points:h5user:add')")
+    @Log(title = "H5用户", businessType = BusinessType.INSERT)
+    @PostMapping
+    public AjaxResult add(@Validated @RequestBody H5User user)
+    {
+        return toAjax(h5UserService.insertUser(user));
+    }
+
+    @PreAuthorize("@ss.hasPermi('points:h5user:edit')")
+    @Log(title = "H5用户", businessType = BusinessType.UPDATE)
+    @PutMapping
+    public AjaxResult edit(@Validated @RequestBody H5User user)
+    {
+        return toAjax(h5UserService.updateUser(user));
+    }
+
+    @PreAuthorize("@ss.hasPermi('points:h5user:remove')")
+    @Log(title = "H5用户", businessType = BusinessType.DELETE)
+    @DeleteMapping("/{userIds}")
+    public AjaxResult remove(@PathVariable Long[] userIds)
+    {
+        return toAjax(h5UserService.deleteUserByIds(userIds));
+    }
+
     @PreAuthorize("@ss.hasPermi('points:h5user:freeze')")
     @Log(title = "H5用户状态", businessType = BusinessType.UPDATE)
     @PutMapping("/status/{userId}/{status}")

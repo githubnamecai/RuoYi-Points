@@ -7,7 +7,7 @@
         <div class="num">{{ userStore.points }}</div>
       </div>
 
-      <van-list v-model:loading="loading" :finished="finished" @load="loadMore" finished-text="到底啦">
+      <van-list v-model:loading="loading" :finished="finished" @load="loadMore" :immediate-check="false" finished-text="到底啦">
         <div v-for="(group, key) in groups" :key="key" class="month-group">
           <div class="month-title">{{ key }}</div>
           <div v-for="item in group" :key="item.detailId" class="item">
@@ -74,7 +74,9 @@ async function loadMore() {
 }
 
 onMounted(() => {
-  if (!userStore.userInfo) userStore.fetchUserInfo()
+  userStore.fetchUserInfo()
+  loading.value = true
+  loadMore()
 })
 </script>
 

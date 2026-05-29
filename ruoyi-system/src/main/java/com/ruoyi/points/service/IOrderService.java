@@ -21,4 +21,7 @@ public interface IOrderService
 
     /** H5 用户确认收货 */
     int confirmReceipt(Long orderId, Long userId);
+
+    /** 修改订单信息 */
+    int updateOrder(Order order, String operator);
 }

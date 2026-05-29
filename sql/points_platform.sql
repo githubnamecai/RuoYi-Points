@@ -90,6 +90,7 @@ CREATE TABLE `t_user`
     `user_id`         bigint(20)    NOT NULL AUTO_INCREMENT COMMENT '用户ID',
     `nickname`        varchar(64)   DEFAULT NULL COMMENT '昵称',
     `phone`           varchar(20)   NOT NULL COMMENT '手机号',
+    `password`        varchar(100)  DEFAULT NULL COMMENT '密码',
     `avatar`          varchar(500)  DEFAULT NULL COMMENT '头像',
     `points_balance`  int(11)       DEFAULT 0 COMMENT '积分余额',
     `total_earned`    int(11)       DEFAULT 0 COMMENT '累计获得',

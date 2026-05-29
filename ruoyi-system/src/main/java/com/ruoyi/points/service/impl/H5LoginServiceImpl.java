@@ -69,7 +69,34 @@ public class H5LoginServiceImpl implements IH5LoginService
         redisTemplate.delete(key);
 
         H5User user = h5UserService.registerOrGet(phone, loginIp);
+        return createToken(user);
+    }
 
+    @Override
+    public String loginByPassword(String phone, String password, String loginIp)
+    {
+        if (StringUtils.isEmpty(phone) || StringUtils.isEmpty(password))
+            throw new ServiceException("参数不完整");
+
+        H5User user = h5UserService.selectUserByPhone(phone);
+        if (user == null)
+            throw new ServiceException("账号不存在");
+        if ("1".equals(user.getStatus()))
+            throw new ServiceException("账号已被冻结");
+        if (!password.equals(user.getPassword()))
+            throw new ServiceException("密码错误");
+
+        H5User update = new H5User();
+        update.setUserId(user.getUserId());
+        update.setLastLoginTime(new java.util.Date());
+        update.setLastLoginIp(loginIp);
+        h5UserService.updateUser(update);
+
+        return createToken(user);
+    }
+
+    private String createToken(H5User user)
+    {
         // 生成 token
         String uuid = IdUtils.fastSimpleUUID();
         Map<String, Object> claims = new HashMap<>();

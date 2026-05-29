@@ -223,4 +223,12 @@ public class OrderServiceImpl implements IOrderService
         if (rows <= 0) throw new ServiceException("订单状态异常");
         return rows;
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int updateOrder(Order order, String operator)
+    {
+        order.setUpdateBy(operator);
+        return orderMapper.updateOrder(order);
+    }
 }

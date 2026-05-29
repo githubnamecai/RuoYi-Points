@@ -80,7 +80,6 @@ const loading = ref(false)
 const totalPoints = computed(() => (goods.value?.points || 0) * qty.value)
 const canSubmit = computed(() => {
   if (!goods.value) return false
-  if (goods.value.goodsType === '0' && !address.value) return false
   return userStore.points >= totalPoints.value
 })
 
@@ -123,7 +122,9 @@ function goAddress() { router.push('/address?picker=1') }
 async function submit() {
   if (!goods.value) return
   if (goods.value.goodsType === '0' && !address.value) {
-    showToast('请选择收货地址'); return
+    await showDialog({ title: '提示', message: '实物商品需选择收货地址，请先选择地址', confirmButtonText: '去选择' })
+    goAddress()
+    return
   }
   if (userStore.points < totalPoints.value) {
     showToast('积分不足'); return

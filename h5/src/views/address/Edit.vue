@@ -178,8 +178,10 @@ async function onSubmit() {
         await setDefaultAddress(res.data.addressId).catch(() => {})
       }
     }
-    showToast(isEdit.value ? '修改成功' : '新增成功')
-    setTimeout(() => router.back(), 300)
+    setTimeout(() => {
+      showToast(isEdit.value ? '修改成功' : '新增成功')
+    }, 100)
+    setTimeout(() => router.back(), 500)
   } finally {
     submitting.value = false
   }

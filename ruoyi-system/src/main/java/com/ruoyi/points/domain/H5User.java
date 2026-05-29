@@ -23,6 +23,8 @@ public class H5User extends BaseEntity
     @Excel(name = "手机号")
     private String phone;
 
+    private String password;
+
     private String avatar;
 
     @Excel(name = "积分余额")
@@ -59,6 +61,8 @@ public class H5User extends BaseEntity
     public void setNickname(String nickname) { this.nickname = nickname; }
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
     public String getAvatar() { return avatar; }
     public void setAvatar(String avatar) { this.avatar = avatar; }
     public Integer getPointsBalance() { return pointsBalance; }

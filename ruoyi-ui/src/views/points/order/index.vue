@@ -46,6 +46,8 @@
       <el-table-column label="创建时间" prop="createTime" width="160" />
       <el-table-column label="操作" width="200" fixed="right">
         <template slot-scope="scope">
+          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)"
+                     v-hasPermi="['points:order:edit']">修改</el-button>
           <el-button v-if="scope.row.status==='0' && scope.row.goodsType==='0'" size="mini" type="text"
                      icon="el-icon-s-promotion" @click="openShip(scope.row)"
                      v-hasPermi="['points:order:ship']">发货</el-button>
@@ -73,11 +75,35 @@
         <el-button @click="shipOpen=false">取 消</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog title="修改订单" :visible.sync="open" width="500px" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
+        <el-form-item label="收货人" prop="consignee">
+          <el-input v-model="form.consignee" placeholder="请输入收货人" />
+        </el-form-item>
+        <el-form-item label="联系电话" prop="phone">
+          <el-input v-model="form.phone" placeholder="请输入联系电话" />
+        </el-form-item>
+        <el-form-item label="收货地址" prop="address">
+          <el-input v-model="form.address" type="textarea" placeholder="请输入详细收货地址" />
+        </el-form-item>
+        <el-form-item label="物流公司" prop="expressCompany">
+          <el-input v-model="form.expressCompany" placeholder="请输入物流公司" />
+        </el-form-item>
+        <el-form-item label="物流单号" prop="expressNo">
+          <el-input v-model="form.expressNo" placeholder="请输入物流单号" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { listOrder, shipOrder, closeOrder } from '@/api/points/order'
+import { listOrder, shipOrder, closeOrder, updateOrder } from '@/api/points/order'
 
 export default {
   name: 'Order',
@@ -98,6 +124,13 @@ export default {
       shipRules: {
         expressCompany: [{ required: true, message: '请输入物流公司', trigger: 'blur' }],
         expressNo: [{ required: true, message: '请输入物流单号', trigger: 'blur' }]
+      },
+      open: false,
+      form: {},
+      rules: {
+        consignee: [{ required: true, message: '收货人不能为空', trigger: 'blur' }],
+        phone: [{ required: true, message: '联系电话不能为空', trigger: 'blur' }],
+        address: [{ required: true, message: '收货地址不能为空', trigger: 'blur' }]
       }
     }
   },
@@ -156,6 +189,25 @@ export default {
     },
     handleExport() {
       this.download('points/order/export', this.queryParams, `订单_${new Date().getTime()}.xlsx`)
+    },
+    handleUpdate(row) {
+      this.form = Object.assign({}, row)
+      this.open = true
+    },
+    cancel() {
+      this.open = false
+      this.resetForm('form')
+    },
+    submitForm() {
+      this.$refs.form.validate(valid => {
+        if (valid) {
+          updateOrder(this.form).then(response => {
+            this.$modal.msgSuccess("修改成功");
+            this.open = false;
+            this.getList();
+          });
+        }
+      });
     }
   }
 }
