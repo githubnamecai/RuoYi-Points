@@ -44,7 +44,9 @@
             <if test="goodsName != null and goodsName != ''">
                 and g.goods_name like concat('%', #{goodsName}, '%')
             </if>
-            <if test="categoryId != null">and g.category_id = #{categoryId}</if>
+            <if test="categoryId != null">
+                and (g.category_id = #{categoryId} or g.category_id in ( select t.category_id from t_goods_category t where find_in_set(#{categoryId}, ancestors) ))
+            </if>
             <if test="status != null and status != ''">and g.status = #{status}</if>
             <if test="goodsType != null and goodsType != ''">and g.goods_type = #{goodsType}</if>
             <if test="params.beginTime != null and params.beginTime != ''">
@@ -61,7 +63,9 @@
         <include refid="selectGoodsVo"/>
         <where>
             g.del_flag='0' and g.status='1'
-            <if test="categoryId != null">and g.category_id = #{categoryId}</if>
+            <if test="categoryId != null">
+                and (g.category_id = #{categoryId} or g.category_id in ( select t.category_id from t_goods_category t where find_in_set(#{categoryId}, ancestors) ))
+            </if>
             <if test="goodsName != null and goodsName != ''">
                 and g.goods_name like concat('%', #{goodsName}, '%')
             </if>

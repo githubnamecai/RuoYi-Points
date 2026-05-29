@@ -1,39 +1,58 @@
 <template>
   <div class="home page-content">
-    <!-- 顶部积分卡 -->
-    <div class="header-card">
-      <div class="hello">你好，{{ userStore.nickname }} 👋</div>
-      <div class="points">
-        <span class="label">我的积分</span>
-        <span class="num">{{ userStore.points }}</span>
-      </div>
-      <div class="actions">
-        <span @click="$router.push('/sign')">每日签到</span>
-        <span @click="$router.push('/points/detail')">积分明细</span>
-      </div>
+    <!-- 顶部搜索与背景 -->
+    <div class="header-bg">
+      <van-search v-model="keyword" placeholder="搜索商品" shape="round" background="transparent" @search="onSearch" />
     </div>
 
-    <!-- 轮播图 -->
-    <van-swipe :autoplay="3500" indicator-color="#ff8c00" class="banner">
-      <van-swipe-item v-for="(b, i) in banners" :key="i">
-        <div class="banner-item" :style="{ background: b.bg }">{{ b.text }}</div>
-      </van-swipe-item>
-    </van-swipe>
+    <div class="main-content">
+      <!-- 轮播图 -->
+      <van-swipe :autoplay="3500" indicator-color="#ff8c00" class="banner">
+        <van-swipe-item v-for="(b, i) in banners" :key="i">
+          <img v-if="b.img" :src="b.img" class="banner-img" />
+          <div v-else class="banner-item" :style="{ background: b.bg }">{{ b.text }}</div>
+        </van-swipe-item>
+      </van-swipe>
 
-    <!-- 分类切换 -->
-    <van-tabs v-model:active="catActive" sticky offset-top="0" line-height="2"
-              title-active-color="#ff8c00" color="#ff8c00" @change="onCatChange">
-      <van-tab title="全部" name="" />
-      <van-tab v-for="c in categories" :key="c.categoryId" :title="c.categoryName" :name="c.categoryId" />
-    </van-tabs>
-
-    <!-- 商品瀑布流 -->
-    <van-list v-model:loading="loading" :finished="finished" finished-text="没有更多了"
-              @load="loadMore" class="goods-list">
-      <div class="goods-grid">
-        <goods-card v-for="g in list" :key="g.goodsId" :goods="g" />
+      <!-- 金刚区图标导航 -->
+      <div class="king-kong">
+        <div class="nav-item" @click="scrollToCategory">
+          <div class="icon-wrap" style="background: linear-gradient(135deg, #ff8a80, #ff5252)"><van-icon name="apps-o" /></div>
+          <span>商品分类</span>
+        </div>
+        <div class="nav-item" @click="$router.push('/sign')">
+          <div class="icon-wrap" style="background: linear-gradient(135deg, #8c9eff, #536dfe)"><van-icon name="calendar-o" /></div>
+          <span>每日签到</span>
+        </div>
+        <div class="nav-item" @click="$router.push('/orders')">
+          <div class="icon-wrap" style="background: linear-gradient(135deg, #b9f6ca, #00e676)"><van-icon name="orders-o" /></div>
+          <span>我的订单</span>
+        </div>
+        <div class="nav-item" @click="$router.push('/points/detail')">
+          <div class="icon-wrap" style="background: linear-gradient(135deg, #ea80fc, #e040fb)"><van-icon name="gold-coin-o" /></div>
+          <span>积分明细</span>
+        </div>
+        <div class="nav-item" @click="$router.push('/address')">
+          <div class="icon-wrap" style="background: linear-gradient(135deg, #b388ff, #7c4dff)"><van-icon name="location-o" /></div>
+          <span>地址管理</span>
+        </div>
       </div>
-    </van-list>
+
+      <!-- 分类切换 -->
+      <van-tabs v-model:active="catActive" sticky offset-top="0" line-height="2"
+                title-active-color="#ff8c00" color="#ff8c00" @change="onCatChange" id="categoryTabs">
+        <van-tab title="全部" name="" />
+        <van-tab v-for="c in categories" :key="c.categoryId" :title="c.categoryName" :name="c.categoryId" />
+      </van-tabs>
+
+      <!-- 商品瀑布流 -->
+      <van-list v-model:loading="loading" :finished="finished" finished-text="没有更多了"
+                @load="loadMore" class="goods-list">
+        <div class="goods-grid">
+          <goods-card v-for="g in list" :key="g.goodsId" :goods="g" />
+        </div>
+      </van-list>
+    </div>
   </div>
 </template>
 
@@ -47,22 +66,38 @@ const userStore = useUserStore()
 const list = ref([])
 const categories = ref([])
 const catActive = ref('')
+const keyword = ref('')
 const pageNum = ref(1)
 const pageSize = 10
 const loading = ref(false)
 const finished = ref(false)
 
 const banners = [
-  { text: '🎉 邀请新用户得 200 积分', bg: 'linear-gradient(135deg, #ff8c00, #ffb84d)' },
-  { text: '✨ 连续签到 7 天奖 50 积分', bg: 'linear-gradient(135deg, #4facfe, #00f2fe)' },
-  { text: '🔥 热门商品限时兑换', bg: 'linear-gradient(135deg, #fa709a, #fee140)' }
+  { img: 'https://img.yzcdn.cn/vant/ipad.jpeg', bg: 'linear-gradient(135deg, #ff8c00, #ffb84d)' },
+  { img: 'https://img.yzcdn.cn/vant/apple-1.jpg', bg: 'linear-gradient(135deg, #4facfe, #00f2fe)' }
 ]
+
+function onSearch() {
+  list.value = []
+  pageNum.value = 1
+  finished.value = false
+  loading.value = true
+  loadMore()
+}
+
+function scrollToCategory() {
+  const el = document.getElementById('categoryTabs')
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth' })
+  }
+}
 
 async function loadMore() {
   try {
     const res = await listGoods({
       pageNum: pageNum.value, pageSize,
-      categoryId: catActive.value || undefined
+      categoryId: catActive.value || undefined,
+      goodsName: keyword.value || undefined
     })
     list.value.push(...(res.rows || []))
     finished.value = list.value.length >= res.total
@@ -76,6 +111,7 @@ function onCatChange() {
   list.value = []
   pageNum.value = 1
   finished.value = false
+  loading.value = true
   loadMore()
 }
 
@@ -96,35 +132,52 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
-.home { background: #f7f7f7; min-height: 100vh; }
-.header-card {
-  margin: 12px;
-  padding: 16px 18px;
-  background: linear-gradient(135deg, #ff8c00, #ffb84d);
-  border-radius: 14px;
-  color: #fff;
-  box-shadow: 0 4px 14px rgba(255, 140, 0, 0.3);
+.home { background: #f7f7f7; min-height: 100vh; position: relative; padding-bottom: 50px; }
+.header-bg {
+  background: linear-gradient(180deg, #fceadd 0%, #f7f7f7 100%);
+  padding: 10px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 99;
 }
-.hello { font-size: 14px; opacity: 0.9; }
-.points {
-  margin: 6px 0;
-  display: flex; align-items: baseline; gap: 8px;
-}
-.points .label { font-size: 13px; opacity: 0.9; }
-.points .num { font-size: 30px; font-weight: 700; letter-spacing: 1px; }
-.actions {
-  display: flex; gap: 10px; margin-top: 6px;
-}
-.actions span {
-  font-size: 12px; padding: 4px 10px;
-  background: rgba(255, 255, 255, 0.25); border-radius: 12px;
+.main-content {
+  margin-top: -10px;
 }
 
 .banner { margin: 0 12px 12px; border-radius: 12px; overflow: hidden; }
+.banner-img { width: 100%; height: 140px; object-fit: cover; display: block; }
 .banner-item {
-  height: 110px;
+  height: 140px;
   display: flex; align-items: center; justify-content: center;
   color: #fff; font-size: 16px; font-weight: 600;
+}
+
+.king-kong {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px 20px;
+  background: transparent;
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 24px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.nav-item span {
+  font-size: 12px;
+  color: #333;
 }
 
 .goods-list { padding: 12px; }

@@ -71,9 +71,14 @@ async function loadMore() {
   } finally { loading.value = false }
 }
 
-function onTabChange() { reset(); loadMore() }
+function onTabChange() { 
+  reset(); 
+  loading.value = true;
+  loadMore(); 
+}
 function onRefresh() {
   reset()
+  loading.value = true
   loadMore().finally(() => refreshing.value = false)
 }
 

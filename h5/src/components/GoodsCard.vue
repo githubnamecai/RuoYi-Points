@@ -5,13 +5,14 @@
       <div v-if="goods.goodsType === '1'" class="tag virtual">虚拟</div>
     </div>
     <div class="info">
+      <div class="brand" v-if="goods.categoryName">{{ goods.categoryName }}</div>
       <div class="title">{{ goods.goodsName }}</div>
       <div class="bottom">
-        <span class="points">
-          <span class="num">{{ goods.points }}</span>
+        <span class="price">
           <span class="unit">积分</span>
+          <span class="num">{{ goods.points }}</span>
         </span>
-        <span class="sales">已兑{{ goods.sales || 0 }}</span>
+        <van-icon name="shopping-cart-o" class="cart-icon" />
       </div>
     </div>
   </div>
@@ -48,24 +49,37 @@ const defaultImg = 'https://via.placeholder.com/300x300?text=Goods'
   padding: 1px 5px;
   border-radius: 4px;
 }
-.info { padding: 8px 10px 10px; }
+.info { padding: 10px; }
+.brand {
+  font-size: 12px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 2px;
+}
 .title {
   font-size: 13px;
-  line-height: 1.3;
-  height: 34px;
+  line-height: 1.4;
+  height: 36px;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
-  color: #333;
+  color: #666;
 }
 .bottom {
-  margin-top: 6px;
+  margin-top: 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-.points .num { color: #ff8c00; font-size: 16px; font-weight: 700; }
-.points .unit { color: #ff8c00; font-size: 11px; margin-left: 2px; }
-.sales { color: #999; font-size: 11px; }
+.price { color: #f44336; display: flex; align-items: baseline; }
+.price .unit { font-size: 12px; margin-right: 2px; }
+.price .num { font-size: 16px; font-weight: bold; }
+.cart-icon {
+  font-size: 14px;
+  color: #666;
+  border: 1px solid #eee;
+  border-radius: 50%;
+  padding: 4px;
+}
 </style>
