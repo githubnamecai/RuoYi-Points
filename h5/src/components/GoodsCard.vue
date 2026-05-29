@@ -1,7 +1,9 @@
 <template>
   <div class="goods-card" @click="$router.push('/product/' + goods.goodsId)">
     <div class="img-wrap">
-      <img :src="goods.coverImg || defaultImg" alt="" />
+      <!-- <img :src="goods.coverImg || defaultImg" alt="" /> -->
+      <img :src="formatImg(goods.coverImg)" alt="" />
+
       <div v-if="goods.goodsType === '1'" class="tag virtual">虚拟</div>
     </div>
     <div class="info">
@@ -20,7 +22,19 @@
 
 <script setup>
 defineProps({ goods: { type: Object, required: true } })
+
 const defaultImg = 'https://via.placeholder.com/300x300?text=Goods'
+const baseApi = import.meta.env.VITE_APP_BASE_API
+
+
+function formatImg(url) {
+  if (!url) return defaultImg
+  if (url.startsWith('/profile')) {
+    console.log(baseApi)
+    return baseApi + url
+  }
+  return url
+}
 </script>
 
 <style scoped lang="scss">
@@ -32,13 +46,21 @@ const defaultImg = 'https://via.placeholder.com/300x300?text=Goods'
   display: flex;
   flex-direction: column;
 }
+
 .img-wrap {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
   background: #f3f3f3;
 }
-.img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .tag.virtual {
   position: absolute;
   top: 6px;
@@ -49,13 +71,18 @@ const defaultImg = 'https://via.placeholder.com/300x300?text=Goods'
   padding: 1px 5px;
   border-radius: 4px;
 }
-.info { padding: 10px; }
+
+.info {
+  padding: 10px;
+}
+
 .brand {
   font-size: 12px;
   font-weight: bold;
   color: #333;
   margin-bottom: 2px;
 }
+
 .title {
   font-size: 13px;
   line-height: 1.4;
@@ -66,15 +93,30 @@ const defaultImg = 'https://via.placeholder.com/300x300?text=Goods'
   overflow: hidden;
   color: #666;
 }
+
 .bottom {
   margin-top: 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-.price { color: #f44336; display: flex; align-items: baseline; }
-.price .unit { font-size: 12px; margin-right: 2px; }
-.price .num { font-size: 16px; font-weight: bold; }
+
+.price {
+  color: #f44336;
+  display: flex;
+  align-items: baseline;
+}
+
+.price .unit {
+  font-size: 12px;
+  margin-right: 2px;
+}
+
+.price .num {
+  font-size: 16px;
+  font-weight: bold;
+}
+
 .cart-icon {
   font-size: 14px;
   color: #666;
