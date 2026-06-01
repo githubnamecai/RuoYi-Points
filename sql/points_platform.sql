@@ -32,13 +32,14 @@ CREATE TABLE `t_goods_category`
   AUTO_INCREMENT = 100
   DEFAULT CHARSET = utf8mb4 COMMENT ='商品分类表';
 
-INSERT INTO `t_goods_category` (category_id, parent_id, ancestors, category_name, order_num, status, create_by, create_time)
-VALUES (1, 0, '0', '虚拟商品', 1, '0', 'admin', NOW()),
-       (2, 0, '0', '实物商品', 2, '0', 'admin', NOW()),
-       (3, 1, '0,1', '话费充值', 1, '0', 'admin', NOW()),
-       (4, 1, '0,1', '视频会员', 2, '0', 'admin', NOW()),
-       (5, 2, '0,2', '生活日用', 1, '0', 'admin', NOW()),
-       (6, 2, '0,2', '数码电器', 2, '0', 'admin', NOW());
+-- INSERT INTO `t_goods_category` (category_id, parent_id, ancestors, category_name, order_num, status, create_by, create_time)
+-- VALUES (1, 0, '0', '虚拟商品', 1, '0', 'admin', NOW()),
+--        (2, 0, '0', '实物商品', 2, '0', 'admin', NOW()),
+--        (3, 1, '0,1', '话费充值', 1, '0', 'admin', NOW()),
+--        (4, 1, '0,1', '视频会员', 2, '0', 'admin', NOW()),
+--        (5, 2, '0,2', '生活日用', 1, '0', 'admin', NOW()),
+--        (6, 2, '0,2', '数码电器', 2, '0', 'admin', NOW());
+INSERT INTO `t_goods_category` VALUES (1,0,'0','数码电器',1,NULL,'0','0','admin','2026-05-28 16:19:56','admin','2026-06-01 09:40:02',NULL),(2,0,'0','生活日用',2,NULL,'0','0','admin','2026-05-28 16:19:56','admin','2026-06-01 09:40:14',NULL),(3,1,'0,1','数码设备',1,NULL,'0','0','admin','2026-05-28 16:19:56','admin','2026-06-01 09:40:27',NULL),(4,1,'0,1','家用电器',2,NULL,'0','0','admin','2026-05-28 16:19:56','admin','2026-06-01 09:43:50',NULL),(5,2,'0,2','手机电脑',1,NULL,'0','0','admin','2026-05-28 16:19:56','admin','2026-06-01 09:40:46',NULL),(6,2,'0,2','家居家装',2,NULL,'0','0','admin','2026-05-28 16:19:56','admin','2026-06-01 09:43:27',NULL),(7,0,'0','运营商',0,NULL,'0','0','admin','2026-05-29 09:54:49','',NULL,NULL),(8,7,'0,7','融合套餐',1,NULL,'0','0','admin','2026-05-29 09:55:02','',NULL,NULL),(9,7,'0,7','手机卡',2,NULL,'0','0','admin','2026-05-29 09:55:10','',NULL,NULL),(10,7,'0,7','宽带',3,NULL,'0','0','admin','2026-05-29 09:55:23','',NULL,NULL),(11,7,'0,7','有线电视',4,NULL,'0','0','admin','2026-05-29 09:55:29','admin','2026-05-29 09:55:39',NULL),(12,4,'0,1,4','家用电器',0,'','0','2','admin','2026-06-01 09:40:33','',NULL,NULL);
 
 -- ----------------------------
 -- 2、商品表
@@ -200,8 +201,8 @@ CREATE TABLE `t_points_rule`
 
 INSERT INTO `t_points_rule`(rule_code, rule_name, rule_type, reward_points, daily_limit, status, create_by, create_time)
 VALUES ('SIGN_IN', '每日签到', '0', 10, 1, '0', 'admin', NOW()),
-       ('INVITE_USER', '邀请新用户', '1', 200, 0, '0', 'admin', NOW()),
-       ('SHARE', '分享商品', '1', 5, 3, '0', 'admin', NOW());
+       ('INVITE_USER', '邀请新用户', '1', 200, 0, '1', 'admin', NOW()),
+       ('SHARE', '分享商品', '1', 5, 3, '1', 'admin', NOW());
 
 -- ----------------------------
 -- 7、签到配置表
@@ -298,6 +299,7 @@ INSERT INTO sys_menu VALUES (2031, '订单查询', 2030, 1, '', '','', '', 1, 0,
 INSERT INTO sys_menu VALUES (2032, '订单发货', 2030, 2, '', '', '', '',1, 0, 'F', '0', '0', 'points:order:ship', '#', 'admin', NOW(), '', NULL, '');
 INSERT INTO sys_menu VALUES (2033, '订单关闭', 2030, 3, '', '','', '', 1, 0, 'F', '0', '0', 'points:order:close', '#', 'admin', NOW(), '', NULL, '');
 INSERT INTO sys_menu VALUES (2034, '订单导出', 2030, 4, '', '', '', '',1, 0, 'F', '0', '0', 'points:order:export', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2035, '订单修改', 2030, 5, '', '', '', '',1, 0, 'F', '0', '0', 'points:order:edit', '#', 'admin', NOW(), '', NULL, '');
 
 -- 积分管理
 INSERT INTO sys_menu VALUES (2040, '积分规则', 2000, 4, 'rule', 'points/rule/index', '', '',1, 0, 'C', '0', '0', 'points:rule:list', 'rate', 'admin', NOW(), '', NULL, '积分规则菜单');
@@ -314,6 +316,9 @@ INSERT INTO sys_menu VALUES (2070, 'H5用户', 2000, 7, 'h5user', 'points/h5user
 INSERT INTO sys_menu VALUES (2071, '用户查询', 2070, 1, '', '', '', '',1, 0, 'F', '0', '0', 'points:h5user:query', '#', 'admin', NOW(), '', NULL, '');
 INSERT INTO sys_menu VALUES (2072, '用户冻结', 2070, 2, '', '', '', '',1, 0, 'F', '0', '0', 'points:h5user:freeze', '#', 'admin', NOW(), '', NULL, '');
 INSERT INTO sys_menu VALUES (2073, '积分调整', 2070, 3, '', '', '', '',1, 0, 'F', '0', '0', 'points:h5user:adjust', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2074, '用户新增', 2070, 4, '', '', '', '',1, 0, 'F', '0', '0', 'points:h5user:add', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2075, '用户修改', 2070, 5, '', '', '', '',1, 0, 'F', '0', '0', 'points:h5user:edit', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2076, '用户删除', 2070, 6, '', '', '', '',1, 0, 'F', '0', '0', 'points:h5user:remove', '#', 'admin', NOW(), '', NULL, '');
 
 -- 给 admin 角色（role_id=1）授权 (RuoYi 默认 admin 拥有所有菜单，无需插入)
 -- 给普通角色 role_id=2 也授权，方便测试
