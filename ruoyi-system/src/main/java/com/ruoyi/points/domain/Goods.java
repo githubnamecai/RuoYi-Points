@@ -35,6 +35,10 @@ public class Goods extends BaseEntity
     /** 商品类型 0实物 1虚拟 */
     @Excel(name = "类型", readConverterExp = "0=实物,1=虚拟")
     private String goodsType;
+    private Long deptId;
+
+    private Long parentId;
+
 
     /** 封面图 */
     private String coverImg;
@@ -88,6 +92,23 @@ public class Goods extends BaseEntity
     public void setGoodsName(String goodsName) { this.goodsName = goodsName; }
     public String getGoodsType() { return goodsType; }
     public void setGoodsType(String goodsType) { this.goodsType = goodsType; }
+
+    public Long getDeptId() {
+        return deptId;
+    }
+
+    public void setDeptId(Long deptId) {
+        this.deptId = deptId;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
     public String getCoverImg() { return coverImg; }
     public void setCoverImg(String coverImg) { this.coverImg = coverImg; }
     public String getImages() { return images; }

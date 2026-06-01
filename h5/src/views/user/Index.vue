@@ -3,26 +3,24 @@
     <!-- 头部信息卡 -->
     <div class="header">
       <div class="profile" @click="goEditProfile">
-        <van-image
-          round
-          width="64"
-          height="64"
-          :src="avatar"
-          fit="cover"
-          error-icon="user-circle-o"
-        />
+        <van-image round width="64" height="64" :src="avatar" fit="cover" error-icon="user-circle-o" />
         <div class="info">
           <div class="nickname">
             {{ nickname }}
             <van-icon name="edit" size="14" class="edit-icon" />
+            <span class="edit-profile-text">个人资料</span>   <!-- 新增文字 -->
           </div>
           <div class="phone">{{ maskedPhone }}</div>
         </div>
       </div>
-
+      <div @click="goEditPassword" class="change-pwd-btn">     <!-- 新增 class 便于样式 -->
+        <van-icon name="lock" size="14" />                     <!-- 新增图标 -->
+        <span>修改密码</span>
+      </div>
       <div class="points-card" @click="goPointsDetail">
         <div class="points-left">
           <div class="label">我的积分</div>
+
           <div class="value">{{ points }}</div>
         </div>
         <div class="points-right">
@@ -87,15 +85,17 @@
     </div>
 
     <!-- 资料编辑 -->
-    <van-dialog
-      v-model:show="showProfile"
-      title="修改资料"
-      show-cancel-button
-      @confirm="saveProfile"
-    >
+    <van-dialog v-model:show="showProfile" title="修改资料" show-cancel-button @confirm="saveProfile">
       <div class="profile-form">
         <van-field v-model="form.nickname" label="昵称" placeholder="请输入昵称" maxlength="20" />
         <van-field v-model="form.avatar" label="头像URL" placeholder="可选" />
+      </div>
+    </van-dialog>
+
+    <!-- 修改密码 -->
+    <van-dialog v-model:show="showPassword" title="修改密码" show-cancel-button @confirm="savePasswordProfile">
+      <div class="profile-form">
+        <van-field v-model="form.password" label="密码" placeholder="请输入密码" maxlength="20" />
       </div>
     </van-dialog>
 
@@ -133,6 +133,8 @@ const router = useRouter()
 const userStore = useUserStore()
 
 const showProfile = ref(false)
+const showPassword = ref(false)
+
 const showRule = ref(false)
 const showAbout = ref(false)
 const stats = reactive({ toShip: 0, shipping: 0 })
@@ -162,7 +164,7 @@ async function loadStats() {
 }
 
 async function refresh() {
-  await userStore.fetchUserInfo().catch(() => {})
+  await userStore.fetchUserInfo().catch(() => { })
   loadStats()
 }
 
@@ -172,12 +174,29 @@ function goEditProfile() {
   showProfile.value = true
 }
 
+function goEditPassword() {
+  form.nickname = userInfo.value.nickname || ''
+  form.avatar = userInfo.value.avatar || ''
+  showPassword.value = true
+}
+
+
 async function saveProfile() {
   if (!form.nickname || !form.nickname.trim()) {
     showToast('昵称不能为空')
     return
   }
   await updateProfile({ nickname: form.nickname.trim(), avatar: form.avatar })
+  showToast('保存成功')
+  await userStore.fetchUserInfo()
+}
+
+async function savePasswordProfile() {
+  if (!form.password || !form.password.trim()) {
+    showToast('密码不能为空')
+    return
+  }
+  await updateProfile({ password: form.password.trim() })
   showToast('保存成功')
   await userStore.fetchUserInfo()
 }
@@ -202,32 +221,69 @@ onActivated(refresh)
 </script>
 
 <style scoped lang="scss">
+/* 原有样式不变，新增以下样式 */
+.nickname {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  
+  .edit-profile-text {
+    font-size: 12px;
+    opacity: 0.85;
+    margin-left: 2px;
+  }
+}
+
+.change-pwd-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  margin-top: 4px;  /* 与 profile 区域垂直对齐微调 */
+}
+
 .user-page {
   min-height: 100vh;
   padding-bottom: 80px;
   background: #f5f5f5;
 }
+
 .header {
   background: linear-gradient(135deg, #ff8c00 0%, #ffb347 100%);
   padding: 32px 16px 16px;
   color: #fff;
   border-radius: 0 0 16px 16px;
 }
+
 .profile {
   display: flex;
   align-items: center;
   gap: 14px;
-  .info { flex: 1; }
+
+  .info {
+    flex: 1;
+  }
+
   .nickname {
     font-size: 18px;
     font-weight: 600;
     display: flex;
     align-items: center;
     gap: 6px;
-    .edit-icon { opacity: 0.85; }
+
+    .edit-icon {
+      opacity: 0.85;
+    }
   }
-  .phone { font-size: 13px; opacity: 0.85; margin-top: 4px; }
+
+  .phone {
+    font-size: 13px;
+    opacity: 0.85;
+    margin-top: 4px;
+  }
 }
+
 .points-card {
   margin-top: 18px;
   background: rgba(255, 255, 255, 0.18);
@@ -236,8 +292,18 @@ onActivated(refresh)
   display: flex;
   align-items: center;
   justify-content: space-between;
-  .label { font-size: 13px; opacity: 0.9; }
-  .value { font-size: 26px; font-weight: 700; margin-top: 4px; }
+
+  .label {
+    font-size: 13px;
+    opacity: 0.9;
+  }
+
+  .value {
+    font-size: 26px;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
   .points-right {
     display: flex;
     align-items: center;
@@ -245,6 +311,7 @@ onActivated(refresh)
     font-size: 13px;
   }
 }
+
 .stats-row {
   display: flex;
   align-items: center;
@@ -252,23 +319,41 @@ onActivated(refresh)
   background: rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   padding: 14px 0;
+
   .stat {
     flex: 1;
     text-align: center;
-    .stat-value { font-size: 18px; font-weight: 700; }
-    .stat-label { font-size: 12px; opacity: 0.9; margin-top: 2px; }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      opacity: 0.9;
+      margin-top: 2px;
+    }
   }
-  .divider { width: 1px; height: 24px; background: rgba(255, 255, 255, 0.35); }
+
+  .divider {
+    width: 1px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.35);
+  }
 }
+
 .menu-group {
   margin-top: 12px;
   border-radius: 12px;
   overflow: hidden;
 }
+
 .order-tabs {
   display: flex;
   background: #fff;
   padding: 14px 0;
+
   .ot-item {
     flex: 1;
     display: flex;
@@ -278,16 +363,34 @@ onActivated(refresh)
     font-size: 12px;
     color: #555;
     cursor: pointer;
-    .van-icon { color: var(--primary-color, #ff8c00); }
+
+    .van-icon {
+      color: var(--primary-color, #ff8c00);
+    }
   }
 }
+
 .logout-wrap {
   margin: 24px 16px 16px;
 }
-.profile-form { padding: 12px 0; }
+
+.profile-form {
+  padding: 12px 0;
+}
+
 .popup-content {
   padding: 24px 20px;
-  h3 { margin: 0 0 16px; font-size: 16px; }
-  p { line-height: 1.8; color: #555; font-size: 14px; margin: 4px 0; }
+
+  h3 {
+    margin: 0 0 16px;
+    font-size: 16px;
+  }
+
+  p {
+    line-height: 1.8;
+    color: #555;
+    font-size: 14px;
+    margin: 4px 0;
+  }
 }
 </style>

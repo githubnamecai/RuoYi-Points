@@ -39,6 +39,10 @@ public class Order extends BaseEntity
     @Excel(name = "数量")
     private Integer quantity;
 
+    private Long deptId;
+
+    private Long parentId;
+
     @Excel(name = "消耗积分")
     private Integer pointsUsed;
 
@@ -88,6 +92,23 @@ public class Order extends BaseEntity
     public String getGoodsType() { return goodsType; }
     public void setGoodsType(String goodsType) { this.goodsType = goodsType; }
     public Integer getQuantity() { return quantity; }
+
+    public Long getDeptId() {
+        return deptId;
+    }
+
+    public void setDeptId(Long deptId) {
+        this.deptId = deptId;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
     public Integer getPointsUsed() { return pointsUsed; }
     public void setPointsUsed(Integer pointsUsed) { this.pointsUsed = pointsUsed; }

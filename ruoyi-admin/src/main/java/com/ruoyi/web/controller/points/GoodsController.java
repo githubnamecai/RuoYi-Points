@@ -28,6 +28,8 @@ public class GoodsController extends BaseController
     public TableDataInfo list(Goods goods)
     {
         startPage();
+        // 判断前端有没有传递当前用户的deptid，没有则后端获取当前用户的deptid
+        if (goods.getDeptId() == null) goods.setDeptId(getDeptId());
         List<Goods> list = goodsService.selectGoodsList(goods);
         return getDataTable(list);
     }
@@ -44,6 +46,7 @@ public class GoodsController extends BaseController
     @PostMapping
     public AjaxResult add(@Validated @RequestBody Goods goods)
     {
+        goods.setDeptId(getDeptId());
         goods.setCreateBy(getUsername());
         return toAjax(goodsService.insertGoods(goods));
     }

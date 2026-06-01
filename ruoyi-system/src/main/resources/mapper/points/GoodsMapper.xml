@@ -9,6 +9,8 @@
         <result property="categoryName"   column="category_name"/>
         <result property="goodsName"      column="goods_name"/>
         <result property="goodsType"      column="goods_type"/>
+        <result property="deptId"       column="dept_id"/>
+        <result property="parentId"       column="parent_id"/>
         <result property="coverImg"       column="cover_img"/>
         <result property="images"         column="images"/>
         <result property="points"         column="points"/>
@@ -29,12 +31,13 @@
     </resultMap>
 
     <sql id="selectGoodsVo">
-        select g.goods_id, g.category_id, c.category_name, g.goods_name, g.goods_type, g.cover_img,
+        select g.goods_id, g.category_id, c.category_name, g.goods_name, g.goods_type, g.dept_id,g.parent_id,g.cover_img,
                g.images, g.points, g.original_price, g.stock, g.sales, g.limit_per_user, g.description,
                g.status, g.sort, g.del_flag, g.version, g.create_by, g.create_time,
                g.update_by, g.update_time, g.remark
         from t_goods g
         left join t_goods_category c on c.category_id = g.category_id
+        left join sys_dept d on g.dept_id = d.dept_id
     </sql>
 
     <select id="selectGoodsList" parameterType="com.ruoyi.points.domain.Goods" resultMap="GoodsResult">
@@ -54,6 +57,9 @@
             </if>
             <if test="params.endTime != null and params.endTime != ''">
                 and g.create_time &lt;= #{params.endTime}
+            </if>
+            <if test="deptId != null and deptId != 0">
+                AND (g.dept_id = #{deptId} OR g.dept_id IN ( SELECT t.dept_id FROM sys_dept t WHERE find_in_set(#{deptId}, ancestors) ))
             </if>
         </where>
         order by g.sort desc, g.goods_id desc
@@ -83,6 +89,8 @@
         <trim prefix="(" suffix=")" suffixOverrides=",">
             category_id, goods_name,
             <if test="goodsType != null">goods_type,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="parentId != null">parent_id,</if>
             <if test="coverImg != null">cover_img,</if>
             <if test="images != null">images,</if>
             points,
@@ -99,6 +107,8 @@
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             #{categoryId}, #{goodsName},
             <if test="goodsType != null">#{goodsType},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="parentId != null">#{parentId},</if>
             <if test="coverImg != null">#{coverImg},</if>
             <if test="images != null">#{images},</if>
             #{points},
@@ -120,6 +130,8 @@
             <if test="categoryId != null">category_id=#{categoryId},</if>
             <if test="goodsName != null">goods_name=#{goodsName},</if>
             <if test="goodsType != null">goods_type=#{goodsType},</if>
+            <if test="deptId != null">dept_id=#{deptId},</if>
+            <if test="parentId != null">parent_id=#{parentId},</if>
             <if test="coverImg != null">cover_img=#{coverImg},</if>
             <if test="images != null">images=#{images},</if>
             <if test="points != null">points=#{points},</if>

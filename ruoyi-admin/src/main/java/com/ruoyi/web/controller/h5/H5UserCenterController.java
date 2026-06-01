@@ -44,6 +44,8 @@ public class H5UserCenterController extends H5BaseController
         u.setUserId(currentUserId());
         u.setNickname(user.getNickname());
         u.setAvatar(user.getAvatar());
+        // H5调用方法更新密码
+        u.setPassword(user.getPassword());
         return toAjax(h5UserService.updateUser(u));
     }
 

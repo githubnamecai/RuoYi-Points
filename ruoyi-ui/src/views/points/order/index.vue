@@ -19,7 +19,7 @@
         <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
         <el-button type="warning" icon="el-icon-download" @click="handleExport"
-                   v-hasPermi="['points:order:export']">导出</el-button>
+          v-hasPermi="['points:order:export']">导出</el-button>
       </el-form-item>
     </el-form>
 
@@ -31,7 +31,7 @@
       <el-table-column label="用户手机" prop="userPhone" width="120" />
       <el-table-column label="类型" width="80">
         <template slot-scope="scope">
-          <el-tag :type="scope.row.goodsType==='1' ? 'success' : ''">
+          <el-tag :type="scope.row.goodsType === '1' ? 'success' : ''">
             {{ scope.row.goodsType === '1' ? '虚拟' : '实物' }}
           </el-tag>
         </template>
@@ -47,19 +47,17 @@
       <el-table-column label="操作" width="200" fixed="right">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)"
-                     v-hasPermi="['points:order:edit']">修改</el-button>
-          <el-button v-if="scope.row.status==='0' && scope.row.goodsType==='0'" size="mini" type="text"
-                     icon="el-icon-s-promotion" @click="openShip(scope.row)"
-                     v-hasPermi="['points:order:ship']">发货</el-button>
-          <el-button v-if="scope.row.status==='0' || scope.row.status==='1'" size="mini" type="text"
-                     icon="el-icon-close" @click="handleClose(scope.row)"
-                     v-hasPermi="['points:order:close']">关闭</el-button>
+            v-hasPermi="['points:order:edit']">修改</el-button>
+          <el-button v-if="scope.row.status === '0' && scope.row.goodsType === '0'" size="mini" type="text"
+            icon="el-icon-s-promotion" @click="openShip(scope.row)" v-hasPermi="['points:order:ship']">发货</el-button>
+          <el-button v-if="scope.row.status === '0' || scope.row.status === '1'" size="mini" type="text"
+            icon="el-icon-close" @click="handleClose(scope.row)" v-hasPermi="['points:order:close']">关闭</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="queryParams.pageNum"
-                :limit.sync="queryParams.pageSize" @pagination="getList" />
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
+      @pagination="getList" />
 
     <el-dialog title="订单发货" :visible.sync="shipOpen" width="480px" append-to-body>
       <el-form ref="shipRef" :model="shipForm" :rules="shipRules" label-width="100px">
@@ -72,7 +70,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitShip">确认发货</el-button>
-        <el-button @click="shipOpen=false">取 消</el-button>
+        <el-button @click="shipOpen = false">取 消</el-button>
       </div>
     </el-dialog>
 
@@ -93,6 +91,18 @@
         <el-form-item label="物流单号" prop="expressNo">
           <el-input v-model="form.expressNo" placeholder="请输入物流单号" />
         </el-form-item>
+        <el-form-item label="状态" prop="status">
+          <el-select v-model="form.status" placeholder="状态" clearable>
+            <el-option v-for="dict in dict.type.points_order_status" :key="dict.value" :label="dict.label"
+              :value="dict.value" />
+          </el-select>
+        </el-form-item>
+          <el-form-item label="订单取消原因" prop="closeReason">
+            <el-input v-model="form.closeReason" type="textarea" placeholder="请输入订单取消原因" />
+          </el-form-item>
+          <el-form-item label="备注" prop="remark">
+            <el-input v-model="form.remark" type="textarea" placeholder="请输入备注" />
+          </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -107,6 +117,7 @@ import { listOrder, shipOrder, closeOrder, updateOrder } from '@/api/points/orde
 
 export default {
   name: 'Order',
+  dicts: ['points_order_status'],
   data() {
     return {
       list: [],
@@ -185,7 +196,7 @@ export default {
           this.$modal.msgSuccess('已关闭，积分已退还')
           this.getList()
         })
-      }).catch(() => {})
+      }).catch(() => { })
     },
     handleExport() {
       this.download('points/order/export', this.queryParams, `订单_${new Date().getTime()}.xlsx`)

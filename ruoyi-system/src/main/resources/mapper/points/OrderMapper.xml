@@ -13,6 +13,8 @@
         <result property="goodsCover"     column="goods_cover"/>
         <result property="goodsType"      column="goods_type"/>
         <result property="quantity"       column="quantity"/>
+        <result property="deptId"       column="dept_id"/>
+        <result property="parentId"       column="parent_id"/>
         <result property="pointsUsed"     column="points_used"/>
         <result property="status"         column="status"/>
         <result property="consignee"      column="consignee"/>
@@ -33,7 +35,7 @@
 
     <sql id="orderVo">
         select order_id, order_no, user_id, user_phone, goods_id, goods_name, goods_cover, goods_type,
-               quantity, points_used, status, consignee, phone, address, express_company, express_no,
+               quantity,dept_id,parent_id, points_used, status, consignee, phone, address, express_company, express_no,
                ship_time, finish_time, close_reason, close_time, create_by, create_time, update_by, update_time, remark
         from t_order
     </sql>
@@ -71,9 +73,9 @@
 
     <insert id="insertOrder" parameterType="com.ruoyi.points.domain.Order" useGeneratedKeys="true" keyProperty="orderId">
         insert into t_order(order_no, user_id, user_phone, goods_id, goods_name, goods_cover, goods_type,
-                            quantity, points_used, status, consignee, phone, address, create_by, create_time, remark)
+                            quantity,dept_id,parent_id, points_used, status, consignee, phone, address, create_by, create_time, remark)
         values(#{orderNo}, #{userId}, #{userPhone}, #{goodsId}, #{goodsName}, #{goodsCover}, #{goodsType},
-               #{quantity}, #{pointsUsed}, '0', #{consignee}, #{phone}, #{address}, #{createBy}, sysdate(), #{remark})
+               #{quantity}, #{deptId},#{parentId},#{pointsUsed}, '0', #{consignee}, #{phone}, #{address}, #{createBy}, sysdate(), #{remark})
     </insert>
 
     <update id="updateOrder" parameterType="com.ruoyi.points.domain.Order">
@@ -83,6 +85,8 @@
             <if test="consignee != null">consignee=#{consignee},</if>
             <if test="phone != null">phone=#{phone},</if>
             <if test="address != null">address=#{address},</if>
+            <if test="deptId != null">dept_id=#{deptId},</if>
+            <if test="parentId != null">parent_id=#{parentId},</if>
             <if test="expressCompany != null">express_company=#{expressCompany},</if>
             <if test="expressNo != null">express_no=#{expressNo},</if>
             <if test="updateBy != null">update_by=#{updateBy},</if>
