@@ -4,6 +4,7 @@ import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.core.domain.BaseEntity;
+import jakarta.validation.constraints.Size;
 
 /**
  * H5 用户对象 t_user（独立于 sys_user）
@@ -19,6 +20,11 @@ public class H5User extends BaseEntity
 
     @Excel(name = "昵称")
     private String nickname;
+    @Excel(name = "姓名")
+    private String name;
+    @Excel(name = "身份证号")
+    @Size(min = 18, max = 18, message = "身份证号长度不能超过18个字符")
+    private String idNumber;
 
     @Excel(name = "手机号")
     private String phone;
@@ -59,6 +65,23 @@ public class H5User extends BaseEntity
     public void setUserId(Long userId) { this.userId = userId; }
     public String getNickname() { return nickname; }
     public void setNickname(String nickname) { this.nickname = nickname; }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getIdNumber() {
+        return idNumber;
+    }
+
+    public void setIdNumber(String idNumber) {
+        this.idNumber = idNumber;
+    }
+
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
     public String getPassword() { return password; }

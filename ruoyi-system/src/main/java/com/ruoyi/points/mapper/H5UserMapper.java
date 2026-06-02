@@ -1,6 +1,8 @@
 package com.ruoyi.points.mapper;
 
 import java.util.List;
+
+import com.ruoyi.points.domain.ResetPwdDTO;
 import org.apache.ibatis.annotations.Param;
 import com.ruoyi.points.domain.H5User;
 
@@ -18,6 +20,7 @@ public interface H5UserMapper
     int insertUser(H5User user);
 
     int updateUser(H5User user);
+    int resetPassword(@Param("userId") Long userId, @Param("password") String password);
 
     /**
      * 乐观锁扣减积分：

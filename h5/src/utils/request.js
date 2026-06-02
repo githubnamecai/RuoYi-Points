@@ -36,11 +36,17 @@ service.interceptors.response.use(res => {
   }
   if (data.code === 401) {
     removeToken()
-    showToast(data.msg || '登录已失效')
+      showToast({
+      message: data.msg || '登录已失效',
+      className: 'my-toast'
+})
     router.replace('/login')
     return Promise.reject(data)
   }
-  showToast(data.msg || '请求异常')
+  showToast({
+  message: data.msg || '请求异常',
+  className: 'my-toast'
+})
   return Promise.reject(data)
 }, err => {
   loadingCount = 0
@@ -50,7 +56,10 @@ service.interceptors.response.use(res => {
     removeToken()
     router.replace('/login')
   }
-  showToast(err.response?.data?.msg || err.message || '网络错误')
+  showToast({
+  message: err.response?.data?.msg || err.message || '网络错误',
+  className: 'my-toast'
+})
   return Promise.reject(err)
 })
 

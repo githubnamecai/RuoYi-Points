@@ -28,7 +28,10 @@ router.beforeEach((to, from, next) => {
   if (to.meta.public) return next()
   const userStore = useUserStore()
   if (!userStore.token) {
-    showToast('请先登录')
+  showToast({
+  message: '请先登录',
+  className: 'my-toast'
+})
     return next({ path: '/login', query: { redirect: to.fullPath } })
   }
   next()

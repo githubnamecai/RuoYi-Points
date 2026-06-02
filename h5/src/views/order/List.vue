@@ -96,7 +96,10 @@ async function confirm(o) {
   try {
     await showDialog({ title: '确认收货？', message: '确认已收到商品？', showCancelButton: true })
     await confirmReceipt(o.orderId)
-    showToast('已确认收货')
+    showToast({
+    message: '已确认收货',
+    className: 'my-toast'
+})
     onRefresh()
   } catch (e) {}
 }

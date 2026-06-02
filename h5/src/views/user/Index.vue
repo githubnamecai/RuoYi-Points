@@ -88,6 +88,7 @@
     <van-dialog v-model:show="showProfile" title="修改资料" show-cancel-button @confirm="saveProfile">
       <div class="profile-form">
         <van-field v-model="form.nickname" label="昵称" placeholder="请输入昵称" maxlength="20" />
+         <van-field v-model="form.name" label="姓名" placeholder="请输入姓名" maxlength="20" />
         <van-field v-model="form.avatar" label="头像URL" placeholder="可选" />
       </div>
     </van-dialog>
@@ -126,8 +127,9 @@
 import { ref, computed, reactive, onMounted, onActivated } from 'vue'
 import { useRouter } from 'vue-router'
 import { showToast, showConfirmDialog } from 'vant'
+// import 'vant/es/toast/style'  // 加上这一行
 import { useUserStore } from '@/stores/user'
-import { updateProfile, listOrders } from '@/api/user'
+import { updateProfile, listOrders,updateResetpwd } from '@/api/user'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -171,33 +173,47 @@ async function refresh() {
 function goEditProfile() {
   form.nickname = userInfo.value.nickname || ''
   form.avatar = userInfo.value.avatar || ''
+  form.name = userInfo.value.name || ''
   showProfile.value = true
 }
 
 function goEditPassword() {
   form.nickname = userInfo.value.nickname || ''
   form.avatar = userInfo.value.avatar || ''
+  form.name = userInfo.value.name || ''
   showPassword.value = true
 }
 
 
 async function saveProfile() {
   if (!form.nickname || !form.nickname.trim()) {
-    showToast('昵称不能为空')
+  showToast({
+  message: '昵称不能为空',
+  className: 'my-toast'
+})
     return
   }
-  await updateProfile({ nickname: form.nickname.trim(), avatar: form.avatar })
-  showToast('保存成功')
+  await updateProfile({ nickname: form.nickname.trim(),name:form.name.trim(), avatar: form.avatar })
+  showToast({
+  message: '保存成功',
+  className: 'my-toast'
+})
   await userStore.fetchUserInfo()
 }
 
 async function savePasswordProfile() {
   if (!form.password || !form.password.trim()) {
-    showToast('密码不能为空')
+  showToast({
+  message: '密码不能为空',
+  className: 'my-toast'
+})
     return
   }
-  await updateProfile({ password: form.password.trim() })
-  showToast('保存成功')
+  await updateResetpwd({ password: form.password.trim() })
+  showToast({
+  message: '保存成功',
+  className: 'my-toast'
+})
   await userStore.fetchUserInfo()
 }
 
@@ -219,7 +235,12 @@ async function doLogout() {
 onMounted(refresh)
 onActivated(refresh)
 </script>
-
+<style>
+/* 全局样式（不要加 scoped） */
+.my-toast {
+  background: rgba(0, 0, 0, 0.7) !important;
+}
+</style>
 <style scoped lang="scss">
 /* 原有样式不变，新增以下样式 */
 .nickname {

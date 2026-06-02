@@ -2,6 +2,7 @@ package com.ruoyi.points.service;
 
 import java.util.List;
 import com.ruoyi.points.domain.H5User;
+import com.ruoyi.points.domain.ResetPwdDTO;
 import com.ruoyi.points.domain.dto.PointsAdjustDTO;
 
 public interface IH5UserService
@@ -15,6 +16,8 @@ public interface IH5UserService
 
     int insertUser(H5User user);
     int updateUser(H5User user);
+    // ... 已有方法
+    int resetPassword(Long userId, String newPassword);
     int deleteUserByIds(Long[] userIds);
     int changeStatus(Long userId, String status);
 

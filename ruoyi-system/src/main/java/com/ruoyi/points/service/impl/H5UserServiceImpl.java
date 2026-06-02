@@ -1,7 +1,10 @@
 package com.ruoyi.points.service.impl;
 
 import java.util.List;
+
+import com.ruoyi.points.domain.ResetPwdDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.ruoyi.common.exception.ServiceException;
@@ -67,6 +70,15 @@ public class H5UserServiceImpl implements IH5UserService
 
     @Override
     public int updateUser(H5User user) { return h5UserMapper.updateUser(user); }
+    @Override
+    public int resetPassword(Long userId, String newPassword) {
+//        @Autowired
+//        private PasswordEncoder passwordEncoder; // RuoYi 框架已提供 BCryptPasswordEncoder
+        // 密码加密
+//        String encodedPassword = passwordEncoder.encode(newPassword);
+        // 调用 Mapper 更新
+        return h5UserMapper.resetPassword(userId, newPassword);
+    }
 
     @Override
     public int deleteUserByIds(Long[] userIds) { return h5UserMapper.deleteUserByIds(userIds); }

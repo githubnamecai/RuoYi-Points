@@ -75,12 +75,19 @@ const count = ref(60)
 
 async function sendCode() {
   if (!/^1[3-9]\d{9}$/.test(phone.value)) {
-    showToast('请输入正确的手机号')
+    showToast({
+    message: '请输入正确的手机号',
+    className: 'my-toast'
+})
     return
   }
   try {
     await sendSms(phone.value)
     showToast('验证码已发送')
+//     showToast({
+//     message: '验证码已发送',
+//     className: 'my-toast'
+// })
     counting.value = true
     count.value = 60
     const timer = setInterval(() => {
@@ -101,7 +108,10 @@ async function onSubmit() {
     })
     userStore.setToken(res.token)
     await userStore.fetchUserInfo()
-    showToast('登录成功')
+    showToast({
+    message: '登录成功',
+    className: 'my-toast'
+})
     router.replace(route.query.redirect || '/home')
   } finally { loading.value = false }
 }

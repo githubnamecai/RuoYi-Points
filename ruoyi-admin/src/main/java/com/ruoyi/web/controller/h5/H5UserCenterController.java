@@ -43,7 +43,22 @@ public class H5UserCenterController extends H5BaseController
         H5User u = new H5User();
         u.setUserId(currentUserId());
         u.setNickname(user.getNickname());
+        u.setName(user.getName());
         u.setAvatar(user.getAvatar());
+        return toAjax(h5UserService.updateUser(u));
+    }
+
+    /** 更新密码 */
+    @PutMapping("/resetpwd")
+    public AjaxResult resetpwd(@RequestBody H5User user)
+    {
+        user.setUserId(currentUserId());
+        // 仅允许更新少量字段
+        H5User u = new H5User();
+        u.setUserId(currentUserId());
+//        u.setNickname(user.getNickname());
+//        u.setName(user.getName());
+//        u.setAvatar(user.getAvatar());
         // H5调用方法更新密码
         u.setPassword(user.getPassword());
         return toAjax(h5UserService.updateUser(u));

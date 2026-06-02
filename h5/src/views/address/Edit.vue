@@ -143,7 +143,10 @@ async function loadEdit() {
     })
     defaultOn.value = item.isDefault === '1'
   } else {
-    showToast('地址不存在')
+    showToast({
+    message: '地址不存在',
+    className: 'my-toast'
+})
   }
 }
 
@@ -179,7 +182,10 @@ async function onSubmit() {
       }
     }
     setTimeout(() => {
-      showToast(isEdit.value ? '修改成功' : '新增成功')
+      showToast({
+      message: isEdit.value ? '修改成功' : '新增成功',
+      className: 'my-toast'
+})
     }, 100)
     setTimeout(() => router.back(), 500)
   } finally {
@@ -191,7 +197,10 @@ async function onDelete() {
   try {
     await showConfirmDialog({ title: '提示', message: '确定删除该地址？' })
     await deleteAddress(form.addressId)
-    showToast('删除成功')
+    showToast({
+    message: '删除成功',
+    className: 'my-toast'
+})
     setTimeout(() => router.back(), 300)
   } catch (e) { /* 取消 */ }
 }

@@ -114,7 +114,10 @@ async function load() {
 async function onSign() {
   try {
     await doSign()
-    showToast('签到成功')
+    showToast({
+    message: '签到成功',
+    className: 'my-toast'
+})
     await userStore.fetchUserInfo()
     load()
   } catch (e) {}
@@ -122,7 +125,12 @@ async function onSign() {
 
 async function onCellClick(cell) {
   if (!cell.day) return
-  if (cell.signed) { showToast('已签到'); return }
+  if (cell.signed) { 
+  showToast({
+  message: '已签到',
+  className: 'my-toast'
+});
+  return }
   if (cell.today && !info.value.signedToday) { onSign(); return }
   if (cell.repairable && info.value.config?.repairEnabled === '1') {
     try {
@@ -132,7 +140,10 @@ async function onCellClick(cell) {
         showCancelButton: true
       })
       await repairSign(cell.ymd)
-      showToast('补签成功')
+      showToast({
+      message: '补签成功',
+      className: 'my-toast'
+});
       await userStore.fetchUserInfo()
       load()
     } catch (e) {}

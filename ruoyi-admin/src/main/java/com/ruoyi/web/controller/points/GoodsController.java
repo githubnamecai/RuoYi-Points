@@ -56,6 +56,9 @@ public class GoodsController extends BaseController
     @PutMapping
     public AjaxResult edit(@RequestBody Goods goods)
     {
+        if (goods.getDeptId() == null){
+            goods.setDeptId(getDeptId());
+        }
         goods.setUpdateBy(getUsername());
         return toAjax(goodsService.updateGoods(goods));
     }

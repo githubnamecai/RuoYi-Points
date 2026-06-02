@@ -127,7 +127,11 @@ async function submit() {
     return
   }
   if (userStore.points < totalPoints.value) {
-    showToast('积分不足'); return
+    showToast({
+    message: '积分不足',
+    className: 'my-toast'
+});
+    return
   }
   try {
     await showDialog({ title: '确认兑换？', message: `将扣除 ${totalPoints.value} 积分`, showCancelButton: true })
@@ -141,7 +145,10 @@ async function submit() {
       addressId: address.value?.addressId,
       remark: remark.value
     })
-    showToast('兑换成功')
+    showToast({
+    message: '兑换成功',
+    className: 'my-toast'
+})
     await userStore.fetchUserInfo()
     router.replace('/orders/' + res.data.orderId)
   } finally { loading.value = false }

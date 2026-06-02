@@ -43,7 +43,8 @@ public class OrderController extends BaseController
     @PutMapping("/ship")
     public AjaxResult ship(@RequestBody Order order)
     {
-        order.setDeptId(getDeptId());
+        if(order.getDeptId()==null){
+        order.setDeptId(getDeptId());}
         return toAjax(orderService.shipOrder(order, getUsername()));
     }
 

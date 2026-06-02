@@ -1,5 +1,6 @@
 package com.ruoyi.web.controller.points;
 
+import com.ruoyi.points.domain.ResetPwdDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -49,6 +50,17 @@ public class H5UserController extends BaseController
     {
         return toAjax(h5UserService.updateUser(user));
     }
+
+    @PreAuthorize("@ss.hasPermi('points:h5user:resetPwd')")
+    @Log(title = "H5用户", businessType = BusinessType.UPDATE)
+    @PutMapping("/pwd")
+    public AjaxResult resetPwd(@Validated @RequestBody ResetPwdDTO dto)
+    {
+        // 调用 Service 方法，传入 userId 和 newPassword
+        int rows = h5UserService.resetPassword(dto.getUserId(), dto.getNewPassword());
+        return toAjax(rows);
+    }
+
 
     @PreAuthorize("@ss.hasPermi('points:h5user:remove')")
     @Log(title = "H5用户", businessType = BusinessType.DELETE)

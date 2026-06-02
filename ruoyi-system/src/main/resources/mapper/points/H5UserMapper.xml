@@ -6,6 +6,8 @@
     <resultMap id="H5UserResult" type="com.ruoyi.points.domain.H5User">
         <id     property="userId"          column="user_id"/>
         <result property="nickname"        column="nickname"/>
+        <result property="name"        column="name"/>
+        <result property="idNumber"        column="id_number"/>
         <result property="phone"           column="phone"/>
         <result property="password"        column="password"/>
         <result property="avatar"          column="avatar"/>
@@ -22,7 +24,7 @@
     </resultMap>
 
     <sql id="selectUserVo">
-        select user_id, nickname, phone, password, avatar, points_balance, total_earned, total_consumed,
+        select user_id, nickname,name,id_number, phone, password, avatar, points_balance, total_earned, total_consumed,
                continuous_days, last_sign_date, status, register_time, last_login_time, last_login_ip, del_flag
         from t_user
     </sql>
@@ -33,6 +35,8 @@
             del_flag='0'
             <if test="phone != null and phone != ''">and phone like concat('%', #{phone}, '%')</if>
             <if test="nickname != null and nickname != ''">and nickname like concat('%', #{nickname}, '%')</if>
+            <if test="name != null and name != ''">and name like concat('%', #{name}, '%')</if>
+            <if test="idNumber != null and idNumber != ''">and id_number =#{idNumber}</if>
             <if test="status != null and status != ''">and status = #{status}</if>
             <if test="params.beginTime != null and params.beginTime != ''">and register_time &gt;= #{params.beginTime}</if>
             <if test="params.endTime != null and params.endTime != ''">and register_time &lt;= #{params.endTime}</if>
@@ -49,9 +53,9 @@
     </select>
 
     <insert id="insertUser" parameterType="com.ruoyi.points.domain.H5User" useGeneratedKeys="true" keyProperty="userId">
-        insert into t_user(nickname, phone, password, avatar, points_balance, total_earned, total_consumed,
+        insert into t_user(nickname,name,id_number, phone, password, avatar, points_balance, total_earned, total_consumed,
                            continuous_days, status, register_time, last_login_time, last_login_ip, del_flag)
-        values(#{nickname}, #{phone}, #{password}, #{avatar}, coalesce(#{pointsBalance},0), coalesce(#{pointsBalance},0), 0, 0,
+        values(#{nickname},#{name},#{idNumber}, #{phone}, #{password}, #{avatar}, coalesce(#{pointsBalance},0), coalesce(#{pointsBalance},0), 0, 0,
                coalesce(#{status},'0'), sysdate(), sysdate(), #{lastLoginIp}, '0')
     </insert>
 
@@ -59,6 +63,8 @@
         update t_user
         <set>
             <if test="nickname != null">nickname=#{nickname},</if>
+            <if test="name != null">name=#{name},</if>
+            <if test="idNumber != null">id_number=#{idNumber},</if>
             <if test="phone != null">phone=#{phone},</if>
             <if test="password != null">password=#{password},</if>
             <if test="avatar != null">avatar=#{avatar},</if>
@@ -68,6 +74,13 @@
             <if test="lastLoginIp != null">last_login_ip=#{lastLoginIp},</if>
         </set>
         where user_id=#{userId}
+    </update>
+
+
+    <update id="resetPassword">
+        UPDATE t_user
+        SET password = #{password}
+        WHERE user_id = #{userId}
     </update>
 
     <update id="deleteUserByIds">

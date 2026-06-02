@@ -6,6 +6,9 @@ export function getUserInfo() {
 export function updateProfile(data) {
   return request({ url: '/h5-api/user/profile', method: 'put', data })
 }
+export function updateResetpwd(data) {
+  return request({ url: '/h5-api/user/resetpwd', method: 'put', data })
+}
 export function listPointsDetail(params) {
   return request({ url: '/h5-api/user/points/detail', method: 'get', params })
 }

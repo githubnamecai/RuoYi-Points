@@ -108,7 +108,10 @@ async function del(item) {
   try {
     await showConfirmDialog({ title: '提示', message: '确定删除该地址？' })
     await deleteAddress(item.addressId)
-    showToast('删除成功')
+    showToast({
+    message: '删除成功',
+    className: 'my-toast'
+})
     load()
   } catch (e) { /* 取消 */ }
 }
@@ -116,7 +119,10 @@ async function del(item) {
 async function setDefault(item, val) {
   if (!val) return
   await setDefaultAddress(item.addressId)
-  showToast('设置成功')
+  showToast({
+  message: '设置成功',
+  className: 'my-toast'
+})
   load()
 }
 
