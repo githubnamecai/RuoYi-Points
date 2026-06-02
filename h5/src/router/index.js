@@ -14,7 +14,9 @@ const routes = [
   { path: '/product/:id/exchange', component: () => import('@/views/product/Exchange.vue'), meta: { title: '兑换确认' } },
   { path: '/points/detail', component: () => import('@/views/points/Detail.vue'), meta: { title: '积分明细' } },
   { path: '/address', component: () => import('@/views/address/List.vue'), meta: { title: '收货地址' } },
-  { path: '/address/edit', component: () => import('@/views/address/Edit.vue'), meta: { title: '编辑地址' } }
+  { path: '/address/edit', component: () => import('@/views/address/Edit.vue'), meta: { title: '编辑地址' } },
+  { path: '/coupon/center', component: () => import('@/views/coupon/Center.vue'), meta: { title: '领券中心' } },
+  { path: '/coupon/my', component: () => import('@/views/coupon/My.vue'), meta: { title: '我的优惠券' } }
 ]
 
 const router = createRouter({

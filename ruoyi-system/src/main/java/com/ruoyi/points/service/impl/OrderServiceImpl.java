@@ -13,6 +13,10 @@ import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.uuid.IdUtils;
 import com.ruoyi.points.constant.PointsConstants;
+import com.ruoyi.points.domain.Coupon;
+import com.ruoyi.points.domain.UserCoupon;
+import com.ruoyi.points.mapper.CouponMapper;
+import com.ruoyi.points.mapper.UserCouponMapper;
 import com.ruoyi.points.domain.Goods;
 import com.ruoyi.points.domain.H5User;
 import com.ruoyi.points.domain.Order;
@@ -46,6 +50,9 @@ public class OrderServiceImpl implements IOrderService
     @Autowired private UserAddressMapper addressMapper;
     @Autowired private IPointsDetailService pointsDetailService;
     @Autowired private StringRedisTemplate redisTemplate;
+
+    @Autowired private CouponMapper couponMapper;
+    @Autowired private UserCouponMapper userCouponMapper;
 
     @Override public List<Order> selectOrderList(Order order) { return orderMapper.selectOrderList(order); }
     @Override public Order selectOrderById(Long orderId) { return orderMapper.selectOrderById(orderId); }
@@ -92,6 +99,41 @@ public class OrderServiceImpl implements IOrderService
             throw new ServiceException("库存不足");
 
         Integer totalPoints = goods.getPoints() * dto.getQuantity();
+        
+        // 校验并计算优惠券
+        UserCoupon uc = null;
+        if (dto.getUserCouponId() != null) {
+            uc = userCouponMapper.selectUserCouponById(dto.getUserCouponId());
+            if (uc == null || !"0".equals(uc.getStatus()) || !uc.getUserId().equals(userId)) {
+                throw new ServiceException("优惠券无效或不可用");
+            }
+            if (uc.getEndTime().before(new Date())) {
+                throw new ServiceException("优惠券已过期");
+            }
+            Coupon coupon = uc.getCoupon();
+            if (coupon.getMinAmount() > 0 && totalPoints < coupon.getMinAmount()) {
+                throw new ServiceException("未达到优惠券使用门槛");
+            }
+            // 校验适用范围
+            if (!"0".equals(coupon.getUseType())) {
+                List<Long> refIds = couponMapper.selectCouponGoodsIds(coupon.getCouponId());
+                if ("1".equals(coupon.getUseType()) && !refIds.contains(goods.getCategoryId())) {
+                    throw new ServiceException("优惠券不适用于该分类");
+                } else if ("2".equals(coupon.getUseType()) && !refIds.contains(goods.getGoodsId())) {
+                    throw new ServiceException("优惠券不适用于该商品");
+                }
+            }
+            
+            // 计算抵扣
+            if ("0".equals(coupon.getCouponType())) { // 满减
+                totalPoints = Math.max(0, totalPoints - coupon.getDiscountValue());
+            } else if ("1".equals(coupon.getCouponType())) { // 折扣
+                totalPoints = Math.max(0, (int)(totalPoints * (coupon.getDiscountValue() / 100.0)));
+            } else if ("2".equals(coupon.getCouponType())) { // 无门槛
+                totalPoints = Math.max(0, totalPoints - coupon.getDiscountValue());
+            }
+        }
+
         if (user.getPointsBalance() < totalPoints)
             throw new ServiceException("积分不足");
 
@@ -147,7 +189,12 @@ public class OrderServiceImpl implements IOrderService
         order.setCreateBy(user.getNickname());
         orderMapper.insertOrder(order);
 
-        // 4. 虚拟商品自动发货完成
+        // 4. 更新优惠券状态
+        if (uc != null) {
+            userCouponMapper.updateStatus(uc.getUserCouponId(), "1", order.getOrderId());
+        }
+
+        // 5. 虚拟商品自动发货完成
         if (PointsConstants.GOODS_TYPE_VIRTUAL.equals(goods.getGoodsType()))
         {
             Order finish = new Order();
@@ -204,6 +251,15 @@ public class OrderServiceImpl implements IOrderService
         h5UserMapper.increasePoints(exist.getUserId(), exist.getPointsUsed());
         // 回滚库存
         goodsMapper.increaseStock(exist.getGoodsId(), exist.getQuantity());
+        // 回退优惠券
+        UserCoupon ucQuery = new UserCoupon();
+        ucQuery.setOrderId(orderId);
+        List<UserCoupon> ucs = userCouponMapper.selectUserCouponList(ucQuery);
+        if (ucs != null && !ucs.isEmpty()) {
+            UserCoupon uc = ucs.get(0);
+            String status = uc.getEndTime().before(new Date()) ? "2" : "0"; // 如果已过原本有效期，则变为过期，否则恢复未使用
+            userCouponMapper.updateStatus(uc.getUserCouponId(), status, null);
+        }
 
         H5User user = h5UserMapper.selectUserById(exist.getUserId());
         pointsDetailService.record(exist.getUserId(),

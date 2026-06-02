@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.points.mapper.UserCouponMapper">
+
+    <resultMap id="UserCouponResult" type="com.ruoyi.points.domain.UserCoupon">
+        <id     property="userCouponId"   column="user_coupon_id"/>
+        <result property="userId"         column="user_id"/>
+        <result property="couponId"       column="coupon_id"/>
+        <result property="receiveType"    column="receive_type"/>
+        <result property="status"         column="status"/>
+        <result property="orderId"        column="order_id"/>
+        <result property="startTime"      column="start_time"/>
+        <result property="endTime"        column="end_time"/>
+        <result property="useTime"        column="use_time"/>
+        <result property="createTime"     column="create_time"/>
+        <result property="nickname"       column="nickname"/>
+        <result property="phone"          column="phone"/>
+        <association property="coupon"    javaType="com.ruoyi.points.domain.Coupon">
+            <id property="couponId" column="c_coupon_id"/>
+            <result property="couponName" column="coupon_name"/>
+            <result property="couponType" column="coupon_type"/>
+            <result property="minAmount" column="min_amount"/>
+            <result property="discountValue" column="discount_value"/>
+            <result property="useType" column="use_type"/>
+        </association>
+    </resultMap>
+
+    <sql id="selectUserCouponVo">
+        select uc.user_coupon_id, uc.user_id, uc.coupon_id, uc.receive_type, uc.status,
+               uc.order_id, uc.start_time, uc.end_time, uc.use_time, uc.create_time,
+               u.nickname, u.phone,
+               c.coupon_id as c_coupon_id, c.coupon_name, c.coupon_type, c.min_amount, c.discount_value, c.use_type
+        from t_user_coupon uc
+        left join t_user u on u.user_id = uc.user_id
+        left join t_coupon c on c.coupon_id = uc.coupon_id
+    </sql>
+
+    <select id="selectUserCouponList" parameterType="com.ruoyi.points.domain.UserCoupon" resultMap="UserCouponResult">
+        <include refid="selectUserCouponVo"/>
+        <where>
+            <if test="userId != null">and uc.user_id = #{userId}</if>
+            <if test="couponId != null">and uc.coupon_id = #{couponId}</if>
+            <if test="status != null and status != ''">and uc.status = #{status}</if>
+            <if test="receiveType != null and receiveType != ''">and uc.receive_type = #{receiveType}</if>
+            <if test="phone != null and phone != ''">and u.phone like concat('%', #{phone}, '%')</if>
+        </where>
+        order by uc.user_coupon_id desc
+    </select>
+
+    <select id="selectUserCouponById" parameterType="Long" resultMap="UserCouponResult">
+        <include refid="selectUserCouponVo"/> where uc.user_coupon_id = #{userCouponId}
+    </select>
+
+    <insert id="insertUserCoupon" parameterType="com.ruoyi.points.domain.UserCoupon" useGeneratedKeys="true" keyProperty="userCouponId">
+        insert into t_user_coupon(
+            user_id, coupon_id, receive_type, status, start_time, end_time, create_time
+        ) values (
+            #{userId}, #{couponId}, coalesce(#{receiveType},'0'), '0', #{startTime}, #{endTime}, sysdate()
+        )
+    </insert>
+
+    <update id="updateUserCoupon" parameterType="com.ruoyi.points.domain.UserCoupon">
+        update t_user_coupon
+        <set>
+            <if test="status != null">status=#{status},</if>
+            <if test="orderId != null">order_id=#{orderId},</if>
+            <if test="useTime != null">use_time=#{useTime},</if>
+        </set>
+        where user_coupon_id=#{userCouponId}
+    </update>
+
+    <select id="countUserReceive" resultType="Integer">
+        select count(1) from t_user_coupon where user_id=#{userId} and coupon_id=#{couponId}
+    </select>
+
+    <update id="updateStatus">
+        update t_user_coupon set status=#{status}, order_id=#{orderId}, use_time=sysdate()
+        where user_coupon_id=#{userCouponId}
+    </update>
+
+</mapper>

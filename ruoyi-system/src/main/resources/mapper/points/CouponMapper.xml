@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.points.mapper.CouponMapper">
+
+    <resultMap id="CouponResult" type="com.ruoyi.points.domain.Coupon">
+        <id     property="couponId"       column="coupon_id"/>
+        <result property="deptId"         column="dept_id"/>
+        <result property="parentId"       column="parent_id"/>
+        <result property="couponName"     column="coupon_name"/>
+        <result property="couponType"     column="coupon_type"/>
+        <result property="minAmount"      column="min_amount"/>
+        <result property="discountValue"  column="discount_value"/>
+        <result property="totalCount"     column="total_count"/>
+        <result property="issuedCount"    column="issued_count"/>
+        <result property="limitPerUser"   column="limit_per_user"/>
+        <result property="useType"        column="use_type"/>
+        <result property="timeType"       column="time_type"/>
+        <result property="startTime"      column="start_time"/>
+        <result property="endTime"        column="end_time"/>
+        <result property="validDays"      column="valid_days"/>
+        <result property="status"         column="status"/>
+        <result property="delFlag"        column="del_flag"/>
+        <result property="createBy"       column="create_by"/>
+        <result property="createTime"     column="create_time"/>
+        <result property="updateBy"       column="update_by"/>
+        <result property="updateTime"     column="update_time"/>
+        <result property="remark"         column="remark"/>
+    </resultMap>
+
+    <sql id="selectCouponVo">
+        select c.coupon_id, c.dept_id, c.parent_id, c.coupon_name, c.coupon_type, c.min_amount,
+               c.discount_value, c.total_count, c.issued_count, c.limit_per_user, c.use_type,
+               c.time_type, c.start_time, c.end_time, c.valid_days, c.status, c.del_flag,
+               c.create_by, c.create_time, c.update_by, c.update_time, c.remark
+        from t_coupon c
+    </sql>
+
+    <select id="selectCouponList" parameterType="com.ruoyi.points.domain.Coupon" resultMap="CouponResult">
+        <include refid="selectCouponVo"/>
+        <where>
+            c.del_flag = '0'
+            <if test="couponName != null and couponName != ''">and c.coupon_name like concat('%', #{couponName}, '%')</if>
+            <if test="status != null and status != ''">and c.status = #{status}</if>
+            <if test="couponType != null and couponType != ''">and c.coupon_type = #{couponType}</if>
+            <if test="useType != null and useType != ''">and c.use_type = #{useType}</if>
+            <!-- 数据范围过滤 -->
+            ${params.dataScope}
+        </where>
+        order by c.coupon_id desc
+    </select>
+
+    <select id="selectCouponById" parameterType="Long" resultMap="CouponResult">
+        <include refid="selectCouponVo"/> where c.coupon_id = #{couponId} and c.del_flag = '0'
+    </select>
+
+    <insert id="insertCoupon" parameterType="com.ruoyi.points.domain.Coupon" useGeneratedKeys="true" keyProperty="couponId">
+        insert into t_coupon(
+            dept_id, parent_id, coupon_name, coupon_type, min_amount, discount_value, total_count,
+            limit_per_user, use_type, time_type, start_time, end_time, valid_days, status, create_by, create_time, remark
+        ) values (
+            #{deptId}, coalesce(#{parentId},0), #{couponName}, #{couponType}, coalesce(#{minAmount},0), #{discountValue}, coalesce(#{totalCount},-1),
+            coalesce(#{limitPerUser},1), coalesce(#{useType},'0'), coalesce(#{timeType},'0'), #{startTime}, #{endTime}, #{validDays}, coalesce(#{status},'0'), #{createBy}, sysdate(), #{remark}
+        )
+    </insert>
+
+    <update id="updateCoupon" parameterType="com.ruoyi.points.domain.Coupon">
+        update t_coupon
+        <set>
+            <if test="couponName != null">coupon_name=#{couponName},</if>
+            <if test="couponType != null">coupon_type=#{couponType},</if>
+            <if test="minAmount != null">min_amount=#{minAmount},</if>
+            <if test="discountValue != null">discount_value=#{discountValue},</if>
+            <if test="totalCount != null">total_count=#{totalCount},</if>
+            <if test="limitPerUser != null">limit_per_user=#{limitPerUser},</if>
+            <if test="useType != null">use_type=#{useType},</if>
+            <if test="timeType != null">time_type=#{timeType},</if>
+            <if test="startTime != null">start_time=#{startTime},</if>
+            <if test="endTime != null">end_time=#{endTime},</if>
+            <if test="validDays != null">valid_days=#{validDays},</if>
+            <if test="status != null">status=#{status},</if>
+            <if test="updateBy != null">update_by=#{updateBy},</if>
+            <if test="remark != null">remark=#{remark},</if>
+            update_time = sysdate()
+        </set>
+        where coupon_id=#{couponId}
+    </update>
+
+    <update id="deleteCouponByIds">
+        update t_coupon set del_flag='2' where coupon_id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">#{id}</foreach>
+    </update>
+
+    <update id="increaseIssuedCount">
+        update t_coupon set issued_count = issued_count + 1 
+        where coupon_id = #{couponId} and (total_count = -1 or issued_count &lt; total_count)
+    </update>
+
+    <insert id="insertCouponGoods">
+        insert into t_coupon_goods(coupon_id, ref_id) values
+        <foreach collection="param2" item="refId" separator=",">
+            (#{param1}, #{refId})
+        </foreach>
+    </insert>
+
+    <delete id="deleteCouponGoodsByCouponId">
+        delete from t_coupon_goods where coupon_id = #{couponId}
+    </delete>
+
+    <select id="selectCouponGoodsIds" resultType="Long">
+        select ref_id from t_coupon_goods where coupon_id = #{couponId}
+    </select>
+
+</mapper>

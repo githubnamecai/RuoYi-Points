@@ -28,9 +28,9 @@
           <div class="icon-wrap" style="background: linear-gradient(135deg, #b9f6ca, #00e676)"><van-icon name="orders-o" /></div>
           <span>我的订单</span>
         </div>
-        <div class="nav-item" @click="$router.push('/points/detail')">
-          <div class="icon-wrap" style="background: linear-gradient(135deg, #ea80fc, #e040fb)"><van-icon name="gold-coin-o" /></div>
-          <span>积分明细</span>
+        <div class="nav-item" @click="$router.push('/coupon/center')">
+          <div class="icon-wrap" style="background: linear-gradient(135deg, #ff9a9e, #fecfef)"><van-icon name="coupon-o" /></div>
+          <span>领券中心</span>
         </div>
         <div class="nav-item" @click="$router.push('/address')">
           <div class="icon-wrap" style="background: linear-gradient(135deg, #b388ff, #7c4dff)"><van-icon name="location-o" /></div>

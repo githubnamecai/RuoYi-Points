@@ -19,6 +19,9 @@ public class ExchangeDTO
 
     private String remark;
 
+    /** 优惠券记录ID（可选） */
+    private Long userCouponId;
+
     public Long getGoodsId() { return goodsId; }
     public void setGoodsId(Long goodsId) { this.goodsId = goodsId; }
     public Integer getQuantity() { return quantity; }
@@ -27,4 +30,6 @@ public class ExchangeDTO
     public void setAddressId(Long addressId) { this.addressId = addressId; }
     public String getRemark() { return remark; }
     public void setRemark(String remark) { this.remark = remark; }
+    public Long getUserCouponId() { return userCouponId; }
+    public void setUserCouponId(Long userCouponId) { this.userCouponId = userCouponId; }
 }

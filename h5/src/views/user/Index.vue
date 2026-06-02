@@ -73,6 +73,7 @@
 
     <!-- 功能菜单 -->
     <van-cell-group inset class="menu-group">
+      <van-cell title="我的优惠券" icon="coupon-o" is-link @click="goCoupons" />
       <van-cell title="积分明细" icon="balance-o" is-link @click="goPointsDetail" />
       <van-cell title="每日签到" icon="calendar-o" is-link @click="goSign" />
       <van-cell title="收货地址" icon="location-o" is-link @click="goAddress" />
@@ -218,6 +219,7 @@ async function savePasswordProfile() {
 }
 
 function goPointsDetail() { router.push('/points/detail') }
+function goCoupons() { router.push('/coupon/my') }
 function goSign() { router.push('/sign') }
 function goAddress() { router.push('/address') }
 function goOrders(status) {

@@ -33,6 +33,17 @@
       <div class="card">
         <van-field v-model="remark" label="备注" placeholder="选填" />
       </div>
+      
+      <!-- 优惠券选择 -->
+      <div class="card" @click="showCouponPopup = true" style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:14px; color:#333;">优惠券</span>
+        <div style="display:flex; align-items:center; color:#999; font-size:13px;">
+          <span v-if="selectedCoupon" style="color:#ff8c00;">-{{ getCouponDiscountText(selectedCoupon.coupon) }}</span>
+          <span v-else-if="availableCoupons.length > 0" style="color:#ff8c00;">{{ availableCoupons.length }}张可用</span>
+          <span v-else>暂无可用</span>
+          <van-icon name="arrow" style="margin-left:4px;" />
+        </div>
+      </div>
 
       <!-- 合计 -->
       <div class="card total">
@@ -57,6 +68,32 @@
         <span class="bar-price">{{ totalPoints }}</span>
       </template>
     </van-submit-bar>
+    
+    <!-- 优惠券弹窗 -->
+    <van-popup v-model:show="showCouponPopup" position="bottom" round style="height: 60%; background: #f7f7f7;">
+      <div style="padding: 16px; text-align: center; font-weight: bold; font-size: 16px;">选择优惠券</div>
+      <div style="padding: 0 12px; height: calc(100% - 100px); overflow-y: auto;">
+        <div 
+          v-for="item in availableCoupons" 
+          :key="item.userCouponId" 
+          @click="selectCoupon(item)"
+          style="background: #fff; border-radius: 8px; margin-bottom: 12px; padding: 12px; display: flex; align-items: center; justify-content: space-between; position: relative;"
+          :style="selectedCoupon?.userCouponId === item.userCouponId ? 'border: 1px solid #ff8c00;' : ''"
+        >
+          <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 15px; font-weight: bold;">{{ item.coupon.couponName }}</span>
+            <span style="font-size: 12px; color: #ff8c00; margin-top: 4px;">抵扣: {{ getCouponDiscountText(item.coupon) }}</span>
+            <span style="font-size: 11px; color: #999; margin-top: 2px;">{{ item.coupon.minAmount > 0 ? `满${item.coupon.minAmount}积分可用` : '无门槛' }}</span>
+          </div>
+          <van-icon v-if="selectedCoupon?.userCouponId === item.userCouponId" name="checked" color="#ff8c00" size="20" />
+          <van-icon v-else name="circle" color="#eee" size="20" />
+        </div>
+      </div>
+      <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 12px; background: #fff; box-sizing: border-box; display: flex; gap: 12px;">
+        <van-button block round type="default" @click="selectCoupon(null)" style="flex: 1;">不使用</van-button>
+        <van-button block round type="primary" @click="showCouponPopup = false" style="flex: 1; background: linear-gradient(90deg, #ff8c00, #ff5252); border: none;">确定</van-button>
+      </div>
+    </van-popup>
   </div>
 </template>
 
@@ -66,6 +103,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { showDialog, showToast } from 'vant'
 import { goodsDetail, exchange } from '@/api/goods'
 import { listAddresses } from '@/api/user'
+import { getAvailableCoupons } from '@/api/coupon'
 import { useUserStore } from '@/stores/user'
 
 const route = useRoute()
@@ -77,7 +115,26 @@ const remark = ref('')
 const address = ref(null)
 const loading = ref(false)
 
-const totalPoints = computed(() => (goods.value?.points || 0) * qty.value)
+const showCouponPopup = ref(false)
+const availableCoupons = ref([])
+const selectedCoupon = ref(null)
+
+const originalTotalPoints = computed(() => (goods.value?.points || 0) * qty.value)
+
+const totalPoints = computed(() => {
+  let tp = originalTotalPoints.value
+  if (selectedCoupon.value) {
+    const c = selectedCoupon.value.coupon
+    if (c.couponType === '0') {
+      tp = Math.max(0, tp - c.discountValue)
+    } else if (c.couponType === '1') {
+      tp = Math.max(0, Math.floor(tp * (c.discountValue / 100)))
+    } else if (c.couponType === '2') {
+      tp = Math.max(0, tp - c.discountValue)
+    }
+  }
+  return tp
+})
 const canSubmit = computed(() => {
   if (!goods.value) return false
   return userStore.points >= totalPoints.value
@@ -115,6 +172,29 @@ async function load() {
     const defaultOne = list.find(a => a.isDefault === '1') || list[0]
     address.value = defaultOne || null
   }
+  
+  // 加载优惠券
+  if (goods.value) {
+    try {
+      const cRes = await getAvailableCoupons(goods.value.goodsId, originalTotalPoints.value)
+      availableCoupons.value = cRes.data || []
+      // 默认选择第一张可用的优惠券
+      if (availableCoupons.value.length > 0) {
+        selectedCoupon.value = availableCoupons.value[0]
+      }
+    } catch (e) {}
+  }
+}
+
+function selectCoupon(item) {
+  selectedCoupon.value = item
+  if (item === null) showCouponPopup.value = false
+}
+
+function getCouponDiscountText(c) {
+  if (!c) return ''
+  if (c.couponType === '1') return `${c.discountValue}%折`
+  return `￥${c.discountValue}`
 }
 
 function goAddress() { router.push('/address?picker=1') }
@@ -143,7 +223,8 @@ async function submit() {
       goodsId: goods.value.goodsId,
       quantity: qty.value,
       addressId: address.value?.addressId,
-      remark: remark.value
+      remark: remark.value,
+      userCouponId: selectedCoupon.value?.userCouponId
     })
     showToast({
     message: '兑换成功',

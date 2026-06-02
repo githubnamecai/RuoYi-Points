@@ -365,4 +365,101 @@ VALUES (1, '实物', '0', 'points_goods_type', '', 'primary', 'N', '0', 'admin',
        (6, '连续奖励', 'CONTINUOUS_BONUS', 'points_source_type', '', 'success', 'N', '0', 'admin', NOW()),
        (7, '补签', 'SIGN_REPAIR', 'points_source_type', '', 'info', 'N', '0', 'admin', NOW());
 
+-- ----------------------------
+-- 11、优惠券表
+-- ----------------------------
+DROP TABLE IF EXISTS `t_coupon`;
+CREATE TABLE `t_coupon` (
+    `coupon_id`      bigint(20)      NOT NULL AUTO_INCREMENT COMMENT '优惠券ID',
+    `dept_id`        bigint(20)      DEFAULT NULL COMMENT '部门ID（用于数据权限）',
+    `parent_id`      bigint(20)      DEFAULT 0 COMMENT '父级ID（用于层级管理，无则为0）',
+    `coupon_name`    varchar(128)    NOT NULL COMMENT '优惠券名称',
+    `coupon_type`    char(1)         DEFAULT '0' COMMENT '类型（0满减券 1折扣券 2无门槛券）',
+    `min_amount`     int(11)         DEFAULT 0 COMMENT '使用门槛（满X积分可用，0为无门槛）',
+    `discount_value` int(11)         NOT NULL COMMENT '优惠面值（抵扣积分或折扣率）',
+    `total_count`    int(11)         DEFAULT -1 COMMENT '发行总量（-1为不限量）',
+    `issued_count`   int(11)         DEFAULT 0 COMMENT '已发放数量',
+    `limit_per_user` int(11)         DEFAULT 1 COMMENT '每人限领数量',
+    `use_type`       char(1)         DEFAULT '0' COMMENT '适用范围（0全部商品 1指定商品分类 2指定商品）',
+    `time_type`      char(1)         DEFAULT '0' COMMENT '有效期类型（0绝对时间 1相对天数）',
+    `start_time`     datetime        DEFAULT NULL COMMENT '有效期开始时间（绝对时间用）',
+    `end_time`       datetime        DEFAULT NULL COMMENT '有效期结束时间（绝对时间用）',
+    `valid_days`     int(11)         DEFAULT NULL COMMENT '领取后有效天数（相对天数用）',
+    `status`         char(1)         DEFAULT '0' COMMENT '状态（0正常 1停用 2过期）',
+    `del_flag`       char(1)         DEFAULT '0' COMMENT '删除标志',
+    `create_by`      varchar(64)     DEFAULT '' COMMENT '创建者',
+    `create_time`    datetime        DEFAULT NULL COMMENT '创建时间',
+    `update_by`      varchar(64)     DEFAULT '' COMMENT '更新者',
+    `update_time`    datetime        DEFAULT NULL COMMENT '更新时间',
+    `remark`         varchar(500)    DEFAULT NULL COMMENT '备注',
+    PRIMARY KEY (`coupon_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='优惠券主表';
+
+-- ----------------------------
+-- 12、优惠券-商品/分类 关联表
+-- ----------------------------
+DROP TABLE IF EXISTS `t_coupon_goods`;
+CREATE TABLE `t_coupon_goods` (
+    `id`             bigint(20)      NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `coupon_id`      bigint(20)      NOT NULL COMMENT '优惠券ID',
+    `ref_id`         bigint(20)      NOT NULL COMMENT '关联的商品ID或分类ID',
+    PRIMARY KEY (`id`),
+    KEY `idx_coupon_id` (`coupon_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='优惠券-商品关联表';
+
+-- ----------------------------
+-- 13、用户领券记录表
+-- ----------------------------
+DROP TABLE IF EXISTS `t_user_coupon`;
+CREATE TABLE `t_user_coupon` (
+    `user_coupon_id` bigint(20)      NOT NULL AUTO_INCREMENT COMMENT '领券记录ID',
+    `user_id`        bigint(20)      NOT NULL COMMENT 'H5用户ID',
+    `coupon_id`      bigint(20)      NOT NULL COMMENT '优惠券ID',
+    `receive_type`   char(1)         DEFAULT '0' COMMENT '获取方式（0主动领取 1后台发放）',
+    `status`         char(1)         DEFAULT '0' COMMENT '使用状态（0未使用 1已使用 2已过期）',
+    `order_id`       bigint(20)      DEFAULT NULL COMMENT '使用的订单ID',
+    `start_time`     datetime        NOT NULL COMMENT '生效时间',
+    `end_time`       datetime        NOT NULL COMMENT '过期时间',
+    `use_time`       datetime        DEFAULT NULL COMMENT '使用时间',
+    `create_time`    datetime        DEFAULT NULL COMMENT '领取时间',
+    PRIMARY KEY (`user_coupon_id`),
+    KEY `idx_user_status` (`user_id`, `status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户优惠券记录表';
+
+-- 优惠券管理菜单
+INSERT INTO sys_menu VALUES (2080, '优惠券管理', 2000, 8, 'coupon', 'points/coupon/index', '', '',1, 0, 'C', '0', '0', 'points:coupon:list', 'money', 'admin', NOW(), '', NULL, '优惠券管理菜单');
+INSERT INTO sys_menu VALUES (2081, '优惠券查询', 2080, 1, '', '', '', '',1, 0, 'F', '0', '0', 'points:coupon:query', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2082, '优惠券新增', 2080, 2, '', '', '', '',1, 0, 'F', '0', '0', 'points:coupon:add', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2083, '优惠券修改', 2080, 3, '', '', '', '',1, 0, 'F', '0', '0', 'points:coupon:edit', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2084, '优惠券删除', 2080, 4, '', '', '', '',1, 0, 'F', '0', '0', 'points:coupon:remove', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2085, '发放优惠券', 2080, 5, '', '', '', '',1, 0, 'F', '0', '0', 'points:coupon:issue', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2086, '发放记录查询', 2080, 6, '', '', '', '',1, 0, 'F', '0', '0', 'points:coupon:record', '#', 'admin', NOW(), '', NULL, '');
+
+-- 字典数据：优惠券类型、范围、有效期等
+INSERT IGNORE INTO sys_dict_type(dict_id, dict_name, dict_type, status, create_by, create_time, remark)
+VALUES (204, '优惠券类型', 'points_coupon_type', '0', 'admin', NOW(), '0满减 1折扣 2无门槛'),
+       (205, '适用范围', 'points_coupon_use_type', '0', 'admin', NOW(), '0全部 1分类 2指定商品'),
+       (206, '有效期类型', 'points_coupon_time_type', '0', 'admin', NOW(), '0绝对时间 1相对天数'),
+       (207, '领券方式', 'points_coupon_receive_type', '0', 'admin', NOW(), '0主动领取 1后台发放'),
+       (208, '优惠券状态', 'points_user_coupon_status', '0', 'admin', NOW(), '0未使用 1已使用 2已过期');
+
+INSERT INTO sys_dict_data(dict_sort, dict_label, dict_value, dict_type, css_class, list_class, is_default, status, create_by, create_time)
+VALUES (1, '满减券', '0', 'points_coupon_type', '', 'primary', 'Y', '0', 'admin', NOW()),
+       (2, '折扣券', '1', 'points_coupon_type', '', 'success', 'N', '0', 'admin', NOW()),
+       (3, '无门槛券', '2', 'points_coupon_type', '', 'warning', 'N', '0', 'admin', NOW()),
+       
+       (1, '全部商品', '0', 'points_coupon_use_type', '', 'primary', 'Y', '0', 'admin', NOW()),
+       (2, '指定分类', '1', 'points_coupon_use_type', '', 'success', 'N', '0', 'admin', NOW()),
+       (3, '指定商品', '2', 'points_coupon_use_type', '', 'warning', 'N', '0', 'admin', NOW()),
+       
+       (1, '固定时间', '0', 'points_coupon_time_type', '', 'primary', 'Y', '0', 'admin', NOW()),
+       (2, '领取后天数', '1', 'points_coupon_time_type', '', 'success', 'N', '0', 'admin', NOW()),
+       
+       (1, '主动领取', '0', 'points_coupon_receive_type', '', 'primary', 'Y', '0', 'admin', NOW()),
+       (2, '后台发放', '1', 'points_coupon_receive_type', '', 'success', 'N', '0', 'admin', NOW()),
+       
+       (1, '未使用', '0', 'points_user_coupon_status', '', 'success', 'Y', '0', 'admin', NOW()),
+       (2, '已使用', '1', 'points_user_coupon_status', '', 'info', 'N', '0', 'admin', NOW()),
+       (3, '已过期', '2', 'points_user_coupon_status', '', 'danger', 'N', '0', 'admin', NOW());
+
 SET FOREIGN_KEY_CHECKS = 1;
