@@ -15,7 +15,10 @@ import com.ruoyi.points.service.ICouponService;
 
 @RestController
 @RequestMapping("/h5-api/coupon")
+/** H5页面的优惠券接口不要用ruoyi-vue的控制器，H5控制器有获取用户id的方法
 public class H5CouponController extends BaseController
+ **/
+public class H5CouponController extends H5BaseController
 {
     @Autowired
     private ICouponService couponService;
@@ -32,7 +35,9 @@ public class H5CouponController extends BaseController
     @PostMapping("/receive")
     public AjaxResult receive(Long couponId)
     {
-        Long userId = H5TokenInterceptor.getUserId();
+//        H5页面获取用户id通过H5接口的控制器来获取
+//        Long userId = H5TokenInterceptor.getUserId();
+        Long userId =currentUserId();
         couponService.receiveCoupon(couponId, userId);
         return AjaxResult.success("领取成功");
     }
@@ -41,7 +46,7 @@ public class H5CouponController extends BaseController
     @GetMapping("/my")
     public AjaxResult my(String status)
     {
-        Long userId = H5TokenInterceptor.getUserId();
+        Long userId =currentUserId();
         UserCoupon q = new UserCoupon();
         q.setUserId(userId);
         q.setStatus(status); // 0未使用 1已使用 2已过期
@@ -53,7 +58,7 @@ public class H5CouponController extends BaseController
     @GetMapping("/available")
     public AjaxResult available(@RequestParam Long goodsId, @RequestParam Integer totalPoints)
     {
-        Long userId = H5TokenInterceptor.getUserId();
+        Long userId =currentUserId();
         List<UserCoupon> list = couponService.selectAvailableCoupons(userId, goodsId, totalPoints);
         return AjaxResult.success(list);
     }
