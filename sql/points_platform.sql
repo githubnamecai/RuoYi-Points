@@ -4,8 +4,8 @@
 -- 使用前请先执行 sql/ry_20260417.sql 与 sql/quartz.sql 初始化系统表
 -- 然后再执行本脚本创建积分平台相关业务表
 -- ============================================================
-
-SET NAMES utf8mb4;
+-- 修改sql语句utf8 和 utf8_general_ci
+SET NAMES utf8;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
@@ -30,7 +30,7 @@ CREATE TABLE `t_goods_category`
     PRIMARY KEY (`category_id`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 100
-  DEFAULT CHARSET = utf8mb4 COMMENT ='商品分类表';
+  DEFAULT CHARSET = utf8 COMMENT ='商品分类表';
 
 -- INSERT INTO `t_goods_category` (category_id, parent_id, ancestors, category_name, order_num, status, create_by, create_time)
 -- VALUES (1, 0, '0', '虚拟商品', 1, '0', 'admin', NOW()),
@@ -75,7 +75,7 @@ CREATE TABLE `t_goods`
     KEY `idx_status_sort` (`status`, `sort`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 1000
-  DEFAULT CHARSET = utf8mb4 COMMENT ='商品表';
+  DEFAULT CHARSET = utf8 COMMENT ='商品表';
 
 -- INSERT INTO `t_goods`(category_id, goods_name, goods_type, cover_img, points, original_price, stock, status, sort, description, create_by, create_time)
 -- VALUES (3, '10元话费充值', '1', 'https://via.placeholder.com/300x300?text=Phone', 1000, 10.00, 1000, '1', 100, '<p>10元话费充值，3工作日内到账</p>', 'admin', NOW()),
@@ -114,7 +114,7 @@ CREATE TABLE `t_user`
     UNIQUE KEY `uniq_phone` (`phone`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 10000
-  DEFAULT CHARSET = utf8mb4 COMMENT ='H5用户表';
+  DEFAULT CHARSET = utf8 COMMENT ='H5用户表';
 
 INSERT INTO `t_user` VALUES (10000,'测试用户1','13800138000',NULL,NULL,NULL,NULL,10000,10000,0,0,NULL,'0','2026-05-28 16:19:56',NULL,NULL,'0'),(10001,'测试用户2','13800138001',NULL,NULL,NULL,NULL,3535,5110,1575,1,'2026-05-29','0','2026-05-28 16:19:56','2026-05-29 10:34:46','127.0.0.1','0'),(10002,'用户用户9106','19272199106',NULL,NULL,'123456','',230,230,0,2,'2026-06-02','0','2026-05-29 10:26:48','2026-06-02 08:54:50','127.0.0.1','0');
 
@@ -143,7 +143,7 @@ CREATE TABLE `t_user_address`
     PRIMARY KEY (`address_id`),
     KEY `idx_user` (`user_id`)
 ) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4 COMMENT ='用户收货地址表';
+  DEFAULT CHARSET = utf8 COMMENT ='用户收货地址表';
 
 -- ----------------------------
 -- 5、订单表
@@ -184,7 +184,7 @@ CREATE TABLE `t_order`
     KEY `idx_goods` (`goods_id`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 100000
-  DEFAULT CHARSET = utf8mb4 COMMENT ='兑换订单表';
+  DEFAULT CHARSET = utf8 COMMENT ='兑换订单表';
 
 INSERT INTO `ry-vue`.t_order
 (order_id, order_no, user_id, user_phone, goods_id, goods_name, goods_cover, goods_type, quantity, dept_id, parent_id, points_used, status, consignee, phone, address, express_company, express_no, ship_time, finish_time, close_reason, close_time, create_by, create_time, update_by, update_time, remark)
@@ -213,7 +213,7 @@ CREATE TABLE `t_points_rule`
     UNIQUE KEY `uniq_rule_code` (`rule_code`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 100
-  DEFAULT CHARSET = utf8mb4 COMMENT ='积分规则表';
+  DEFAULT CHARSET = utf8 COMMENT ='积分规则表';
 
 INSERT INTO `t_points_rule`(rule_code, rule_name, rule_type, reward_points, daily_limit, status, create_by, create_time)
 VALUES ('SIGN_IN', '每日签到', '0', 10, 1, '0', 'admin', NOW()),
@@ -237,7 +237,7 @@ CREATE TABLE `t_sign_config`
     `update_time`       datetime      DEFAULT NULL COMMENT '更新时间',
     PRIMARY KEY (`config_id`)
 ) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4 COMMENT ='签到全局配置表';
+  DEFAULT CHARSET = utf8 COMMENT ='签到全局配置表';
 
 INSERT INTO `t_sign_config`(config_id, enabled, base_points, continuous_reward, repair_enabled, repair_cost, repair_max_days, update_by, update_time)
 VALUES (1, '1', 10,
@@ -260,7 +260,7 @@ CREATE TABLE `t_sign_record`
     PRIMARY KEY (`record_id`),
     UNIQUE KEY `uniq_user_date` (`user_id`, `sign_date`)
 ) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4 COMMENT ='签到记录表';
+  DEFAULT CHARSET = utf8 COMMENT ='签到记录表';
 
 -- ----------------------------
 -- 9、积分明细表
@@ -282,7 +282,7 @@ CREATE TABLE `t_points_detail`
     KEY `idx_user_time` (`user_id`, `create_time`),
     KEY `idx_source` (`source_type`)
 ) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4 COMMENT ='积分变动明细表';
+  DEFAULT CHARSET = utf8 COMMENT ='积分变动明细表';
 
 -- ----------------------------
 -- 10、菜单数据（接入 RuoYi 权限体系）
@@ -393,7 +393,7 @@ CREATE TABLE `t_coupon` (
     `update_time`    datetime        DEFAULT NULL COMMENT '更新时间',
     `remark`         varchar(500)    DEFAULT NULL COMMENT '备注',
     PRIMARY KEY (`coupon_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='优惠券主表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='优惠券主表';
 
 -- ----------------------------
 -- 12、优惠券-商品/分类 关联表
@@ -405,7 +405,7 @@ CREATE TABLE `t_coupon_goods` (
     `ref_id`         bigint(20)      NOT NULL COMMENT '关联的商品ID或分类ID',
     PRIMARY KEY (`id`),
     KEY `idx_coupon_id` (`coupon_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='优惠券-商品关联表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='优惠券-商品关联表';
 
 -- ----------------------------
 -- 13、用户领券记录表
@@ -424,7 +424,7 @@ CREATE TABLE `t_user_coupon` (
     `create_time`    datetime        DEFAULT NULL COMMENT '领取时间',
     PRIMARY KEY (`user_coupon_id`),
     KEY `idx_user_status` (`user_id`, `status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户优惠券记录表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户优惠券记录表';
 
 -- 优惠券管理菜单
 INSERT INTO sys_menu VALUES (2080, '优惠券管理', 2000, 8, 'coupon', 'points/coupon/index', '', '',1, 0, 'C', '0', '0', 'points:coupon:list', 'money', 'admin', NOW(), '', NULL, '优惠券管理菜单');
@@ -434,6 +434,15 @@ INSERT INTO sys_menu VALUES (2083, '优惠券修改', 2080, 3, '', '', '', '',1,
 INSERT INTO sys_menu VALUES (2084, '优惠券删除', 2080, 4, '', '', '', '',1, 0, 'F', '0', '0', 'points:coupon:remove', '#', 'admin', NOW(), '', NULL, '');
 INSERT INTO sys_menu VALUES (2085, '发放优惠券', 2080, 5, '', '', '', '',1, 0, 'F', '0', '0', 'points:coupon:issue', '#', 'admin', NOW(), '', NULL, '');
 INSERT INTO sys_menu VALUES (2086, '发放记录查询', 2080, 6, '', '', '', '',1, 0, 'F', '0', '0', 'points:coupon:record', '#', 'admin', NOW(), '', NULL, '');
+
+
+INSERT INTO sys_menu VALUES (2090, '优惠券领取记录管理', 2000,9, 'usercoupon', 'points/usercoupon/index', '', '',1, 0, 'C', '0', '0', 'points:usercoupon:list', 'money', 'admin', NOW(), '', NULL, '优惠券用户领取记录管理菜单');
+INSERT INTO sys_menu VALUES (2091, '优惠券领取记录查询', 2090, 1, '', '', '', '',1, 0, 'F', '0', '0', 'points:usercoupon:query', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2092, '优惠券领取记录新增', 2090, 2, '', '', '', '',1, 0, 'F', '0', '0', 'points:usercoupon:add', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2093, '优惠券领取记录修改', 2090, 3, '', '', '', '',1, 0, 'F', '0', '0', 'points:usercoupon:edit', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2094, '优惠券是否领取', 2090, 4, '', '', '', '',1, 0, 'F', '0', '0', 'points:usercoupon:receive', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO sys_menu VALUES (2095, '优惠券状态更新', 2090, 5, '', '', '', '',1, 0, 'F', '0', '0', 'points:usercoupon:isstatus', '#', 'admin', NOW(), '', NULL, '');
+
 
 -- 字典数据：优惠券类型、范围、有效期等
 INSERT IGNORE INTO sys_dict_type(dict_id, dict_name, dict_type, status, create_by, create_time, remark)
