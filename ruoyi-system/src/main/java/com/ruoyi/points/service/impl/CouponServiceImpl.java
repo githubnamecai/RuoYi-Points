@@ -3,8 +3,11 @@ package com.ruoyi.points.service.impl;
 import java.util.Date;
 import java.util.List;
 import java.util.Calendar;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.ruoyi.common.core.domain.entity.SysRole;
+import com.ruoyi.common.core.domain.entity.SysUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,9 +92,32 @@ public class CouponServiceImpl implements ICouponService
      * 权限校验：若设置为"全部商品"，只有超级管理员可以操作
      */
     private void checkPermission(Coupon coupon) {
-        if ("0".equals(coupon.getUseType()) && !SecurityUtils.isAdmin(SecurityUtils.getUserId())) {
-            throw new ServiceException("仅超级管理员可创建全场通用的优惠券");
+//        if ("0".equals(coupon.getUseType()) && !SecurityUtils.isAdmin(SecurityUtils.getUserId())) {
+//            throw new ServiceException("仅超级管理员可创建全场通用的优惠券");
+//        }
+        if ("0".equals(coupon.getUseType())) {
+            Long currentUserId = SecurityUtils.getUserId();
+            boolean hasPermission = SecurityUtils.isAdmin(currentUserId)
+                    || isMarketSpecialAccount();
+
+            if (!hasPermission) {
+                throw new ServiceException("该优惠券仅限管理员使用");
+            }
         }
+    }
+    // 单独提取判断方法
+    private boolean isMarketSpecialAccount() {
+        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
+        // 部门ID为105
+        if (currentUser.getDeptId() == null || !currentUser.getDeptId().equals(103L)) {
+            return false;
+        }
+        // 检查是否拥有market角色
+        List<SysRole> roles = currentUser.getRoles();
+        if (roles == null || roles.isEmpty()) {
+            return false;
+        }
+        return roles.stream().anyMatch(role -> "market".equals(role.getRoleKey()));
     }
 
     @Override
