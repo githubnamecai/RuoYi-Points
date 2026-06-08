@@ -38,7 +38,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref,onMounted  } from 'vue'
 import { showDialog, showToast } from 'vant'
 import { listOrders, confirmReceipt } from '@/api/user'
 
@@ -50,7 +50,10 @@ const loading = ref(false)
 const finished = ref(false)
 const refreshing = ref(false)
 const baseApi = import.meta.env.VITE_APP_BASE_API
-
+// 2. 页面初始化自动调用 ✅
+onMounted(() => {
+  onTabChange() // 直接在这里调用
+})
 function formatImg(url) {
   if (!url) return defaultImg
   if (url.startsWith('/profile')) {
