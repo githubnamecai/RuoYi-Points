@@ -38,8 +38,8 @@
         <van-field v-model="remark" label="备注" placeholder="选填" />
       </div>
       
-      <!-- 优惠券选择 -->
-      <div class="card" @click="showCouponPopup = true" style="display:flex; justify-content:space-between; align-items:center;">
+      <!-- 优惠券选择（仅实物商品） -->
+      <div v-if="goods.goodsType === '0'" class="card" @click="showCouponPopup = true" style="display:flex; justify-content:space-between; align-items:center;">
         <span style="font-size:14px; color:#333;">优惠券</span>
         <div style="display:flex; align-items:center; color:#999; font-size:13px;">
           <span v-if="selectedCoupon" style="color:#ff8c00;">-{{ getCouponDiscountText(selectedCoupon.coupon) }}</span>
@@ -51,19 +51,26 @@
 
       <!-- 合计 -->
       <div class="card total">
-        <div v-if="goods.goodsType !== '0'" class="row"><span>当前余额</span><b class="points">{{ userStore.points }}</b></div>
-        <div v-if="goods.goodsType !== '0'" class="row"><span>合计扣减</span><b class="points">-{{ totalPoints }}</b></div>
-        <div v-if="goods.goodsType !== '0'" class="row"><span>兑换后剩余</span><b class="points">{{ userStore.points - totalPoints }}</b></div>
-        <div v-if="goods.goodsType === '0'" class="row"><span>金额</span><b class="cash">¥{{ (goods.price || 0) * qty }}</b></div>
-        <div v-if="goods.goodsType === '0' && goods.discountPrice" class="row"><span>优惠价</span><b class="cash-discount">¥{{ goods.discountPrice * qty }}</b></div>
+        <!-- 虚拟商品：积分信息 -->
+        <template v-if="goods.goodsType !== '0'">
+          <div class="row"><span>当前余额</span><b class="points">{{ userStore.points }}</b></div>
+          <div class="row"><span>合计扣减</span><b class="points">-{{ totalPoints }}</b></div>
+          <div class="row"><span>兑换后剩余</span><b class="points">{{ userStore.points - totalPoints }}</b></div>
+        </template>
+        <!-- 实物商品：金额信息 -->
+        <template v-else>
+          <div class="row"><span>商品金额</span><b class="cash">¥{{ totalPrice.toFixed(2) }}</b></div>
+          <div v-if="couponDiscountAmount > 0" class="row"><span>优惠券抵扣</span><b class="cash-discount">-¥{{ couponDiscountAmount.toFixed(2) }}</b></div>
+          <div class="row"><span>实付金额</span><b class="cash-final">¥{{ payAmount.toFixed(2) }}</b></div>
+        </template>
       </div>
     </div>
 
     <div class="bottom-bar">
       <div class="bar-info">
         <template v-if="goods?.goodsType === '0'">
-          <span class="bar-price">¥{{ (goods?.price || 0) * qty }}</span>
-          <span v-if="goods?.discountPrice" class="bar-discount">优惠价¥{{ goods.discountPrice * qty }}</span>
+          <span class="bar-price">¥{{ payAmount.toFixed(2) }}</span>
+          <span v-if="couponDiscountAmount > 0" class="bar-discount">已优惠¥{{ couponDiscountAmount.toFixed(2) }}</span>
         </template>
         <template v-else>
           <span class="bar-price points-color">{{ totalPoints }}</span>
@@ -125,6 +132,33 @@ const selectedCoupon = ref(null)
 
 const originalTotalPoints = computed(() => (goods.value?.points || 0) * qty.value)
 
+// 实物商品：计算总金额
+const totalPrice = computed(() => {
+  if (!goods.value || goods.value.goodsType !== '0') return 0
+  return (goods.value.price || 0) * qty.value
+})
+
+// 实物商品：计算优惠券抵扣金额
+const couponDiscountAmount = computed(() => {
+  if (!selectedCoupon.value || !goods.value || goods.value.goodsType !== '0') return 0
+  const c = selectedCoupon.value.coupon
+  const tp = totalPrice.value
+  if (c.couponType === '0') { // 满减
+    return Math.min(tp, c.discountValue)
+  } else if (c.couponType === '1') { // 折扣
+    return +(tp * (1 - c.discountValue / 100)).toFixed(2)
+  } else if (c.couponType === '2') { // 无门槛
+    return Math.min(tp, c.discountValue)
+  }
+  return 0
+})
+
+// 实物商品：实付金额 = 总金额 - 优惠券抵扣
+const payAmount = computed(() => {
+  if (!goods.value || goods.value.goodsType !== '0') return 0
+  return Math.max(0, +(totalPrice.value - couponDiscountAmount.value).toFixed(2))
+})
+
 const totalPoints = computed(() => {
   let tp = originalTotalPoints.value
   if (selectedCoupon.value) {
@@ -177,10 +211,10 @@ async function load() {
     address.value = defaultOne || null
   }
   
-  // 加载优惠券
-  if (goods.value) {
+  // 加载优惠券（仅实物商品）
+  if (goods.value && goods.value.goodsType === '0') {
     try {
-      const cRes = await getAvailableCoupons(goods.value.goodsId, originalTotalPoints.value)
+      const cRes = await getAvailableCoupons(goods.value.goodsId, totalPrice.value)
       availableCoupons.value = cRes.data || []
       // 默认选择第一张可用的优惠券
       if (availableCoupons.value.length > 0) {
@@ -205,20 +239,27 @@ function goAddress() { router.push('/address?picker=1') }
 
 async function submit() {
   if (!goods.value) return
-  if (goods.value.goodsType === '0' && !address.value) {
-    await showDialog({ title: '提示', message: '实物商品需选择收货地址，请先选择地址', confirmButtonText: '去选择' })
+  const isReal = goods.value.goodsType === '0'
+
+  // 实物商品：校验地址
+  if (!address.value) {
+    await showDialog({ title: '提示', message: '商品需选择收货地址，请先选择地址', confirmButtonText: '去选择' })
     goAddress()
     return
   }
-  if (userStore.points < totalPoints.value) {
-    showToast({
-    message: '积分不足',
-    className: 'my-toast'
-});
+
+  // 虚拟商品：校验积分
+  if (!isReal && userStore.points < totalPoints.value) {
+    showToast({ message: '积分不足', className: 'my-toast' })
     return
   }
+
+  // 确认弹窗
   try {
-    await showDialog({ title: '确认兑换？', message: `将扣除 ${totalPoints.value} 积分`, showCancelButton: true })
+    const msg = isReal
+      ? `支付金额 ¥${payAmount.value.toFixed(2)}`
+      : `将扣除 ${totalPoints.value} 积分`
+    await showDialog({ title: '确认兑换？', message: msg, showCancelButton: true })
   } catch (e) { return }
 
   loading.value = true
@@ -228,12 +269,10 @@ async function submit() {
       quantity: qty.value,
       addressId: address.value?.addressId,
       remark: remark.value,
-      userCouponId: selectedCoupon.value?.userCouponId
+      userCouponId: isReal ? selectedCoupon.value?.userCouponId : undefined,
+      payAmount: isReal ? payAmount.value : undefined
     })
-    showToast({
-    message: '兑换成功',
-    className: 'my-toast'
-})
+    showToast({ message: '兑换成功', className: 'my-toast' })
     await userStore.fetchUserInfo()
     router.replace('/orders/' + res.data.orderId)
   } finally { loading.value = false }
@@ -264,6 +303,7 @@ onActivated(load)
 .points { color: #ff8c00; font-weight: 600; }
 .cash { color: #e53935; font-weight: 600; }
 .cash-discount { color: #ff8c00; font-weight: 600; }
+.cash-final { color: #e53935; font-weight: 700; font-size: 16px; }
 .bottom-bar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
   background: #fff; display: flex; align-items: center; justify-content: space-between;

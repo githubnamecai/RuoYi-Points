@@ -2,6 +2,7 @@ package com.ruoyi.points.domain.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
 /**
  * 兑换请求 DTO
@@ -22,6 +23,9 @@ public class ExchangeDTO
     /** 优惠券记录ID（可选） */
     private Long userCouponId;
 
+    /** 实物商品支付金额（前端计算传入） */
+    private BigDecimal payAmount;
+
     public Long getGoodsId() { return goodsId; }
     public void setGoodsId(Long goodsId) { this.goodsId = goodsId; }
     public Integer getQuantity() { return quantity; }
@@ -32,4 +36,6 @@ public class ExchangeDTO
     public void setRemark(String remark) { this.remark = remark; }
     public Long getUserCouponId() { return userCouponId; }
     public void setUserCouponId(Long userCouponId) { this.userCouponId = userCouponId; }
+    public BigDecimal getPayAmount() { return payAmount; }
+    public void setPayAmount(BigDecimal payAmount) { this.payAmount = payAmount; }
 }

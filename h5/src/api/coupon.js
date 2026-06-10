@@ -9,6 +9,6 @@ export function receiveCoupon(couponId) {
 export function getMyCoupons(status) {
   return request({ url: '/h5-api/coupon/my', method: 'get', params: { status } })
 }
-export function getAvailableCoupons(goodsId, totalPoints) {
-  return request({ url: '/h5-api/coupon/available', method: 'get', params: { goodsId, totalPoints } })
+export function getAvailableCoupons(goodsId, totalAmount) {
+  return request({ url: '/h5-api/coupon/available', method: 'get', params: { goodsId, totalPoints: totalAmount } })
 }

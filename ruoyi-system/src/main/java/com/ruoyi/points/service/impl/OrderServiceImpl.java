@@ -3,6 +3,7 @@ package com.ruoyi.points.service.impl;
 import java.util.Date;
 import java.util.List;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,9 +100,19 @@ public class OrderServiceImpl implements IOrderService
         if (goods.getStock() < dto.getQuantity())
             throw new ServiceException("库存不足");
 
-        Integer totalPoints = goods.getPoints() * dto.getQuantity();
-        
-        // 校验并计算优惠券
+        // 限兑校验
+        if (goods.getLimitPerUser() != null && goods.getLimitPerUser() > 0)
+        {
+            int already = goodsMapper.countUserExchangeQuantity(userId, goods.getGoodsId());
+            if (already + dto.getQuantity() > goods.getLimitPerUser())
+                throw new ServiceException("超出每人限兑数量(" + goods.getLimitPerUser() + ")");
+        }
+
+        boolean isReal = PointsConstants.GOODS_TYPE_REAL.equals(goods.getGoodsType());
+        Integer totalPoints = 0;
+        BigDecimal payAmount = BigDecimal.ZERO;
+
+        // 校验优惠券
         UserCoupon uc = null;
         if (dto.getUserCouponId() != null) {
             uc = userCouponMapper.selectUserCouponById(dto.getUserCouponId());
@@ -112,9 +123,6 @@ public class OrderServiceImpl implements IOrderService
                 throw new ServiceException("优惠券已过期");
             }
             Coupon coupon = uc.getCoupon();
-            if (coupon.getMinAmount() > 0 && totalPoints < coupon.getMinAmount()) {
-                throw new ServiceException("未达到优惠券使用门槛");
-            }
             // 校验适用范围
             if (!"0".equals(coupon.getUseType())) {
                 List<Long> refIds = couponMapper.selectCouponGoodsIds(coupon.getCouponId());
@@ -124,31 +132,51 @@ public class OrderServiceImpl implements IOrderService
                     throw new ServiceException("优惠券不适用于该商品");
                 }
             }
-            
-            // 计算抵扣
-            if ("0".equals(coupon.getCouponType())) { // 满减
-                totalPoints = Math.max(0, totalPoints - coupon.getDiscountValue());
-            } else if ("1".equals(coupon.getCouponType())) { // 折扣
-                totalPoints = Math.max(0, (int)(totalPoints * (coupon.getDiscountValue() / 100.0)));
-            } else if ("2".equals(coupon.getCouponType())) { // 无门槛
-                totalPoints = Math.max(0, totalPoints - coupon.getDiscountValue());
-            }
         }
 
-        if (user.getPointsBalance() < totalPoints)
-            throw new ServiceException("积分不足");
-
-        // 限兑校验
-        if (goods.getLimitPerUser() != null && goods.getLimitPerUser() > 0)
+        if (isReal)
         {
-            int already = goodsMapper.countUserExchangeQuantity(userId, goods.getGoodsId());
-            if (already + dto.getQuantity() > goods.getLimitPerUser())
-                throw new ServiceException("超出每人限兑数量(" + goods.getLimitPerUser() + ")");
+            // ========== 实物商品：使用金额，可使用优惠券，不扣积分 ==========
+            BigDecimal unitPrice = goods.getPrice() != null ? goods.getPrice() : BigDecimal.ZERO;
+            BigDecimal totalPrice = unitPrice.multiply(BigDecimal.valueOf(dto.getQuantity()));
+
+            // 优惠券抵扣（针对金额）
+            BigDecimal couponDiscount = BigDecimal.ZERO;
+            if (uc != null) {
+                Coupon coupon = uc.getCoupon();
+                if (coupon.getMinAmount() > 0 && totalPrice.compareTo(BigDecimal.valueOf(coupon.getMinAmount())) < 0) {
+                    throw new ServiceException("未达到优惠券使用门槛");
+                }
+                if ("0".equals(coupon.getCouponType())) { // 满减
+                    couponDiscount = BigDecimal.valueOf(coupon.getDiscountValue());
+                } else if ("1".equals(coupon.getCouponType())) { // 折扣
+                    couponDiscount = totalPrice.multiply(
+                        BigDecimal.ONE.subtract(BigDecimal.valueOf(coupon.getDiscountValue()).divide(BigDecimal.valueOf(100)))
+                    ).setScale(2, RoundingMode.HALF_UP);
+                } else if ("2".equals(coupon.getCouponType())) { // 无门槛
+                    couponDiscount = BigDecimal.valueOf(coupon.getDiscountValue());
+                }
+            }
+
+            payAmount = totalPrice.subtract(couponDiscount);
+            if (payAmount.compareTo(BigDecimal.ZERO) < 0) payAmount = BigDecimal.ZERO;
+            totalPoints = 0;
+        }
+        else
+        {
+            // ========== 虚拟商品：使用积分，不支持优惠券 ==========
+            if (uc != null) {
+                throw new ServiceException("虚拟商品不支持使用优惠券");
+            }
+            totalPoints = goods.getPoints() * dto.getQuantity();
+            if (user.getPointsBalance() < totalPoints)
+                throw new ServiceException("积分不足");
+            payAmount = BigDecimal.ZERO;
         }
 
         // 实物商品：校验地址
         String consignee = null, phone = null, fullAddr = null;
-        if (PointsConstants.GOODS_TYPE_REAL.equals(goods.getGoodsType()))
+        if (isReal)
         {
             if (dto.getAddressId() == null) throw new ServiceException("请选择收货地址");
             UserAddress addr = addressMapper.selectById(dto.getAddressId());
@@ -167,9 +195,11 @@ public class OrderServiceImpl implements IOrderService
         int rows = goodsMapper.decreaseStock(goods.getGoodsId(), dto.getQuantity(), goods.getVersion());
         if (rows <= 0) throw new ServiceException("商品库存不足或并发冲突，请重试");
 
-        // 2. 乐观锁扣积分
-        rows = h5UserMapper.decreasePoints(userId, totalPoints);
-        if (rows <= 0) throw new ServiceException("积分扣减失败（余额不足）");
+        // 2. 虚拟商品：扣积分；实物商品：不扣积分
+        if (!isReal && totalPoints > 0) {
+            rows = h5UserMapper.decreasePoints(userId, totalPoints);
+            if (rows <= 0) throw new ServiceException("积分扣减失败（余额不足）");
+        }
 
         // 3. 创建订单
         Order order = new Order();
@@ -182,14 +212,7 @@ public class OrderServiceImpl implements IOrderService
         order.setGoodsType(goods.getGoodsType());
         order.setQuantity(dto.getQuantity());
         order.setPointsUsed(totalPoints);
-        // 计算支付金额 = (金额 - 优惠金额) * 数量
-        if (goods.getPrice() != null) {
-            BigDecimal unitPrice = goods.getPrice();
-            BigDecimal discount = goods.getDiscountPrice() != null ? goods.getDiscountPrice() : BigDecimal.ZERO;
-            BigDecimal payAmount = unitPrice.subtract(discount).multiply(BigDecimal.valueOf(dto.getQuantity()));
-            if (payAmount.compareTo(BigDecimal.ZERO) < 0) payAmount = BigDecimal.ZERO;
-            order.setPayAmount(payAmount);
-        }
+        order.setPayAmount(payAmount);
         order.setStatus(PointsConstants.ORDER_STATUS_PENDING);
         order.setConsignee(consignee);
         order.setPhone(phone);
@@ -215,17 +238,19 @@ public class OrderServiceImpl implements IOrderService
             order.setFinishTime(new Date());
         }
 
-        // 5. 写积分明细
-        Integer newBalance = user.getPointsBalance() - totalPoints;
-        pointsDetailService.record(userId,
-            PointsConstants.CHANGE_TYPE_DECREASE,
-            PointsConstants.SOURCE_EXCHANGE,
-            order.getOrderNo(), totalPoints, newBalance,
-            "兑换商品：" + goods.getGoodsName(),
-            user.getNickname());
+        // 6. 写积分明细（仅虚拟商品扣了积分才记录）
+        if (!isReal && totalPoints > 0) {
+            Integer newBalance = user.getPointsBalance() - totalPoints;
+            pointsDetailService.record(userId,
+                PointsConstants.CHANGE_TYPE_DECREASE,
+                PointsConstants.SOURCE_EXCHANGE,
+                order.getOrderNo(), totalPoints, newBalance,
+                "兑换商品：" + goods.getGoodsName(),
+                user.getNickname());
+        }
 
-        log.info("用户[{}]兑换商品[{}]成功，订单[{}]，扣减积分[{}]",
-            userId, goods.getGoodsName(), order.getOrderNo(), totalPoints);
+        log.info("用户[{}]兑换商品[{}]成功，订单[{}]，扣减积分[{}]，支付金额[{}]",
+            userId, goods.getGoodsName(), order.getOrderNo(), totalPoints, payAmount);
         return order;
     }
 
@@ -256,8 +281,10 @@ public class OrderServiceImpl implements IOrderService
         int rows = orderMapper.closeOrder(orderId, reason);
         if (rows <= 0) throw new ServiceException("关闭订单失败");
 
-        // 退还积分
-        h5UserMapper.increasePoints(exist.getUserId(), exist.getPointsUsed());
+        // 退还积分（仅虚拟商品实际扣过积分）
+        if (exist.getPointsUsed() != null && exist.getPointsUsed() > 0) {
+            h5UserMapper.increasePoints(exist.getUserId(), exist.getPointsUsed());
+        }
         // 回滚库存
         goodsMapper.increaseStock(exist.getGoodsId(), exist.getQuantity());
         // 回退优惠券
@@ -270,14 +297,17 @@ public class OrderServiceImpl implements IOrderService
             userCouponMapper.updateStatus(uc.getUserCouponId(), status, null);
         }
 
-        H5User user = h5UserMapper.selectUserById(exist.getUserId());
-        pointsDetailService.record(exist.getUserId(),
-            PointsConstants.CHANGE_TYPE_INCREASE,
-            PointsConstants.SOURCE_REFUND,
-            exist.getOrderNo(), exist.getPointsUsed(),
-            user.getPointsBalance(),
-            "订单关闭退还：" + StringUtils.nvl(reason, ""),
-            operator);
+        // 写积分明细（仅退还了积分才记录）
+        if (exist.getPointsUsed() != null && exist.getPointsUsed() > 0) {
+            H5User user = h5UserMapper.selectUserById(exist.getUserId());
+            pointsDetailService.record(exist.getUserId(),
+                PointsConstants.CHANGE_TYPE_INCREASE,
+                PointsConstants.SOURCE_REFUND,
+                exist.getOrderNo(), exist.getPointsUsed(),
+                user.getPointsBalance(),
+                "订单关闭退还：" + StringUtils.nvl(reason, ""),
+                operator);
+        }
         return rows;
     }
 
