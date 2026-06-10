@@ -26,7 +26,7 @@
               <div class="name">{{ o.goodsName }}</div>
               <div class="meta">数量: {{ o.quantity }} · {{ o.goodsType === '1' ? '虚拟' : '实物' }}</div>
             </div>
-            <div class="points">-{{ o.pointsUsed }}</div>
+            <div class="points">-{{ o.pointsUsed }}积分</div>
           </div>
           <div v-if="o.payAmount != null" class="pay-amount">支付金额: <span>¥{{ o.payAmount }}</span></div>
           <div class="actions" v-if="o.status === '1'">
