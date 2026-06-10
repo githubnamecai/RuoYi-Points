@@ -28,6 +28,7 @@
             </div>
             <div class="points">-{{ o.pointsUsed }}</div>
           </div>
+          <div v-if="o.payAmount != null" class="pay-amount">支付金额: <span>¥{{ o.payAmount }}</span></div>
           <div class="actions" v-if="o.status === '1'">
             <van-button size="small" type="primary" plain @click.stop="confirm(o)">确认收货</van-button>
           </div>
@@ -132,6 +133,8 @@ async function confirm(o) {
 .goods .name { font-size: 14px; color: #333; line-height: 1.3; }
 .goods .meta { font-size: 12px; color: #999; margin-top: 4px; }
 .goods .points { color: #ff8c00; font-weight: 600; }
+.pay-amount { font-size: 12px; color: #999; text-align: right; padding-top: 4px; }
+.pay-amount span { color: #e53935; font-weight: 600; }
 
 .actions { text-align: right; padding-top: 4px; border-top: 1px dashed #eee; }
 </style>

@@ -57,6 +57,8 @@ CREATE TABLE `t_goods`
     `images`          varchar(2000) DEFAULT NULL COMMENT '轮播图，JSON数组',
     `points`          int(11)       NOT NULL DEFAULT 0 COMMENT '兑换所需积分',
     `original_price`  decimal(10, 2) DEFAULT 0 COMMENT '原价（仅展示用）',
+    `price`           decimal(10, 2) DEFAULT NULL COMMENT '金额',
+    `discount_price`  decimal(10, 2) DEFAULT NULL COMMENT '优惠金额',
     `stock`           int(11)       DEFAULT 0 COMMENT '库存',
     `sales`           int(11)       DEFAULT 0 COMMENT '已售数量',
     `limit_per_user`  int(11)       DEFAULT 0 COMMENT '每人限兑数量(0不限制)',
@@ -163,6 +165,7 @@ CREATE TABLE `t_order`
     `dept_id`        int(11)        COMMENT '部门id',
     `parent_id`        int(11)        COMMENT '上级部门id',
     `points_used`     int(11)       NOT NULL COMMENT '消耗积分',
+    `pay_amount`      decimal(10, 2) DEFAULT NULL COMMENT '支付金额',
     `status`          char(1)       DEFAULT '0' COMMENT '订单状态（0待发货 1已发货 2已完成 3已关闭）',
     `consignee`       varchar(64)   DEFAULT NULL COMMENT '收件人',
     `phone`           varchar(20)   DEFAULT NULL COMMENT '联系电话',
@@ -470,5 +473,12 @@ VALUES (1, '满减券', '0', 'points_coupon_type', '', 'primary', 'Y', '0', 'adm
        (1, '未使用', '0', 'points_user_coupon_status', '', 'success', 'Y', '0', 'admin', NOW()),
        (2, '已使用', '1', 'points_user_coupon_status', '', 'info', 'N', '0', 'admin', NOW()),
        (3, '已过期', '2', 'points_user_coupon_status', '', 'danger', 'N', '0', 'admin', NOW());
+
+-- ----------------------------
+-- 新增字段：商品金额、优惠金额、订单支付金额
+-- ----------------------------
+ALTER TABLE `t_goods` ADD COLUMN `price` decimal(10,2) DEFAULT NULL COMMENT '金额' AFTER `original_price`;
+ALTER TABLE `t_goods` ADD COLUMN `discount_price` decimal(10,2) DEFAULT NULL COMMENT '优惠金额' AFTER `price`;
+ALTER TABLE `t_order` ADD COLUMN `pay_amount` decimal(10,2) DEFAULT NULL COMMENT '支付金额' AFTER `points_used`;
 
 SET FOREIGN_KEY_CHECKS = 1;

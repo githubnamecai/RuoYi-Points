@@ -2,6 +2,7 @@ package com.ruoyi.points.service.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.math.BigDecimal;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,6 +182,14 @@ public class OrderServiceImpl implements IOrderService
         order.setGoodsType(goods.getGoodsType());
         order.setQuantity(dto.getQuantity());
         order.setPointsUsed(totalPoints);
+        // 计算支付金额 = (金额 - 优惠金额) * 数量
+        if (goods.getPrice() != null) {
+            BigDecimal unitPrice = goods.getPrice();
+            BigDecimal discount = goods.getDiscountPrice() != null ? goods.getDiscountPrice() : BigDecimal.ZERO;
+            BigDecimal payAmount = unitPrice.subtract(discount).multiply(BigDecimal.valueOf(dto.getQuantity()));
+            if (payAmount.compareTo(BigDecimal.ZERO) < 0) payAmount = BigDecimal.ZERO;
+            order.setPayAmount(payAmount);
+        }
         order.setStatus(PointsConstants.ORDER_STATUS_PENDING);
         order.setConsignee(consignee);
         order.setPhone(phone);

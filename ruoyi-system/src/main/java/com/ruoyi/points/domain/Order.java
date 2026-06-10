@@ -1,6 +1,7 @@
 package com.ruoyi.points.domain;
 
 import java.util.Date;
+import java.math.BigDecimal;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.core.domain.BaseEntity;
@@ -45,6 +46,10 @@ public class Order extends BaseEntity
 
     @Excel(name = "消耗积分")
     private Integer pointsUsed;
+
+    /** 支付金额 */
+    @Excel(name = "支付金额")
+    private BigDecimal payAmount;
 
     /** 0待发货 1已发货 2已完成 3已关闭 */
     @Excel(name = "状态", readConverterExp = "0=待发货,1=已发货,2=已完成,3=已关闭")
@@ -112,6 +117,8 @@ public class Order extends BaseEntity
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
     public Integer getPointsUsed() { return pointsUsed; }
     public void setPointsUsed(Integer pointsUsed) { this.pointsUsed = pointsUsed; }
+    public BigDecimal getPayAmount() { return payAmount; }
+    public void setPayAmount(BigDecimal payAmount) { this.payAmount = payAmount; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     public String getConsignee() { return consignee; }

@@ -28,6 +28,7 @@
       <el-table-column label="商品" prop="goodsName" min-width="160" show-overflow-tooltip />
       <el-table-column label="数量" prop="quantity" width="70" />
       <el-table-column label="消耗积分" prop="pointsUsed" width="100" />
+      <el-table-column label="支付金额" prop="payAmount" width="100" />
       <el-table-column label="用户手机" prop="userPhone" width="120" />
       <el-table-column label="类型" width="80">
         <template slot-scope="scope">
@@ -60,12 +61,21 @@
       @pagination="getList" />
 
     <el-dialog title="订单发货" :visible.sync="shipOpen" width="480px" append-to-body>
-      <el-form ref="shipRef" :model="shipForm" :rules="shipRules" label-width="100px">
+      <el-form ref="shipRef" :model="shipForm" :rules="shipRules" label-width="120px">
+        <el-form-item v-if="shipRow && shipRow.payAmount != null" label="支付金额">
+          <span style="color:#e53935;font-weight:600;font-size:16px">¥{{ shipRow.payAmount }}</span>
+        </el-form-item>
         <el-form-item label="物流公司" prop="expressCompany">
           <el-input v-model="shipForm.expressCompany" placeholder="如：顺丰速运" />
         </el-form-item>
         <el-form-item label="物流单号" prop="expressNo">
           <el-input v-model="shipForm.expressNo" />
+        </el-form-item>
+        <el-form-item v-if="shipRow && shipRow.goodsType === '0'" label="线下支付" prop="offlinePaid">
+          <el-radio-group v-model="shipForm.offlinePaid">
+            <el-radio label="1">已完成线下支付</el-radio>
+            <el-radio label="0">其他支付</el-radio>
+          </el-radio-group>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -97,12 +107,18 @@
               :value="dict.value" />
           </el-select>
         </el-form-item>
-          <el-form-item label="订单取消原因" prop="closeReason">
-            <el-input v-model="form.closeReason" type="textarea" placeholder="请输入订单取消原因" />
-          </el-form-item>
-          <el-form-item label="备注" prop="remark">
-            <el-input v-model="form.remark" type="textarea" placeholder="请输入备注" />
-          </el-form-item>
+        <el-form-item v-if="form.goodsType === '0'" label="支付金额" prop="payAmount">
+          <el-input-number v-model="form.payAmount" :min="0" :precision="2" :step="0.01" />
+        </el-form-item>
+        <el-form-item v-if="form.goodsType === '0'" label="线下支付" prop="offlinePaid">
+          <el-radio-group v-model="form.offlinePaid">
+            <el-radio label="1">已完成线下支付</el-radio>
+            <el-radio label="0">其他支付</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="订单取消原因" prop="closeReason">
+          <el-input v-model="form.closeReason" type="textarea" placeholder="请输入订单取消原因" />
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -131,6 +147,7 @@ export default {
         status: ''
       },
       shipOpen: false,
+      shipRow: null,
       shipForm: {},
       shipRules: {
         expressCompany: [{ required: true, message: '请输入物流公司', trigger: 'blur' }],
@@ -172,15 +189,23 @@ export default {
       return { '0': '待发货', '1': '已发货', '2': '已完成', '3': '已关闭' }[s] || s
     },
     openShip(row) {
-      this.shipForm = { orderId: row.orderId }
+      this.shipRow = row
+      this.shipForm = { orderId: row.orderId, offlinePaid: '1' }
       this.shipOpen = true
     },
     submitShip() {
       this.$refs.shipRef.validate(valid => {
         if (!valid) return
-        shipOrder(this.shipForm).then(() => {
+        const data = Object.assign({}, this.shipForm)
+        // 实物订单根据线下支付状态追加 remark
+        if (this.shipRow && this.shipRow.goodsType === '0') {
+          data.remark = data.offlinePaid === '1' ? '已完成线下支付' : '其他支付'
+        }
+        delete data.offlinePaid
+        shipOrder(data).then(() => {
           this.$modal.msgSuccess('发货成功')
           this.shipOpen = false
+          this.shipRow = null
           this.getList()
         })
       })
@@ -202,7 +227,7 @@ export default {
       this.download('points/order/export', this.queryParams, `订单_${new Date().getTime()}.xlsx`)
     },
     handleUpdate(row) {
-      this.form = Object.assign({}, row)
+      this.form = Object.assign({}, row, { offlinePaid: '1' })
       this.open = true
     },
     cancel() {
@@ -212,7 +237,15 @@ export default {
     submitForm() {
       this.$refs.form.validate(valid => {
         if (valid) {
-          updateOrder(this.form).then(response => {
+          const data = Object.assign({}, this.form)
+          // 实物订单根据线下支付状态追加 remark
+          if (data.goodsType === '0') {
+            const payRemark = data.offlinePaid === '1' ? '已完成线下支付' : '其他支付'
+            data.remark=payRemark
+          //   data.remark = data.remark ? data.remark + '；' + payRemark : payRemark
+          }
+          delete data.offlinePaid
+          updateOrder(data).then(response => {
             this.$modal.msgSuccess("修改成功");
             this.open = false;
             this.getList();

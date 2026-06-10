@@ -59,6 +59,9 @@
         </template>
       </el-table-column>
       <el-table-column label="积分" prop="points" width="90" />
+      <el-table-column label="金额" prop="price" width="100" />
+      <el-table-column label="优惠金额" prop="discountPrice" width="100" />
+      <el-table-column label="原价" prop="originalPrice" width="100" />
       <el-table-column label="库存" prop="stock" width="90" />
       <el-table-column label="销量" prop="sales" width="90" />
       <el-table-column label="状态" width="100">
@@ -100,8 +103,17 @@
         <el-form-item label="封面图">
           <image-upload v-model="form.coverImg" :limit="1" />
         </el-form-item>
-        <el-form-item label="积分" prop="points">
+        <el-form-item v-if="form.goodsType === '1'" label="积分" prop="points">
           <el-input-number v-model="form.points" :min="0" />
+        </el-form-item>
+        <el-form-item v-if="form.goodsType === '0'" label="金额" prop="price">
+          <el-input-number v-model="form.price" :min="0" :precision="2" :step="0.01" />
+        </el-form-item>
+        <el-form-item v-if="form.goodsType === '0'" label="优惠金额" prop="discountPrice">
+          <el-input-number v-model="form.discountPrice" :min="0" :precision="2" :step="0.01" />
+        </el-form-item>
+        <el-form-item label="原价" prop="originalPrice">
+          <el-input-number v-model="form.originalPrice" :min="0" :precision="2" :step="0.01" />
         </el-form-item>
         <el-form-item label="库存">
           <el-input-number v-model="form.stock" :min="0" />
@@ -158,7 +170,9 @@ export default {
       rules: {
         goodsName: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
         categoryId: [{ required: true, message: '请选择分类', trigger: 'change' }],
-        points: [{ required: true, message: '请输入积分', trigger: 'blur' }]
+        goodsType: [{ required: true, message: '请选择商品类型', trigger: 'change' }],
+        points: [{ required: true, message: '请输入积分', trigger: 'blur' }],
+        price: [{ required: true, message: '请输入金额', trigger: 'blur' }]
       }
     }
   },
@@ -166,6 +180,16 @@ export default {
     this.getList()
     this.getCategories()
   },
+  // watch: {
+  //   'form.goodsType'(val) {
+  //     if (val === '0') {
+  //       this.form.points = 0
+  //     } else if (val === '1') {
+  //       this.form.price = 0
+  //       this.form.discountPrice = 0
+  //     }
+  //   }
+  // },
   methods: {
     getList() {
       this.loading = true
@@ -185,9 +209,12 @@ export default {
         goodsId: undefined,
         goodsName: '',
         categoryId: undefined,
-        goodsType: '0',
+        goodsType: undefined,
         coverImg: '',
         points: 0,
+        price: 0,
+        discountPrice: 0,
+        originalPrice: 0,
         stock: 0,
         sort: 0,
         status: '1',
@@ -224,6 +251,12 @@ export default {
     submitForm() {
       this.$refs.goodsRef.validate(valid => {
         if (!valid) return
+        // 清除隐藏字段的校验残留
+        // if (this.form.goodsType === '0') {
+        //   this.$refs.goodsRef.clearValidate(['points'])
+        // } else if (this.form.goodsType === '1') {
+        //   this.$refs.goodsRef.clearValidate(['price', 'discountPrice'])
+        // }
         const op = this.form.goodsId ? updateGoods : addGoods
         op(this.form).then(() => {
           this.$modal.msgSuccess('保存成功')

@@ -25,6 +25,7 @@
       <div class="card info-list">
         <div class="row"><span>订单编号</span><span>{{ order.orderNo }}</span></div>
         <div class="row"><span>下单时间</span><span>{{ order.createTime }}</span></div>
+        <div v-if="order.payAmount != null" class="row"><span>支付金额</span><span style="color:#e53935;font-weight:600">¥{{ order.payAmount }}</span></div>
         <div v-if="order.expressCompany" class="row"><span>物流公司</span><span>{{ order.expressCompany }}</span></div>
         <div v-if="order.expressNo" class="row"><span>物流单号</span><span>{{ order.expressNo }}</span></div>
         <div v-if="order.shipTime" class="row"><span>发货时间</span><span>{{ order.shipTime }}</span></div>

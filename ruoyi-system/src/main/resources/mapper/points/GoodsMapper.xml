@@ -15,6 +15,8 @@
         <result property="images"         column="images"/>
         <result property="points"         column="points"/>
         <result property="originalPrice"  column="original_price"/>
+        <result property="price"          column="price"/>
+        <result property="discountPrice"  column="discount_price"/>
         <result property="stock"          column="stock"/>
         <result property="sales"          column="sales"/>
         <result property="limitPerUser"   column="limit_per_user"/>
@@ -32,7 +34,7 @@
 
     <sql id="selectGoodsVo">
         select g.goods_id, g.category_id, c.category_name, g.goods_name, g.goods_type, g.dept_id,g.parent_id,g.cover_img,
-               g.images, g.points, g.original_price, g.stock, g.sales, g.limit_per_user, g.description,
+               g.images, g.points, g.original_price, g.price, g.discount_price, g.stock, g.sales, g.limit_per_user, g.description,
                g.status, g.sort, g.del_flag, g.version, g.create_by, g.create_time,
                g.update_by, g.update_time, g.remark
         from t_goods g
@@ -95,6 +97,8 @@
             <if test="images != null">images,</if>
             points,
             <if test="originalPrice != null">original_price,</if>
+            <if test="price != null">price,</if>
+            <if test="discountPrice != null">discount_price,</if>
             <if test="stock != null">stock,</if>
             <if test="limitPerUser != null">limit_per_user,</if>
             <if test="description != null">description,</if>
@@ -113,6 +117,8 @@
             <if test="images != null">#{images},</if>
             #{points},
             <if test="originalPrice != null">#{originalPrice},</if>
+            <if test="price != null">#{price},</if>
+            <if test="discountPrice != null">#{discountPrice},</if>
             <if test="stock != null">#{stock},</if>
             <if test="limitPerUser != null">#{limitPerUser},</if>
             <if test="description != null">#{description},</if>
@@ -136,6 +142,8 @@
             <if test="images != null">images=#{images},</if>
             <if test="points != null">points=#{points},</if>
             <if test="originalPrice != null">original_price=#{originalPrice},</if>
+            <if test="price != null">price=#{price},</if>
+            <if test="discountPrice != null">discount_price=#{discountPrice},</if>
             <if test="stock != null">stock=#{stock},</if>
             <if test="limitPerUser != null">limit_per_user=#{limitPerUser},</if>
             <if test="description != null">description=#{description},</if>

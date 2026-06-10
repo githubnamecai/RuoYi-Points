@@ -24,7 +24,11 @@
         <img :src="formatImg(goods.coverImg)" class="cover"/>
         <div class="info">
           <div class="name">{{ goods.goodsName }}</div>
-          <div class="price"><span>{{ goods.points }}</span> 积分 × {{ qty }}</div>
+          <div v-if="goods.goodsType === '0'" class="price">
+            <span>¥{{ goods.price || 0 }}</span> /件
+            <span v-if="goods.discountPrice" class="discount-info">优惠价¥{{ goods.discountPrice }}</span>
+          </div>
+          <div v-else class="price"><span>{{ goods.points }}</span> 积分 × {{ qty }}</div>
         </div>
         <van-stepper v-model="qty" min="1" :max="Math.min(goods.stock, 99)" integer />
       </div>
@@ -47,27 +51,27 @@
 
       <!-- 合计 -->
       <div class="card total">
-        <div class="row"><span>当前余额</span><b class="points">{{ userStore.points }}</b></div>
-        <div class="row"><span>合计扣减</span><b class="points">-{{ totalPoints }}</b></div>
-        <div class="row"><span>兑换后剩余</span><b class="points">{{ userStore.points - totalPoints }}</b></div>
+        <div v-if="goods.goodsType !== '0'" class="row"><span>当前余额</span><b class="points">{{ userStore.points }}</b></div>
+        <div v-if="goods.goodsType !== '0'" class="row"><span>合计扣减</span><b class="points">-{{ totalPoints }}</b></div>
+        <div v-if="goods.goodsType !== '0'" class="row"><span>兑换后剩余</span><b class="points">{{ userStore.points - totalPoints }}</b></div>
+        <div v-if="goods.goodsType === '0'" class="row"><span>金额</span><b class="cash">¥{{ (goods.price || 0) * qty }}</b></div>
+        <div v-if="goods.goodsType === '0' && goods.discountPrice" class="row"><span>优惠价</span><b class="cash-discount">¥{{ goods.discountPrice * qty }}</b></div>
       </div>
     </div>
 
-    <van-submit-bar
-      :price="totalPoints * 100"
-      button-text="确认兑换"
-      button-color="#ff8c00"
-      currency=""
-      label="合计:"
-      suffix-label="积分"
-      :loading="loading"
-      :disabled="!canSubmit"
-      @submit="submit"
-    >
-      <template #price>
-        <span class="bar-price">{{ totalPoints }}</span>
-      </template>
-    </van-submit-bar>
+    <div class="bottom-bar">
+      <div class="bar-info">
+        <template v-if="goods?.goodsType === '0'">
+          <span class="bar-price">¥{{ (goods?.price || 0) * qty }}</span>
+          <span v-if="goods?.discountPrice" class="bar-discount">优惠价¥{{ goods.discountPrice * qty }}</span>
+        </template>
+        <template v-else>
+          <span class="bar-price points-color">{{ totalPoints }}</span>
+          <span class="bar-suffix">积分</span>
+        </template>
+      </div>
+      <div class="bar-btn" :class="{ 'is-loading': loading, 'is-disabled': goods?.goodsType !== '0' && !canSubmit }" @click="submit">确认兑换</div>
+    </div>
     
     <!-- 优惠券弹窗 -->
     <van-popup v-model:show="showCouponPopup" position="bottom" round style="height: 60%; background: #f7f7f7;">
@@ -255,7 +259,25 @@ onActivated(load)
 .goods-card .name { font-size: 14px; color: #333; line-height: 1.3; }
 .goods-card .price { color: #ff8c00; font-size: 13px; margin-top: 4px; }
 .goods-card .price span { font-weight: 600; font-size: 15px; }
+.goods-card .price .discount-info { font-size: 11px; color: #ff8c00; margin-left: 4px; font-weight: normal; }
 .total .row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; color: #555; }
 .points { color: #ff8c00; font-weight: 600; }
-.bar-price { color: #ff8c00; font-weight: 700; font-size: 18px; }
+.cash { color: #e53935; font-weight: 600; }
+.cash-discount { color: #ff8c00; font-weight: 600; }
+.bottom-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: #fff; display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+}
+.bar-info { display: flex; align-items: baseline; gap: 4px; flex: 1; }
+.bar-price { color: #e53935; font-weight: 700; font-size: 20px; }
+.bar-price.points-color { color: #ff8c00; }
+.bar-discount { color: #ff8c00; font-size: 12px; margin-left: 4px; }
+.bar-suffix { color: #ff8c00; font-size: 13px; margin-left: 2px; }
+.bar-btn {
+  background: #ff8c00; color: #fff; font-size: 15px; font-weight: 600;
+  padding: 10px 28px; border-radius: 20px; white-space: nowrap; cursor: pointer;
+}
+.bar-btn.is-loading { opacity: 0.6; pointer-events: none; }
+.bar-btn.is-disabled { opacity: 0.4; pointer-events: none; }
 </style>

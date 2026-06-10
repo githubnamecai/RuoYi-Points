@@ -8,10 +8,21 @@
       <div class="brand" v-if="goods.categoryName">{{ goods.categoryName }}</div>
       <div class="title">{{ goods.goodsName }}</div>
       <div class="bottom">
-        <span class="price">
-          <span class="unit">积分</span>
-          <span class="num">{{ goods.points }}</span>
-        </span>
+        <!-- 实物商品：显示金额 + 优惠价 -->
+        <template v-if="goods.goodsType === '0'">
+          <span class="price cash">
+            <span class="unit">¥</span>
+            <span class="num">{{ goods.price || 0 }}</span>
+          </span>
+          <span v-if="goods.discountPrice" class="discount-tag">优惠价¥{{ goods.discountPrice }}</span>
+        </template>
+        <!-- 虚拟商品：显示积分 -->
+        <template v-else>
+          <span class="price">
+            <span class="unit">积分</span>
+            <span class="num">{{ goods.points }}</span>
+          </span>
+        </template>
         <van-icon name="shopping-cart-o" class="cart-icon" />
       </div>
     </div>
@@ -97,13 +108,34 @@ function formatImg(url) {
   margin-top: 8px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
+}
+
+.discount-tag {
+  font-size: 12px;
+  color: #ff8c00;
+  background: #fff3e0;
+  padding: 1px 4px;
+  border-radius: 3px;
+  line-height: 1.3;
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .price {
   color: #f44336;
   display: flex;
   align-items: baseline;
+}
+
+.price.cash {
+  color: #e53935;
+}
+
+.price.cash .num {
+  font-size: 18px;
 }
 
 .price .unit {

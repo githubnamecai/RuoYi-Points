@@ -51,7 +51,10 @@ async function fetchCoupons() {
 async function doReceive(id) {
   try {
     await receiveCoupon(id)
-    showToast('领取成功')
+    showToast({
+    message: '领取成功',
+    className: 'my-toast'
+})
   } catch (e) {
     // 错误在 request 拦截器中处理
   }

@@ -55,6 +55,14 @@ public class Goods extends BaseEntity
     @Excel(name = "原价")
     private BigDecimal originalPrice;
 
+    /** 金额 */
+    @Excel(name = "金额")
+    private BigDecimal price;
+
+    /** 优惠金额 */
+    @Excel(name = "优惠金额")
+    private BigDecimal discountPrice;
+
     /** 库存 */
     @Excel(name = "库存")
     private Integer stock;
@@ -117,6 +125,10 @@ public class Goods extends BaseEntity
     public void setPoints(Integer points) { this.points = points; }
     public BigDecimal getOriginalPrice() { return originalPrice; }
     public void setOriginalPrice(BigDecimal originalPrice) { this.originalPrice = originalPrice; }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
+    public BigDecimal getDiscountPrice() { return discountPrice; }
+    public void setDiscountPrice(BigDecimal discountPrice) { this.discountPrice = discountPrice; }
     public Integer getStock() { return stock; }
     public void setStock(Integer stock) { this.stock = stock; }
     public Integer getSales() { return sales; }
