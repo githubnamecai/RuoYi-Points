@@ -5,12 +5,12 @@
       <div class="hero-card">
         <div class="hero-top">
           <div class="hero-copy">
-            <div class="hero-title">东方有线积分权益</div>
-            <div class="hero-sub">实物好礼、5G、宽带与电视服务一站兑换</div>
-          </div>
-          <div class="hero-points">
-            <span class="label">当前积分</span>
-            <span class="value">{{ userStore.points || 0 }}</span>
+            <div class="hero-title">东方有线权益中心</div>
+            <div class="hero-sub">精选好礼、5G、宽带与电视服务一站浏览与兑换</div>
+            <!-- <div class="hero-badges">
+               <span>游客可浏览</span>
+               <span>登录后兑换</span>
+            </div> -->
           </div>
         </div>
         <van-search v-model="keyword" placeholder="搜索商品 / 服务权益" shape="round" background="transparent" @search="onSearch" />
@@ -79,10 +79,8 @@
 defineOptions({ name: 'Home' })
 import { ref, onMounted,onActivated  } from 'vue'
 import { listGoods, listCategories } from '@/api/goods'
-import { useUserStore } from '@/stores/user'
 import GoodsCard from '@/components/GoodsCard.vue'
 
-const userStore = useUserStore()
 const list = ref([])
 const categories = ref([])
 const catActive = ref('')
@@ -97,6 +95,9 @@ const banners = [
   { img: 'https://img.yzcdn.cn/vant/apple-1.jpg', bg: 'linear-gradient(135deg, #4facfe, #00f2fe)' }
 ]
 
+/**
+ * 根据关键词重新搜索商品。
+ */
 function onSearch() {
   list.value = []
   pageNum.value = 1
@@ -105,6 +106,9 @@ function onSearch() {
   loadMore()
 }
 
+/**
+ * 加载商品分页数据。
+ */
 async function loadMore() {
   try {
     const res = await listGoods({
@@ -120,6 +124,9 @@ async function loadMore() {
   }
 }
 
+/**
+ * 切换分类后重置并重新加载。
+ */
 function onCatChange() {
   list.value = []
   pageNum.value = 1
@@ -128,6 +135,9 @@ function onCatChange() {
   loadMore()
 }
 
+/**
+ * 加载首页一级分类。
+ */
 async function loadCategories() {
   try {
     const res = await listCategories()
@@ -138,9 +148,6 @@ async function loadCategories() {
 // 首次加载
 onMounted(async () => {
   loadCategories()
-  if (userStore.token && !userStore.userInfo) {
-    try { await userStore.fetchUserInfo() } catch (e) {}
-  }
 })
 // 关键：从其他页面返回时（keep-alive 缓存激活），重新检测并加载
 onActivated(() => {
@@ -226,32 +233,29 @@ onActivated(() => {
 
 .hero-sub {
   margin-top: 8px;
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.6;
   color: rgba(255, 255, 255, 0.82);
 }
 
-.hero-points {
-  min-width: 92px;
-  padding: 10px 12px;
-  border-radius: 18px;
+.hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.hero-badges span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
   background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(10px);
-  color: #fff;
-  text-align: right;
-}
-
-.hero-points .label {
-  display: block;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.74);
-}
-
-.hero-points .value {
-  display: block;
-  margin-top: 4px;
-  font-size: 22px;
-  font-weight: 700;
 }
 
 .hero-card :deep(.van-search) {
@@ -289,13 +293,13 @@ onActivated(() => {
 
 .banner-img {
   width: 100%;
-  height: 156px;
+  height: 184px;
   object-fit: cover;
   display: block;
 }
 
 .banner-item {
-  height: 156px;
+  height: 184px;
   display: flex; align-items: center; justify-content: center;
   color: #fff; font-size: 16px; font-weight: 700;
   letter-spacing: 0.04em;

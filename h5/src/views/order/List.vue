@@ -51,10 +51,18 @@ const loading = ref(false)
 const finished = ref(false)
 const refreshing = ref(false)
 const baseApi = import.meta.env.VITE_APP_BASE_API
-// 2. 页面初始化自动调用 ✅
+const defaultImg = 'https://via.placeholder.com/300x300?text=Goods'
+
+/**
+ * 页面初始化时加载订单列表。
+ */
 onMounted(() => {
-  onTabChange() // 直接在这里调用
+  onTabChange()
 })
+
+/**
+ * 格式化订单商品图片地址。
+ */
 function formatImg(url) {
   if (!url) return defaultImg
   if (url.startsWith('/profile')) {
@@ -63,16 +71,25 @@ function formatImg(url) {
   return url
 }
 
+/**
+ * 获取订单状态文案。
+ */
 function statusText(s) {
   return { '0':'待发货','1':'已发货','2':'已完成','3':'已关闭' }[s] || s
 }
 
+/**
+ * 重置列表加载状态。
+ */
 function reset() {
   list.value = []
   pageNum.value = 1
   finished.value = false
 }
 
+/**
+ * 加载订单分页数据。
+ */
 async function loadMore() {
   try {
     const res = await listOrders({
@@ -85,17 +102,27 @@ async function loadMore() {
   } finally { loading.value = false }
 }
 
+/**
+ * 切换订单状态标签后重新加载数据。
+ */
 function onTabChange() { 
   reset(); 
   loading.value = true;
   loadMore(); 
 }
+
+/**
+ * 下拉刷新订单列表。
+ */
 function onRefresh() {
   reset()
   loading.value = true
   loadMore().finally(() => refreshing.value = false)
 }
 
+/**
+ * 确认收货并刷新订单状态。
+ */
 async function confirm(o) {
   try {
     await showDialog({ title: '确认收货？', message: '确认已收到商品？', showCancelButton: true })
@@ -110,31 +137,79 @@ async function confirm(o) {
 </script>
 
 <style scoped lang="scss">
-.order-list { background: #f7f7f7; min-height: 100vh; }
-.empty { padding-top: 60px; }
-.order-card {
-  background: #fff;
-  margin: 8px 12px;
-  border-radius: 12px;
-  padding: 12px 14px;
+.order-list {
+  background: transparent;
+  min-height: 100vh;
 }
+
+.order-list :deep(.van-tabs__wrap) {
+  background: rgba(245, 249, 255, 0.88);
+  backdrop-filter: blur(14px);
+}
+
+.empty { padding-top: 60px; }
+
+.order-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(249, 251, 255, 0.82));
+  margin: 10px 12px;
+  border-radius: 22px;
+  padding: 14px 16px;
+  border: 1px solid rgba(124, 147, 187, 0.12);
+  box-shadow: 0 16px 30px rgba(22, 53, 110, 0.08);
+}
+
 .order-no {
   display: flex; justify-content: space-between;
-  font-size: 12px; color: #888;
-  padding-bottom: 8px; border-bottom: 1px dashed #eee;
+  font-size: 12px; color: #7f8ba0;
+  padding-bottom: 10px; border-bottom: 1px dashed rgba(124, 147, 187, 0.2);
 }
-.order-no .status { color: #ff8c00; font-weight: 600; }
-.order-no .status.s2 { color: #07c160; }
-.order-no .status.s3 { color: #999; }
+
+.order-no .status {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(13, 91, 215, 0.08);
+  color: #0d5bd7;
+  font-weight: 700;
+}
+
+.order-no .status.s2 {
+  background: rgba(37, 176, 125, 0.12);
+  color: #25b07d;
+}
+
+.order-no .status.s3 {
+  background: rgba(166, 175, 191, 0.16);
+  color: #8f98ab;
+}
 
 .goods { display: flex; gap: 10px; padding: 10px 0; align-items: center; }
-.goods img { width: 64px; height: 64px; border-radius: 6px; object-fit: cover; background: #f5f5f5; }
+.goods img {
+  width: 68px;
+  height: 68px;
+  border-radius: 16px;
+  object-fit: cover;
+  background: linear-gradient(180deg, #f6f9ff, #edf4ff);
+}
 .goods .info { flex: 1; }
-.goods .name { font-size: 14px; color: #333; line-height: 1.3; }
-.goods .meta { font-size: 12px; color: #999; margin-top: 4px; }
-.goods .points { color: #ff8c00; font-weight: 600; }
-.pay-amount { font-size: 12px; color: #999; text-align: right; padding-top: 4px; }
-.pay-amount span { color: #e53935; font-weight: 600; }
+.goods .name { font-size: 14px; color: #1a2640; line-height: 1.45; font-weight: 700; }
+.goods .meta { font-size: 12px; color: #7f8ba0; margin-top: 6px; }
+.goods .points {
+  color: #0d5bd7;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(13, 91, 215, 0.08);
+}
+.pay-amount { font-size: 12px; color: #7f8ba0; text-align: right; padding-top: 6px; }
+.pay-amount span { color: #d85267; font-weight: 700; }
 
-.actions { text-align: right; padding-top: 4px; border-top: 1px dashed #eee; }
+.actions {
+  text-align: right;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(124, 147, 187, 0.2);
+}
+
+.actions :deep(.van-button) {
+  min-width: 96px;
+}
 </style>

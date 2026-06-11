@@ -1,6 +1,10 @@
 <template>
   <div class="activity-page">
     <van-nav-bar title="热门活动" left-arrow @click-left="$router.back()" />
+    <div class="hero-panel">
+      <div class="hero-title">热门活动精选</div>
+      <div class="hero-subtitle">到厅福利、生活权益与套餐优惠集中呈现</div>
+    </div>
 
     <div class="activity-list">
       <div class="activity-card" v-for="(item, index) in activities" :key="index">
@@ -59,7 +63,28 @@ const activities = [
 <style scoped lang="scss">
 .activity-page {
   min-height: 100vh;
-  background: #f7f7f7;
+  background: transparent;
+}
+
+.hero-panel {
+  margin: 12px 12px 0;
+  padding: 22px 20px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #0c4ead 0%, #1765e3 52%, #57b9ff 100%);
+  box-shadow: 0 20px 38px rgba(13, 91, 215, 0.2);
+  color: #fff;
+}
+
+.hero-title {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.hero-subtitle {
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.84);
 }
 
 .activity-list {
@@ -67,32 +92,34 @@ const activities = [
 }
 
 .activity-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(249, 251, 255, 0.82));
+  border-radius: 22px;
+  padding: 18px 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 16px 30px rgba(22, 53, 110, 0.08);
+  border: 1px solid rgba(124, 147, 187, 0.12);
 }
 
 .card-tag {
   display: inline-block;
-  background: linear-gradient(135deg, #ff8c00, #ffb84d);
+  background: linear-gradient(135deg, #123f96, #1f73ef 70%, #58b9ff);
   color: #fff;
   font-size: 12px;
-  padding: 2px 10px;
-  border-radius: 12px;
-  margin-bottom: 10px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 12px;
+  font-weight: 600;
 }
 
 .card-content {
   font-size: 14px;
-  color: #333;
-  line-height: 1.6;
+  color: #1f2c45;
+  line-height: 1.8;
 }
 
 .footer-tip {
   text-align: center;
-  color: #ccc;
+  color: #9ea7b8;
   font-size: 13px;
   padding: 20px 0 40px;
 }

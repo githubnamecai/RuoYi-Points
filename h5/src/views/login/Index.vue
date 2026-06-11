@@ -148,6 +148,7 @@ onMounted(() => {
   loadCaptcha()
 })
 
+/** 提交登录表单 */
 async function onSubmit() {
   loading.value = true
   try {
@@ -172,6 +173,7 @@ async function onSubmit() {
   }
 }
 
+/** 跳转注册页 */
 function goRegister() {
   router.push({ path: '/register', query: route.query.redirect ? { redirect: route.query.redirect } : {} })
 }
@@ -180,35 +182,49 @@ function goRegister() {
 <style scoped lang="scss">
 .login-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #fff5e6 0%, #fff 35%);
-  padding-top: 60px;
+  background: linear-gradient(180deg, #edf4ff 0%, #f7fbff 42%, #ffffff 100%);
+  padding: 56px 12px 24px;
 }
-.logo { text-align: center; margin-bottom: 40px; }
+
+.logo {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
 .logo .icon {
-  width: 64px; height: 64px; line-height: 64px;
+  width: 68px; height: 68px; line-height: 68px;
   margin: 0 auto 12px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #ff8c00, #ffb84d);
+  border-radius: 20px;
+  background: linear-gradient(135deg, #123f96, #1f73ef 70%, #58b9ff);
   color: #fff; font-size: 32px; font-weight: 700;
-  box-shadow: 0 6px 16px rgba(255, 140, 0, 0.35);
+  box-shadow: 0 16px 30px rgba(13, 91, 215, 0.2);
 }
-.logo .title { font-size: 22px; font-weight: 700; color: #333; }
-.logo .subtitle { color: #999; font-size: 12px; margin-top: 4px; }
-.form { padding: 0 8px; }
+.logo .title { font-size: 24px; font-weight: 700; color: #1a2640; }
+.logo .subtitle { color: #7f8ba0; font-size: 12px; margin-top: 6px; }
+
+.form {
+  padding: 20px 6px 24px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(249, 251, 255, 0.84));
+  box-shadow: 0 22px 42px rgba(22, 53, 110, 0.08);
+  border: 1px solid rgba(124, 147, 187, 0.12);
+}
+
 .form-title {
   font-size: 16px;
-  font-weight: 600;
-  color: #333;
+  font-weight: 700;
+  color: #1a2640;
   text-align: center;
   margin-bottom: 20px;
 }
+
 .login-tip {
-  background: #fff7e6;
-  color: #ff8c00;
+  background: rgba(13, 91, 215, 0.08);
+  color: #0d5bd7;
   font-size: 13px;
   text-align: center;
   padding: 10px 0;
-  border-radius: 8px;
+  border-radius: 14px;
   margin: 0 16px 16px;
   display: flex;
   align-items: center;
@@ -217,20 +233,45 @@ function goRegister() {
 }
 .captcha-img {
   height: 32px;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
+  border: 1px solid rgba(124, 147, 187, 0.16);
 }
 .submit { padding: 24px 16px 12px; }
-.tip { padding: 8px 24px; font-size: 12px; color: #999; }
-.tip b { color: #ff8c00; }
+.tip { padding: 8px 24px; font-size: 12px; color: #8a95a9; }
+.tip b { color: #0d5bd7; }
 .register-link {
   text-align: center;
   font-size: 14px;
-  color: #999;
+  color: #8a95a9;
   padding-top: 4px;
   span {
-    color: #ff8c00;
-    font-weight: 500;
+    color: #0d5bd7;
+    font-weight: 600;
   }
+}
+
+.form :deep(.van-cell-group) {
+  background: transparent;
+}
+
+.form :deep(.van-field) {
+  margin: 0 12px 12px;
+  padding: 14px 14px;
+  border-radius: 18px;
+  background: rgba(242, 247, 255, 0.9);
+}
+
+.form :deep(.van-field__label) {
+  width: 60px;
+  color: #516078 !important;
+}
+
+.form :deep(.van-field__control) {
+  color: #1a2640;
+}
+
+.submit :deep(.van-button) {
+  height: 46px;
 }
 </style>

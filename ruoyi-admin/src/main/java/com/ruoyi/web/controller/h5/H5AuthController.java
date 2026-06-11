@@ -24,15 +24,15 @@ public class H5AuthController extends BaseController
     @Autowired private SysLoginService sysLoginService;
 
     /** 发送验证码 */
-    @PostMapping("/sms")
-    public AjaxResult sendSms(@RequestParam @NotBlank
-        @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确") String phone)
-    {
-        h5LoginService.sendSmsCode(phone);
-        AjaxResult r = AjaxResult.success("已发送（开发环境查看后端日志，或使用万能码 123456）");
-        r.put("debug", "use code: 123456");
-        return r;
-    }
+//    @PostMapping("/sms")
+//    public AjaxResult sendSms(@RequestParam @NotBlank
+//        @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确") String phone)
+//    {
+//        h5LoginService.sendSmsCode(phone);
+//        AjaxResult r = AjaxResult.success("已发送（开发环境查看后端日志，或使用万能码 123456）");
+//        r.put("debug", "use code: 123456");
+//        return r;
+//    }
 
     /** 登录（首次自动注册） */
     @PostMapping("/login")

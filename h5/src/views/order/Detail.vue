@@ -50,7 +50,11 @@ const route = useRoute()
 const router = useRouter()
 const order = ref(null)
 const baseApi = import.meta.env.VITE_APP_BASE_API
+const defaultImg = 'https://via.placeholder.com/300x300?text=Goods'
 
+/**
+ * 格式化订单详情商品图片地址。
+ */
 function formatImg(url) {
   if (!url) return defaultImg
   if (url.startsWith('/profile')) {
@@ -59,15 +63,29 @@ function formatImg(url) {
   return url
 }
 
+/**
+ * 获取订单主状态文案。
+ */
 function statusText(s) { return { '0':'待发货','1':'待收货','2':'已完成','3':'已关闭' }[s] || s }
+
+/**
+ * 获取订单状态补充说明。
+ */
 function statusSub(o) {
   return { '0':'商家正在备货', '1':'商品已发出，请耐心等待', '2':'交易已完成，感谢使用', '3':o.closeReason || '订单已关闭' }[o.status]
 }
 
+/**
+ * 加载订单详情数据。
+ */
 async function load() {
   const res = await orderDetail(route.params.id)
   order.value = res.data
 }
+
+/**
+ * 确认收货并刷新详情。
+ */
 async function confirm() {
   try {
     await showDialog({ title: '确认收货？', showCancelButton: true })
@@ -84,32 +102,93 @@ onMounted(load)
 </script>
 
 <style scoped lang="scss">
-.order-detail { padding-top: 46px; padding-bottom: 80px; background: #f7f7f7; min-height: 100vh; }
-.status-card {
-  background: linear-gradient(135deg, #ff8c00, #ffb84d);
-  color: #fff;
-  padding: 20px;
-  margin: 12px;
-  border-radius: 12px;
+.order-detail {
+  padding-top: 46px;
+  padding-bottom: 92px;
+  background: transparent;
+  min-height: 100vh;
 }
-.status-text { font-size: 20px; font-weight: 700; }
-.status-sub { font-size: 13px; opacity: 0.9; margin-top: 4px; }
-.card { background: #fff; margin: 8px 12px; border-radius: 12px; padding: 12px 14px; }
-.addr-line { line-height: 1.6; font-size: 14px; }
+
+.status-card {
+  background: linear-gradient(135deg, #0c4ead 0%, #1765e3 52%, #57b9ff 100%);
+  color: #fff;
+  padding: 22px 20px;
+  margin: 12px;
+  border-radius: 24px;
+  box-shadow: 0 20px 38px rgba(13, 91, 215, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.status-card::before,
+.status-card::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.status-card::before {
+  width: 140px;
+  height: 140px;
+  top: -50px;
+  right: -34px;
+}
+
+.status-card::after {
+  width: 92px;
+  height: 92px;
+  bottom: -28px;
+  left: -16px;
+}
+
+.status-text { font-size: 22px; font-weight: 700; position: relative; z-index: 1; }
+.status-sub { font-size: 13px; opacity: 0.9; margin-top: 6px; position: relative; z-index: 1; }
+
+.card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(249, 251, 255, 0.82));
+  margin: 10px 12px;
+  border-radius: 22px;
+  padding: 14px 16px;
+  border: 1px solid rgba(124, 147, 187, 0.12);
+  box-shadow: 0 16px 30px rgba(22, 53, 110, 0.08);
+}
+
+.addr-line { line-height: 1.7; font-size: 14px; color: #1f2c45; }
 .goods-card { display: flex; gap: 10px; align-items: center; }
-.goods-card img { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; background: #f5f5f5; }
+.goods-card img {
+  width: 68px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #f6f9ff, #edf4ff);
+}
 .goods-card .info { flex: 1; }
-.goods-card .name { font-size: 14px; color: #333; }
-.goods-card .qty { font-size: 12px; color: #999; margin-top: 4px; }
-.goods-card .points { color: #ff8c00; font-weight: 600; }
+.goods-card .name { font-size: 15px; color: #1a2640; font-weight: 700; line-height: 1.45; }
+.goods-card .qty { font-size: 12px; color: #7f8ba0; margin-top: 6px; }
+.goods-card .points {
+  color: #0d5bd7;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(13, 91, 215, 0.08);
+}
 .info-list .row {
   display: flex; justify-content: space-between;
-  padding: 6px 0; font-size: 13px; color: #555;
+  padding: 8px 0; font-size: 13px; color: #516078;
 }
-.info-list .row span:first-child { color: #999; }
+.info-list .row span:first-child { color: #8a95a9; }
+.info-list .row span:last-child {
+  max-width: 56%;
+  text-align: right;
+  word-break: break-all;
+}
+
 .bottom-bar {
   position: fixed; bottom: 0; left: 0; right: 0;
-  background: #fff; padding: 10px 16px;
-  box-shadow: 0 -1px 4px rgba(0,0,0,0.05);
+  background: rgba(245, 249, 255, 0.92);
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -10px 24px rgba(22, 53, 110, 0.08);
+  backdrop-filter: blur(16px);
 }
 </style>
