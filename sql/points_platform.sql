@@ -98,8 +98,10 @@ CREATE TABLE `t_user`
     `user_id`         bigint(20)    NOT NULL AUTO_INCREMENT COMMENT '用户ID',
     `nickname`        varchar(64)   DEFAULT NULL COMMENT '昵称',
     `name`        varchar(64)   DEFAULT NULL COMMENT '姓名',
-    `id_number`        char(18)   DEFAULT NULL COMMENT '身份证号',
-    `phone`           varchar(20)   NOT NULL COMMENT '手机号',
+    `id_number`        varchar(256)   DEFAULT NULL COMMENT '身份证号（加密存储）',
+    `id_number_hash`   char(64)       DEFAULT NULL COMMENT '身份证号Hash（SHA-256，用于检索）',
+    `phone`           varchar(256)   NOT NULL COMMENT '手机号（加密存储）',
+    `phone_hash`      char(64)       NOT NULL COMMENT '手机号Hash（SHA-256，用于检索）',
     `password`        varchar(100)  DEFAULT NULL COMMENT '密码',
     `avatar`          varchar(500)  DEFAULT NULL COMMENT '头像',
     `points_balance`  int(11)       DEFAULT 0 COMMENT '积分余额',
@@ -113,12 +115,10 @@ CREATE TABLE `t_user`
     `last_login_ip`   varchar(64)   DEFAULT NULL COMMENT '最近登录IP',
     `del_flag`        char(1)       DEFAULT '0' COMMENT '删除标志',
     PRIMARY KEY (`user_id`),
-    UNIQUE KEY `uniq_phone` (`phone`)
+    UNIQUE KEY `uniq_phone_hash` (`phone_hash`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 10000
   DEFAULT CHARSET = utf8 COMMENT ='H5用户表';
-
-INSERT INTO `t_user` VALUES (10000,'测试用户1','13800138000',NULL,NULL,NULL,NULL,10000,10000,0,0,NULL,'0','2026-05-28 16:19:56',NULL,NULL,'0'),(10001,'测试用户2','13800138001',NULL,NULL,NULL,NULL,3535,5110,1575,1,'2026-05-29','0','2026-05-28 16:19:56','2026-05-29 10:34:46','127.0.0.1','0'),(10002,'用户用户9106','19272199106',NULL,NULL,'123456','',230,230,0,2,'2026-06-02','0','2026-05-29 10:26:48','2026-06-02 08:54:50','127.0.0.1','0');
 
 
 -- INSERT INTO `t_user`(nickname, phone, avatar, points_balance, total_earned, status, register_time)

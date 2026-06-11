@@ -1,9 +1,12 @@
 package com.ruoyi.points.domain;
 
 import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ruoyi.common.annotation.Sensitive;
 import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.core.domain.BaseEntity;
+import com.ruoyi.common.enums.DesensitizedType;
 import jakarta.validation.constraints.Size;
 
 /**
@@ -24,14 +27,23 @@ public class H5User extends BaseEntity
     private String name;
     @Excel(name = "身份证号")
     @Size(min = 18, max = 18, message = "身份证号长度不能超过18个字符")
+    @Sensitive(desensitizedType = DesensitizedType.ID_CARD)
     private String idNumber;
 
     @Excel(name = "手机号")
+    @Sensitive(desensitizedType = DesensitizedType.PHONE)
     private String phone;
 
+    @Sensitive(desensitizedType = DesensitizedType.PASSWORD)
     private String password;
 
     private String avatar;
+
+    @JsonIgnore
+    private String phoneHash;
+
+    @JsonIgnore
+    private String idNumberHash;
 
     @Excel(name = "积分余额")
     private Integer pointsBalance;
@@ -88,6 +100,10 @@ public class H5User extends BaseEntity
     public void setPassword(String password) { this.password = password; }
     public String getAvatar() { return avatar; }
     public void setAvatar(String avatar) { this.avatar = avatar; }
+    public String getPhoneHash() { return phoneHash; }
+    public void setPhoneHash(String phoneHash) { this.phoneHash = phoneHash; }
+    public String getIdNumberHash() { return idNumberHash; }
+    public void setIdNumberHash(String idNumberHash) { this.idNumberHash = idNumberHash; }
     public Integer getPointsBalance() { return pointsBalance; }
     public void setPointsBalance(Integer pointsBalance) { this.pointsBalance = pointsBalance; }
     public Integer getTotalEarned() { return totalEarned; }

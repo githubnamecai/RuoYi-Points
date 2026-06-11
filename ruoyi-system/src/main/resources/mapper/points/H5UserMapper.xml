@@ -8,7 +8,9 @@
         <result property="nickname"        column="nickname"/>
         <result property="name"        column="name"/>
         <result property="idNumber"        column="id_number"/>
+        <result property="idNumberHash"    column="id_number_hash"/>
         <result property="phone"           column="phone"/>
+        <result property="phoneHash"       column="phone_hash"/>
         <result property="password"        column="password"/>
         <result property="avatar"          column="avatar"/>
         <result property="pointsBalance"   column="points_balance"/>
@@ -24,7 +26,7 @@
     </resultMap>
 
     <sql id="selectUserVo">
-        select user_id, nickname,name,id_number, phone, password, avatar, points_balance, total_earned, total_consumed,
+        select user_id, nickname,name,id_number, id_number_hash, phone, phone_hash, password, avatar, points_balance, total_earned, total_consumed,
                continuous_days, last_sign_date, status, register_time, last_login_time, last_login_ip, del_flag
         from t_user
     </sql>
@@ -33,10 +35,10 @@
         <include refid="selectUserVo"/>
         <where>
             del_flag='0'
-            <if test="phone != null and phone != ''">and phone like concat('%', #{phone}, '%')</if>
+            <if test="phoneHash != null and phoneHash != ''">and phone_hash = #{phoneHash}</if>
             <if test="nickname != null and nickname != ''">and nickname like concat('%', #{nickname}, '%')</if>
             <if test="name != null and name != ''">and name like concat('%', #{name}, '%')</if>
-            <if test="idNumber != null and idNumber != ''">and id_number =#{idNumber}</if>
+            <if test="idNumberHash != null and idNumberHash != ''">and id_number_hash = #{idNumberHash}</if>
             <if test="status != null and status != ''">and status = #{status}</if>
             <if test="params.beginTime != null and params.beginTime != ''">and register_time &gt;= #{params.beginTime}</if>
             <if test="params.endTime != null and params.endTime != ''">and register_time &lt;= #{params.endTime}</if>
@@ -48,14 +50,14 @@
         <include refid="selectUserVo"/> where user_id=#{userId}
     </select>
 
-    <select id="selectUserByPhone" parameterType="String" resultMap="H5UserResult">
-        <include refid="selectUserVo"/> where phone=#{phone}
+    <select id="selectUserByPhoneHash" parameterType="String" resultMap="H5UserResult">
+        <include refid="selectUserVo"/> where phone_hash=#{phoneHash}
     </select>
 
     <insert id="insertUser" parameterType="com.ruoyi.points.domain.H5User" useGeneratedKeys="true" keyProperty="userId">
-        insert into t_user(nickname,name,id_number, phone, password, avatar, points_balance, total_earned, total_consumed,
+        insert into t_user(nickname,name,id_number, id_number_hash, phone, phone_hash, password, avatar, points_balance, total_earned, total_consumed,
                            continuous_days, status, register_time, last_login_time, last_login_ip, del_flag)
-        values(#{nickname},#{name},#{idNumber}, #{phone}, #{password}, #{avatar}, coalesce(#{pointsBalance},0), coalesce(#{pointsBalance},0), 0, 0,
+        values(#{nickname},#{name},#{idNumber}, #{idNumberHash}, #{phone}, #{phoneHash}, #{password}, #{avatar}, coalesce(#{pointsBalance},0), coalesce(#{pointsBalance},0), 0, 0,
                coalesce(#{status},'0'), sysdate(), sysdate(), #{lastLoginIp}, '0')
     </insert>
 
@@ -65,7 +67,9 @@
             <if test="nickname != null">nickname=#{nickname},</if>
             <if test="name != null">name=#{name},</if>
             <if test="idNumber != null">id_number=#{idNumber},</if>
+            <if test="idNumberHash != null">id_number_hash=#{idNumberHash},</if>
             <if test="phone != null">phone=#{phone},</if>
+            <if test="phoneHash != null">phone_hash=#{phoneHash},</if>
             <if test="password != null">password=#{password},</if>
             <if test="avatar != null">avatar=#{avatar},</if>
             <if test="status != null">status=#{status},</if>

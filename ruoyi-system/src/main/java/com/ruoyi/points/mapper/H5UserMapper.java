@@ -15,7 +15,7 @@ public interface H5UserMapper
 
     H5User selectUserById(Long userId);
 
-    H5User selectUserByPhone(String phone);
+    H5User selectUserByPhoneHash(@Param("phoneHash") String phoneHash);
 
     int insertUser(H5User user);
 

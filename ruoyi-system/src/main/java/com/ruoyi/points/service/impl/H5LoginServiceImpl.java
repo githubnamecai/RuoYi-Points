@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.uuid.IdUtils;
 import com.ruoyi.points.constant.PointsConstants;
@@ -83,7 +84,9 @@ public class H5LoginServiceImpl implements IH5LoginService
             throw new ServiceException("账号不存在");
         if ("1".equals(user.getStatus()))
             throw new ServiceException("账号已被冻结");
-        if (!password.equals(user.getPassword()))
+        if (StringUtils.isEmpty(user.getPassword()))
+            throw new ServiceException("该账号未设置密码");
+        if (!SecurityUtils.matchesPassword(password, user.getPassword()))
             throw new ServiceException("密码错误");
 
         H5User update = new H5User();
