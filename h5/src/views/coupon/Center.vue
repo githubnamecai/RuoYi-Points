@@ -7,6 +7,7 @@
     <div class="coupon-list" v-else>
       <div class="coupon-item" v-for="item in list" :key="item.couponId">
         <div class="left">
+          <div class="status-chip">可领取</div>
           <div class="amount" v-if="item.couponType === '1'">
             <span class="num">{{ item.discountValue }}</span><span class="unit">%折</span>
           </div>
@@ -79,26 +80,29 @@ onMounted(() => {
 <style scoped lang="scss">
 .page-container {
   min-height: 100vh;
-  background: #f7f7f7;
+  background: transparent;
 }
+
 .coupon-list {
   padding: 12px;
 }
+
 .coupon-item {
   display: flex;
-  background: #fff;
-  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(249, 251, 255, 0.8));
+  border-radius: 22px;
   overflow: hidden;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  margin-bottom: 14px;
+  box-shadow: 0 16px 34px rgba(22, 53, 110, 0.08);
+  border: 1px solid rgba(124, 147, 187, 0.12);
   position: relative;
   
   &::before, &::after {
     content: '';
     position: absolute;
-    width: 12px;
-    height: 12px;
-    background: #f7f7f7;
+    width: 14px;
+    height: 14px;
+    background: #eef3fb;
     border-radius: 50%;
     left: 94px;
     z-index: 2;
@@ -108,48 +112,66 @@ onMounted(() => {
 
   .left {
     width: 100px;
-    background: linear-gradient(135deg, #ff8c00, #ffb84d);
+    background: linear-gradient(160deg, #0d5bd7 0%, #2c8dff 62%, #69beff 100%);
     color: #fff;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 12px 0;
+    padding: 14px 0;
+
+    .status-chip {
+      margin-bottom: 10px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.16);
+      color: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
     
     .amount {
       display: flex;
       align-items: baseline;
       .unit { font-size: 14px; }
-      .num { font-size: 28px; font-weight: bold; }
+      .num { font-size: 30px; font-weight: 700; }
     }
     .condition {
       font-size: 12px;
-      margin-top: 4px;
+      margin-top: 6px;
       opacity: 0.9;
+      text-align: center;
+      padding: 0 8px;
     }
   }
   
   .right {
     flex: 1;
-    padding: 12px;
+    padding: 14px 14px 14px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-left: 1px dashed #eee;
+    border-left: 1px dashed rgba(124, 147, 187, 0.2);
     
     .info {
       flex: 1;
-      .title { font-size: 15px; font-weight: bold; color: #333; margin-bottom: 4px; }
-      .desc { font-size: 12px; color: #ff8c00; margin-bottom: 6px; }
-      .time { font-size: 11px; color: #999; }
+      .title { font-size: 16px; font-weight: 700; color: #1a2640; margin-bottom: 6px; }
+      .desc { font-size: 12px; color: #0d5bd7; margin-bottom: 8px; }
+      .time { font-size: 11px; color: #8a95a9; }
     }
     
     .receive-btn {
-      width: 72px;
-      height: 28px;
-      background: linear-gradient(90deg, #ff8c00, #ff5252);
+      width: 82px;
+      height: 32px;
+      background: linear-gradient(135deg, #123f96, #1f73ef 70%, #58b9ff);
       border: none;
+      box-shadow: 0 10px 18px rgba(13, 91, 215, 0.18);
     }
   }
+}
+
+.page-container :deep(.van-empty) {
+  padding-top: 110px;
 }
 </style>

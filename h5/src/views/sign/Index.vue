@@ -157,65 +157,186 @@ onMounted(load)
 .sign { background: #f7f7f7; min-height: 100vh; }
 .head-card {
   margin: 12px;
-  padding: 18px 20px;
-  background: linear-gradient(135deg, #ff8c00, #ffb84d);
-  border-radius: 14px;
+  padding: 20px 20px 18px;
+  background: linear-gradient(135deg, #0c4ead 0%, #1f72ed 55%, #66bcff 100%);
+  border-radius: 24px;
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 4px 14px rgba(255,140,0,0.3);
+  box-shadow: 0 20px 38px rgba(13, 91, 215, 0.2);
+  position: relative;
+  overflow: hidden;
 }
-.head-card .title { font-size: 20px; font-weight: 700; }
-.head-card .sub { font-size: 12px; opacity: 0.9; margin-top: 6px; }
-.head-card .right { text-align: center; }
-.head-card .days { font-size: 34px; font-weight: 700; line-height: 1; }
+
+.head-card::before,
+.head-card::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.head-card::before {
+  width: 130px;
+  height: 130px;
+  top: -48px;
+  right: -30px;
+}
+
+.head-card::after {
+  width: 88px;
+  height: 88px;
+  bottom: -20px;
+  left: -18px;
+}
+
+.head-card .left,
+.head-card .right {
+  position: relative;
+  z-index: 1;
+}
+
+.head-card .title { font-size: 22px; font-weight: 700; }
+.head-card .sub { font-size: 12px; opacity: 0.88; margin-top: 8px; }
+.head-card .right {
+  min-width: 88px;
+  text-align: center;
+  padding: 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+}
+
+.head-card .days { font-size: 36px; font-weight: 700; line-height: 1; }
 .head-card .label { font-size: 12px; opacity: 0.9; margin-top: 6px; }
 
-.card { background: #fff; margin: 8px 12px; padding: 14px; border-radius: 12px; }
-.progress-title { font-weight: 600; margin-bottom: 12px; }
+.card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(249, 251, 255, 0.76));
+  margin: 10px 12px;
+  padding: 16px;
+  border-radius: 22px;
+  border: 1px solid rgba(124, 147, 187, 0.12);
+  box-shadow: 0 14px 28px rgba(22, 53, 110, 0.08);
+}
+
+.progress-title {
+  font-weight: 700;
+  margin-bottom: 14px;
+  color: #1a2640;
+}
+
 .progress-list {
   display: flex; justify-content: space-between; align-items: center; gap: 6px;
   position: relative;
 }
-.progress-item { text-align: center; flex: 1; position: relative; }
+
+.progress-list::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  top: 15px;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(13, 91, 215, 0.14), rgba(13, 91, 215, 0.22));
+}
+
+.progress-item { text-align: center; flex: 1; position: relative; z-index: 1; }
+
 .progress-item .dot {
   width: 30px; height: 30px; line-height: 30px;
   border-radius: 50%; margin: 0 auto;
-  background: #eee; color: #888; font-weight: 600; font-size: 13px;
+  background: #ecf2ff;
+  color: #6f7f9d;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
-.progress-item.reached .dot { background: #ff8c00; color: #fff; }
-.progress-item .reward { font-size: 11px; color: #ff8c00; margin-top: 4px; }
+.progress-item.reached .dot {
+  background: linear-gradient(135deg, #0f5cd6, #62baff);
+  color: #fff;
+  box-shadow: 0 8px 16px rgba(13, 91, 215, 0.22);
+}
+
+.progress-item .reward {
+  font-size: 11px;
+  color: #0d5bd7;
+  margin-top: 6px;
+}
 
 .sign-card { padding: 18px; }
 
-.month-bar { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 600; }
-.month-stat { color: #ff8c00; font-size: 13px; font-weight: normal; }
+.sign-card :deep(.van-button) {
+  height: 46px;
+}
+
+.month-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  font-weight: 700;
+  color: #1a2640;
+}
+
+.month-stat { color: #0d5bd7; font-size: 13px; font-weight: 600; }
+
 .weekdays {
   display: grid; grid-template-columns: repeat(7, 1fr); text-align: center;
-  color: #999; font-size: 12px; padding: 6px 0;
+  color: #8691a7; font-size: 12px; padding: 8px 0 10px;
 }
+
 .days-grid {
-  display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
 }
+
 .day-cell {
   position: relative;
   aspect-ratio: 1;
   display: flex; align-items: center; justify-content: center;
-  border-radius: 8px;
+  border-radius: 16px;
   font-size: 13px;
-  color: #333;
-  background: transparent;
+  color: #2f3f5d;
+  background: linear-gradient(180deg, #f8fbff, #edf4ff);
+  border: 1px solid rgba(125, 145, 182, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
-.day-cell.signed { background: #fff5e6; color: #ff8c00; font-weight: 600; }
+
+.day-cell.signed {
+  background: linear-gradient(180deg, rgba(13, 91, 215, 0.14), rgba(13, 91, 215, 0.08));
+  color: #0d5bd7;
+  font-weight: 700;
+  border-color: rgba(13, 91, 215, 0.18);
+}
+
 .day-cell.signed .check {
-  position: absolute; bottom: 2px; right: 2px; font-size: 12px;
-  color: #ff8c00;
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  font-size: 12px;
+  color: #0d5bd7;
 }
-.day-cell.repairable { border: 1px dashed #ff8c00; color: #ff8c00; }
-.day-cell.today { background: #ff8c00 !important; color: #fff !important; }
-.legend { margin-top: 10px; font-size: 12px; color: #999; display: flex; gap: 14px; }
+
+.day-cell.repairable {
+  border: 1px dashed rgba(240, 166, 58, 0.82);
+  color: #c07a19;
+  background: linear-gradient(180deg, rgba(240, 166, 58, 0.08), rgba(240, 166, 58, 0.02));
+}
+
+.day-cell.today {
+  background: linear-gradient(135deg, #0d5bd7, #55b6ff) !important;
+  color: #fff !important;
+  box-shadow: 0 10px 18px rgba(13, 91, 215, 0.22);
+}
+
+.legend {
+  margin-top: 14px;
+  font-size: 12px;
+  color: #8691a7;
+  display: flex;
+  gap: 14px;
+}
+
 .legend .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
-.legend .dot.signed { background: #ff8c00; }
-.legend .dot.repair { background: #fff; border: 1px dashed #ff8c00; }
+.legend .dot.signed { background: #0d5bd7; }
+.legend .dot.repair { background: #fff; border: 1px dashed #f0a63a; }
 </style>

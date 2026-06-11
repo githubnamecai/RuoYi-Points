@@ -2,7 +2,19 @@
   <div class="home page-content">
     <!-- 顶部搜索与背景 -->
     <div class="header-bg">
-      <van-search v-model="keyword" placeholder="搜索商品" shape="round" background="transparent" @search="onSearch" />
+      <div class="hero-card">
+        <div class="hero-top">
+          <div class="hero-copy">
+            <div class="hero-title">东方有线积分权益</div>
+            <div class="hero-sub">实物好礼、5G、宽带与电视服务一站兑换</div>
+          </div>
+          <div class="hero-points">
+            <span class="label">当前积分</span>
+            <span class="value">{{ userStore.points || 0 }}</span>
+          </div>
+        </div>
+        <van-search v-model="keyword" placeholder="搜索商品 / 服务权益" shape="round" background="transparent" @search="onSearch" />
+      </div>
     </div>
 
     <div class="main-content">
@@ -15,35 +27,41 @@
       </van-swipe>
 
       <!-- 金刚区图标导航 -->
-      <div class="king-kong">
+      <div class="king-kong glass-panel">
         <div class="nav-item" @click="$router.push('/activity')">
-          <div class="icon-wrap" style="background: linear-gradient(135deg, #ff8a80, #ff5252)"><van-icon name="fire-o" /></div>
+          <div class="icon-wrap hot"><van-icon name="fire-o" /></div>
           <span>热门活动</span>
         </div>
         <div class="nav-item" @click="$router.push('/sign')">
-          <div class="icon-wrap" style="background: linear-gradient(135deg, #8c9eff, #536dfe)"><van-icon name="calendar-o" /></div>
+          <div class="icon-wrap sign"><van-icon name="calendar-o" /></div>
           <span>每日签到</span>
         </div>
         <div class="nav-item" @click="$router.push('/orders')">
-          <div class="icon-wrap" style="background: linear-gradient(135deg, #b9f6ca, #00e676)"><van-icon name="orders-o" /></div>
+          <div class="icon-wrap order"><van-icon name="orders-o" /></div>
           <span>我的订单</span>
         </div>
         <div class="nav-item" @click="$router.push('/coupon/center')">
-          <div class="icon-wrap" style="background: linear-gradient(135deg, #ff9a9e, #fecfef)"><van-icon name="coupon-o" /></div>
+          <div class="icon-wrap coupon"><van-icon name="coupon-o" /></div>
           <span>领券中心</span>
         </div>
         <div class="nav-item" @click="$router.push('/address')">
-          <div class="icon-wrap" style="background: linear-gradient(135deg, #b388ff, #7c4dff)"><van-icon name="location-o" /></div>
+          <div class="icon-wrap address"><van-icon name="location-o" /></div>
           <span>地址管理</span>
         </div>
       </div>
 
       <!-- 分类切换 -->
-      <van-tabs v-model:active="catActive" sticky offset-top="0" line-height="2"
-                title-active-color="#ff8c00" color="#ff8c00" @change="onCatChange" id="categoryTabs">
-        <van-tab title="全部" name="" />
-        <van-tab v-for="c in categories" :key="c.categoryId" :title="c.categoryName" :name="c.categoryId" />
-      </van-tabs>
+      <div class="tabs-panel">
+        <div class="section-head">
+          <div class="section-title">精选权益</div>
+          <div class="section-note">积分兑好礼</div>
+        </div>
+        <van-tabs v-model:active="catActive" sticky offset-top="0" line-height="2"
+                  title-active-color="var(--primary-color)" color="var(--primary-color)" @change="onCatChange" id="categoryTabs" shrink>
+          <van-tab title="全部" name="" />
+          <van-tab v-for="c in categories" :key="c.categoryId" :title="c.categoryName" :name="c.categoryId" />
+        </van-tabs>
+      </div>
 
       <!-- 商品瀑布流 -->
       <van-list v-model:loading="loading" :finished="finished" finished-text="没有更多了"
@@ -136,58 +154,237 @@ onActivated(() => {
 </script>
 
 <style scoped lang="scss">
-.home { background: #f7f7f7; min-height: 100vh; position: relative; padding-bottom: 50px; }
+.home {
+  background: transparent;
+  min-height: 100vh;
+  position: relative;
+  padding-bottom: 58px;
+}
+
 .header-bg {
-  background: linear-gradient(180deg, #fceadd 0%, #f7f7f7 100%);
-  padding: 10px 12px;
+  padding: 10px 12px 0;
   position: sticky;
   top: 0;
   z-index: 99;
-}
-.main-content {
-  margin-top: -10px;
+  background: linear-gradient(180deg, rgba(241, 247, 255, 0.98) 0%, rgba(241, 247, 255, 0.9) 72%, rgba(241, 247, 255, 0) 100%);
+  backdrop-filter: blur(14px);
 }
 
-.banner { margin: 0 12px 12px; border-radius: 12px; overflow: hidden; }
-.banner-img { width: 100%; height: 140px; object-fit: cover; display: block; }
-.banner-item {
+.hero-card {
+  padding: 16px;
+  border-radius: 26px;
+  background: linear-gradient(135deg, rgba(10, 67, 161, 0.96) 0%, rgba(20, 93, 210, 0.92) 52%, rgba(78, 174, 255, 0.78) 100%);
+  box-shadow: 0 22px 42px rgba(13, 91, 215, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-card::before,
+.hero-card::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hero-card::before {
+  width: 140px;
   height: 140px;
+  top: -48px;
+  right: -28px;
+}
+
+.hero-card::after {
+  width: 96px;
+  height: 96px;
+  bottom: -32px;
+  left: -20px;
+}
+
+.hero-top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.hero-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.hero-title {
+  font-size: 21px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.hero-sub {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.hero-points {
+  min-width: 92px;
+  padding: 10px 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  text-align: right;
+}
+
+.hero-points .label {
+  display: block;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.hero-points .value {
+  display: block;
+  margin-top: 4px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.hero-card :deep(.van-search) {
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-card :deep(.van-search__content) {
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding-left: 10px;
+}
+
+.hero-card :deep(.van-field__control),
+.hero-card :deep(.van-icon-search) {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.hero-card :deep(.van-field__control::placeholder) {
+  color: rgba(255, 255, 255, 0.64);
+}
+
+.main-content {
+  margin-top: 8px;
+}
+
+.banner {
+  margin: 0 12px 14px;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 16px 34px rgba(22, 53, 110, 0.12);
+}
+
+.banner-img {
+  width: 100%;
+  height: 156px;
+  object-fit: cover;
+  display: block;
+}
+
+.banner-item {
+  height: 156px;
   display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 16px; font-weight: 600;
+  color: #fff; font-size: 16px; font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 .king-kong {
   display: flex;
   justify-content: space-between;
-  padding: 12px 16px 20px;
-  background: transparent;
+  margin: 0 12px 14px;
+  padding: 14px 10px 18px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(248, 251, 255, 0.72));
+  box-shadow: 0 16px 34px rgba(22, 53, 110, 0.08);
+  border: 1px solid rgba(135, 160, 197, 0.12);
 }
+
 .nav-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  width: 20%;
 }
+
 .icon-wrap {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  border-radius: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
   font-size: 24px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-.nav-item span {
-  font-size: 12px;
-  color: #333;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.14);
 }
 
-.goods-list { padding: 12px; }
+.icon-wrap.hot { background: linear-gradient(135deg, #ff9b78, #f55d74); }
+.icon-wrap.sign { background: linear-gradient(135deg, #4e7dff, #6ac1ff); }
+.icon-wrap.order { background: linear-gradient(135deg, #35b888, #67d49b); }
+.icon-wrap.coupon { background: linear-gradient(135deg, #9a72ff, #d689ff); }
+.icon-wrap.address { background: linear-gradient(135deg, #5b88ff, #7fc8ff); }
+
+.nav-item span {
+  font-size: 12px;
+  color: #25324a;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.tabs-panel {
+  margin: 0 12px 6px;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 0 4px;
+}
+
+.section-note {
+  font-size: 12px;
+  color: #7b89a3;
+}
+
+.tabs-panel :deep(.van-tabs__wrap) {
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 10px 22px rgba(22, 53, 110, 0.06);
+  backdrop-filter: blur(10px);
+}
+
+.tabs-panel :deep(.van-tab) {
+  color: #62708a;
+}
+
+.goods-list {
+  padding: 8px 12px 0;
+}
+
 .goods-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 12px;
+}
+
+.goods-list :deep(.van-list__finished-text),
+.goods-list :deep(.van-list__loading-text) {
+  color: #8691a7;
 }
 </style>

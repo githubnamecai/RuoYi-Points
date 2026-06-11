@@ -102,7 +102,7 @@
     </van-dialog>
 
     <!-- 规则 -->
-    <van-popup v-model:show="showRule" position="bottom" round closeable style="height: 60%">
+    <van-popup v-model:show="showRule" position="bottom" round closeable class="info-popup" style="height: 60%">
       <div class="popup-content">
         <h3>积分兑换规则</h3>
         <p>1. 每日签到可获得积分奖励，连续签到有额外奖励；</p>
@@ -114,7 +114,7 @@
     </van-popup>
 
     <!-- 关于 -->
-    <van-popup v-model:show="showAbout" position="bottom" round closeable style="height: 40%">
+    <van-popup v-model:show="showAbout" position="bottom" round closeable class="info-popup" style="height: 40%">
       <div class="popup-content">
         <h3>关于权益平台</h3>
         <p>本平台基于 RuoYi-Vue 框架二次开发，提供积分管理、商品兑换、每日签到等功能。</p>
@@ -261,28 +261,61 @@ onActivated(refresh)
 .change-pwd-btn {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   cursor: pointer;
-  margin-top: 4px;  /* 与 profile 区域垂直对齐微调 */
+  margin-top: 10px;
+  width: fit-content;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
 }
 
 .user-page {
   min-height: 100vh;
   padding-bottom: 80px;
-  background: #f5f5f5;
+  background: transparent;
 }
 
 .header {
-  background: linear-gradient(135deg, #ff8c00 0%, #ffb347 100%);
-  padding: 32px 16px 16px;
+  background: linear-gradient(135deg, #0c4ead 0%, #1765e3 52%, #57b9ff 100%);
+  padding: 24px 16px 20px;
   color: #fff;
-  border-radius: 0 0 16px 16px;
+  border-radius: 0 0 30px 30px;
+  box-shadow: 0 18px 40px rgba(13, 91, 215, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before,
+.header::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.header::before {
+  width: 160px;
+  height: 160px;
+  top: -70px;
+  right: -50px;
+}
+
+.header::after {
+  width: 110px;
+  height: 110px;
+  bottom: -44px;
+  left: -36px;
 }
 
 .profile {
   display: flex;
   align-items: center;
   gap: 14px;
+  position: relative;
+  z-index: 1;
 
   .info {
     flex: 1;
@@ -302,19 +335,24 @@ onActivated(refresh)
 
   .phone {
     font-size: 13px;
-    opacity: 0.85;
-    margin-top: 4px;
+    opacity: 0.82;
+    margin-top: 6px;
   }
 }
 
 .points-card {
   margin-top: 18px;
-  background: rgba(255, 255, 255, 0.18);
-  border-radius: 12px;
-  padding: 14px 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.14));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 22px;
+  padding: 16px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(12px);
+  position: relative;
+  z-index: 1;
 
   .label {
     font-size: 13px;
@@ -322,9 +360,9 @@ onActivated(refresh)
   }
 
   .value {
-    font-size: 26px;
+    font-size: 30px;
     font-weight: 700;
-    margin-top: 4px;
+    margin-top: 6px;
   }
 
   .points-right {
@@ -332,6 +370,9 @@ onActivated(refresh)
     align-items: center;
     gap: 4px;
     font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
   }
 }
 
@@ -340,15 +381,18 @@ onActivated(refresh)
   align-items: center;
   margin-top: 16px;
   background: rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  padding: 14px 0;
+  border-radius: 22px;
+  padding: 16px 0;
+  backdrop-filter: blur(12px);
+  position: relative;
+  z-index: 1;
 
   .stat {
     flex: 1;
     text-align: center;
 
     .stat-value {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 700;
     }
 
@@ -368,14 +412,20 @@ onActivated(refresh)
 
 .menu-group {
   margin-top: 12px;
-  border-radius: 12px;
+  border-radius: 20px;
   overflow: hidden;
+  margin-left: 12px;
+  margin-right: 12px;
+  padding: 6px 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(249, 251, 255, 0.74));
+  border: 1px solid rgba(124, 147, 187, 0.12);
+  box-shadow: 0 16px 34px rgba(22, 53, 110, 0.08);
 }
 
 .order-tabs {
   display: flex;
-  background: #fff;
-  padding: 14px 0;
+  background: transparent;
+  padding: 14px 0 10px;
 
   .ot-item {
     flex: 1;
@@ -384,11 +434,12 @@ onActivated(refresh)
     align-items: center;
     gap: 6px;
     font-size: 12px;
-    color: #555;
+    color: #516078;
     cursor: pointer;
 
     .van-icon {
-      color: var(--primary-color, #ff8c00);
+      color: var(--primary-color, #0d5bd7);
+      font-size: 26px;
     }
   }
 }
@@ -398,7 +449,7 @@ onActivated(refresh)
 }
 
 .profile-form {
-  padding: 12px 0;
+  padding: 12px 0 4px;
 }
 
 .popup-content {
@@ -411,9 +462,35 @@ onActivated(refresh)
 
   p {
     line-height: 1.8;
-    color: #555;
+    color: #516078;
     font-size: 14px;
     margin: 4px 0;
   }
+}
+
+.menu-group :deep(.van-cell) {
+  padding: 15px 16px;
+}
+
+.menu-group :deep(.van-cell__left-icon) {
+  margin-right: 10px;
+  color: var(--primary-color);
+}
+
+.menu-group :deep(.van-cell__value),
+.menu-group :deep(.van-icon-arrow) {
+  color: #8b95a9;
+}
+
+.logout-wrap :deep(.van-button) {
+  height: 46px;
+  background: linear-gradient(135deg, #123c8d, #1d6cf0) !important;
+  border: none !important;
+  box-shadow: 0 14px 28px rgba(13, 91, 215, 0.18);
+}
+
+:global(.info-popup) {
+  background: rgba(255, 255, 255, 0.94) !important;
+  backdrop-filter: blur(18px);
 }
 </style>
