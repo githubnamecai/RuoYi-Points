@@ -5,6 +5,7 @@ import { showToast } from 'vant'
 const routes = [
   { path: '/', redirect: '/home' },
   { path: '/login', component: () => import('@/views/login/Index.vue'), meta: { title: '登录', public: true } },
+  { path: '/register', component: () => import('@/views/login/Register.vue'), meta: { title: '注册', public: true } },
   { path: '/home', component: () => import('@/views/home/Index.vue'), meta: { title: '积分商城', tabbar: true, public: true } },
   { path: '/sign', component: () => import('@/views/sign/Index.vue'), meta: { title: '每日签到', tabbar: true } },
   { path: '/orders', component: () => import('@/views/order/List.vue'), meta: { title: '我的订单', tabbar: true } },

@@ -23,6 +23,11 @@ export default defineConfig(({ mode }) => {
         '/h5-api': {
           target: env.VITE_API_BASE || 'http://localhost:8080',
           changeOrigin: true
+        },
+        // 验证码接口
+        '/captchaImage': {
+          target: env.VITE_API_BASE || 'http://localhost:8080',
+          changeOrigin: true
         }
       }
     },

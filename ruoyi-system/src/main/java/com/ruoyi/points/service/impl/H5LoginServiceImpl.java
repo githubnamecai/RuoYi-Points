@@ -95,6 +95,36 @@ public class H5LoginServiceImpl implements IH5LoginService
         return createToken(user);
     }
 
+    @Override
+    public void register(String phone, String password, String loginIp)
+    {
+        if (StringUtils.isEmpty(phone) || StringUtils.isEmpty(password))
+            throw new ServiceException("参数不完整");
+
+        // 密码复杂度校验：至少8位，包含大小写字母和数字
+        if (password.length() < 8)
+            throw new ServiceException("密码长度至少8位");
+        if (!password.matches(".*[a-z].*") || !password.matches(".*[A-Z].*") || !password.matches(".*\\d.*"))
+            throw new ServiceException("密码需包含大写字母、小写字母和数字");
+
+        // 检查手机号是否已注册
+        H5User exist = h5UserService.selectUserByPhone(phone);
+        if (exist != null)
+            throw new ServiceException("该手机号已注册");
+
+        // 创建新用户
+        H5User user = new H5User();
+        user.setPhone(phone);
+        user.setPassword(password);
+        user.setNickname("用户" + phone.substring(phone.length() - 4));
+        user.setRegisterTime(new java.util.Date());
+        user.setLastLoginIp(loginIp);
+        user.setLastLoginTime(new java.util.Date());
+        user.setStatus("0");
+        user.setPointsBalance(0);
+        h5UserService.insertUser(user);
+    }
+
     private String createToken(H5User user)
     {
         // 生成 token

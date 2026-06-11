@@ -1,18 +1,12 @@
 <template>
-  <div class="login-page">
+  <div class="register-page">
     <div class="logo">
       <div class="icon">★</div>
-      <div class="title">积分商城</div>
-      <div class="subtitle">签到 · 兑换 · 福利</div>
+      <div class="title">注册账号</div>
+      <div class="subtitle">注册后即可享受积分福利</div>
     </div>
 
     <van-form @submit="onSubmit" class="form">
-      <div v-if="route.query.redirect" class="login-tip">
-        <van-icon name="info-o" /> 请先登录
-      </div>
-
-      <div class="form-title">账号登录</div>
-
       <van-cell-group inset>
         <van-field
           v-model="phone"
@@ -26,8 +20,24 @@
           v-model="password"
           type="password"
           label="密码"
-          placeholder="请输入密码"
-          :rules="[{ required: true, message: '请输入密码' }]"
+          placeholder="至少8位，含大小写字母和数字"
+          :rules="[
+            { required: true, message: '请输入密码' },
+            { validator: val => val.length >= 8, message: '密码至少8位' },
+            { validator: val => /[a-z]/.test(val), message: '需包含小写字母' },
+            { validator: val => /[A-Z]/.test(val), message: '需包含大写字母' },
+            { validator: val => /[0-9]/.test(val), message: '需包含数字' }
+          ]"
+        />
+        <van-field
+          v-model="confirmPwd"
+          type="password"
+          label="确认密码"
+          placeholder="请再次输入密码"
+          :rules="[
+            { required: true, message: '请确认密码' },
+            { validator: val => val === password, message: '两次密码不一致' }
+          ]"
         />
         <van-field
           v-model="captchaCode"
@@ -50,12 +60,12 @@
 
       <div class="submit">
         <van-button block round type="primary" native-type="submit" :loading="loading">
-          登 录
+          注 册
         </van-button>
       </div>
 
-      <div class="register-link" @click="goRegister">
-        没有账号？<span>立即注册</span>
+      <div class="login-link" @click="goLogin">
+        已有账号？<span>去登录</span>
       </div>
     </van-form>
   </div>
@@ -65,14 +75,13 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { showToast } from 'vant'
-import { login, getCaptchaImage } from '@/api/auth'
-import { useUserStore } from '@/stores/user'
+import { register, getCaptchaImage } from '@/api/auth'
 
 const route = useRoute()
 const router = useRouter()
-const userStore = useUserStore()
 const phone = ref('')
 const password = ref('')
+const confirmPwd = ref('')
 const captchaCode = ref('')
 const captchaImg = ref('')
 const captchaUuid = ref('')
@@ -86,7 +95,6 @@ async function loadCaptcha() {
       captchaImg.value = 'data:image/jpg;base64,' + res.img
       captchaUuid.value = res.uuid
     } else {
-      // 验证码未启用，隐藏验证码输入
       captchaImg.value = ''
       captchaUuid.value = ''
     }
@@ -100,21 +108,21 @@ onMounted(() => {
 })
 
 async function onSubmit() {
+  if (password.value !== confirmPwd.value) {
+    showToast({ message: '两次密码不一致', className: 'my-toast' })
+    return
+  }
   loading.value = true
   try {
-    const res = await login({
-      loginType: 'password',
+    await register({
       phone: phone.value,
       password: password.value,
       captchaCode: captchaCode.value,
       uuid: captchaUuid.value
     })
-    userStore.setToken(res.token)
-    await userStore.fetchUserInfo()
-    showToast({ message: '登录成功', className: 'my-toast' })
-    router.replace(route.query.redirect || '/home')
+    showToast({ message: '注册成功，请登录', className: 'my-toast' })
+    router.replace({ path: '/login', query: route.query.redirect ? { redirect: route.query.redirect } : {} })
   } catch (e) {
-    // 验证码错误或过期时刷新
     loadCaptcha()
     captchaCode.value = ''
   } finally {
@@ -122,13 +130,13 @@ async function onSubmit() {
   }
 }
 
-function goRegister() {
-  router.push({ path: '/register', query: route.query.redirect ? { redirect: route.query.redirect } : {} })
+function goLogin() {
+  router.replace({ path: '/login', query: route.query.redirect ? { redirect: route.query.redirect } : {} })
 }
 </script>
 
 <style scoped lang="scss">
-.login-page {
+.register-page {
   min-height: 100vh;
   background: linear-gradient(180deg, #fff5e6 0%, #fff 35%);
   padding-top: 60px;
@@ -145,33 +153,13 @@ function goRegister() {
 .logo .title { font-size: 22px; font-weight: 700; color: #333; }
 .logo .subtitle { color: #999; font-size: 12px; margin-top: 4px; }
 .form { padding: 0 8px; }
-.form-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-  text-align: center;
-  margin-bottom: 20px;
-}
-.login-tip {
-  background: #fff7e6;
-  color: #ff8c00;
-  font-size: 13px;
-  text-align: center;
-  padding: 10px 0;
-  border-radius: 8px;
-  margin: 0 16px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-}
 .captcha-img {
   height: 32px;
   border-radius: 4px;
   cursor: pointer;
 }
 .submit { padding: 24px 16px 12px; }
-.register-link {
+.login-link {
   text-align: center;
   font-size: 14px;
   color: #999;

@@ -9,6 +9,7 @@ import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.common.utils.ip.IpUtils;
 import com.ruoyi.points.domain.dto.LoginBodyDTO;
 import com.ruoyi.points.service.IH5LoginService;
+import com.ruoyi.framework.web.service.SysLoginService;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
@@ -20,6 +21,7 @@ import jakarta.validation.constraints.Pattern;
 public class H5AuthController extends BaseController
 {
     @Autowired private IH5LoginService h5LoginService;
+    @Autowired private SysLoginService sysLoginService;
 
     /** 发送验证码 */
     @PostMapping("/sms")
@@ -36,6 +38,9 @@ public class H5AuthController extends BaseController
     @PostMapping("/login")
     public AjaxResult login(@Validated @RequestBody LoginBodyDTO body)
     {
+        // 图形验证码校验
+        sysLoginService.validateCaptcha(body.getPhone(), body.getCaptchaCode(), body.getUuid());
+
         String ip = IpUtils.getIpAddr(ServletUtils.getRequest());
         String token;
         if ("password".equals(body.getLoginType())) {
@@ -46,5 +51,17 @@ public class H5AuthController extends BaseController
         AjaxResult r = AjaxResult.success();
         r.put("token", token);
         return r;
+    }
+
+    /** 注册 */
+    @PostMapping("/register")
+    public AjaxResult register(@Validated @RequestBody LoginBodyDTO body)
+    {
+        // 图形验证码校验
+        sysLoginService.validateCaptcha(body.getPhone(), body.getCaptchaCode(), body.getUuid());
+
+        String ip = IpUtils.getIpAddr(ServletUtils.getRequest());
+        h5LoginService.register(body.getPhone(), body.getPassword(), ip);
+        return AjaxResult.success("注册成功");
     }
 }

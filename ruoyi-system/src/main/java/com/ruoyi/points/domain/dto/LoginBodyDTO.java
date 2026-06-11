@@ -18,6 +18,12 @@ public class LoginBodyDTO
     
     private String password;
 
+    /** 验证码唯一标识 */
+    private String uuid;
+
+    /** 图形验证码 */
+    private String captchaCode;
+
     public String getLoginType() { return loginType; }
     public void setLoginType(String loginType) { this.loginType = loginType; }
     public String getPhone() { return phone; }
@@ -26,4 +32,8 @@ public class LoginBodyDTO
     public void setCode(String code) { this.code = code; }
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+    public String getUuid() { return uuid; }
+    public void setUuid(String uuid) { this.uuid = uuid; }
+    public String getCaptchaCode() { return captchaCode; }
+    public void setCaptchaCode(String captchaCode) { this.captchaCode = captchaCode; }
 }
