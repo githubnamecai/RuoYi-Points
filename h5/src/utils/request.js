@@ -36,11 +36,14 @@ service.interceptors.response.use(res => {
   }
   if (data.code === 401) {
     removeToken()
+    const currentPath = router.currentRoute.value.path
+    if (currentPath !== '/login') {
       showToast({
-      message: data.msg || '登录已失效',
-      className: 'my-toast'
-})
-    router.replace('/login')
+        message: data.msg || '登录已失效',
+        className: 'my-toast'
+      })
+      router.replace({ path: '/login', query: { redirect: router.currentRoute.value.fullPath } })
+    }
     return Promise.reject(data)
   }
   showToast({
@@ -54,7 +57,10 @@ service.interceptors.response.use(res => {
   const status = err.response ? err.response.status : 0
   if (status === 401) {
     removeToken()
-    router.replace('/login')
+    const currentPath = router.currentRoute.value.path
+    if (currentPath !== '/login') {
+      router.replace({ path: '/login', query: { redirect: router.currentRoute.value.fullPath } })
+    }
   }
   showToast({
   message: err.response?.data?.msg || err.message || '网络错误',

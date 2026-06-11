@@ -29,8 +29,14 @@ public class H5TokenInterceptor implements HandlerInterceptor
         throws IOException
     {
         String path = request.getRequestURI();
-        // 公开接口直接放行
-        if (path.contains("/h5-api/auth/")) return true;
+        // 公开接口直接放行（登录/注册 + 商品列表/详情/分类）
+        if (path.contains("/h5-api/auth/")
+            || path.endsWith("/h5-api/goods/list")
+            || path.endsWith("/h5-api/goods/categories")
+            || path.matches(".*\\/h5-api\\/goods\\/\\d+$"))
+        {
+            return true;
+        }
 
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) token = token.substring(7);

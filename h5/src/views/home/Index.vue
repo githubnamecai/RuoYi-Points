@@ -127,7 +127,7 @@ async function loadCategories() {
 // 首次加载
 onMounted(async () => {
   loadCategories()
-  if (!userStore.userInfo) {
+  if (userStore.token && !userStore.userInfo) {
     try { await userStore.fetchUserInfo() } catch (e) {}
   }
 })

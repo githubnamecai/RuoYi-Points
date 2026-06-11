@@ -19,6 +19,11 @@ public class H5WebMvcConfig implements WebMvcConfigurer
     {
         registry.addInterceptor(h5TokenInterceptor)
             .addPathPatterns("/h5-api/**")
-            .excludePathPatterns("/h5-api/auth/**");
+            .excludePathPatterns(
+                "/h5-api/auth/**",
+                "/h5-api/goods/list",
+                "/h5-api/goods/categories",
+                "/h5-api/goods/*"
+            );
     }
 }

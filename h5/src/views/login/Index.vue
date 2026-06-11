@@ -7,6 +7,9 @@
     </div>
 
     <van-form @submit="onSubmit" class="form">
+      <div v-if="route.query.redirect" class="login-tip">
+        <van-icon name="info-o" /> 请先登录
+      </div>
       <van-tabs v-model:active="loginType" title-active-color="#ff8c00" color="#ff8c00" background="transparent">
         <van-tab title="短信登录" name="sms"></van-tab>
         <van-tab title="密码登录" name="password"></van-tab>
@@ -135,6 +138,19 @@ async function onSubmit() {
 .logo .title { font-size: 22px; font-weight: 700; color: #333; }
 .logo .subtitle { color: #999; font-size: 12px; margin-top: 4px; }
 .form { padding: 0 8px; }
+.login-tip {
+  background: #fff7e6;
+  color: #ff8c00;
+  font-size: 13px;
+  text-align: center;
+  padding: 10px 0;
+  border-radius: 8px;
+  margin: 0 16px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
 .tip { padding: 8px 24px; font-size: 12px; color: #999; }
 .tip b { color: #ff8c00; }
 .submit { padding: 24px 16px; }
