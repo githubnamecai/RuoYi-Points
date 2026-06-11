@@ -16,9 +16,9 @@
 
       <!-- 金刚区图标导航 -->
       <div class="king-kong">
-        <div class="nav-item" @click="scrollToCategory">
-          <div class="icon-wrap" style="background: linear-gradient(135deg, #ff8a80, #ff5252)"><van-icon name="apps-o" /></div>
-          <span>商品分类</span>
+        <div class="nav-item" @click="$router.push('/activity')">
+          <div class="icon-wrap" style="background: linear-gradient(135deg, #ff8a80, #ff5252)"><van-icon name="fire-o" /></div>
+          <span>热门活动</span>
         </div>
         <div class="nav-item" @click="$router.push('/sign')">
           <div class="icon-wrap" style="background: linear-gradient(135deg, #8c9eff, #536dfe)"><van-icon name="calendar-o" /></div>
@@ -85,13 +85,6 @@ function onSearch() {
   finished.value = false
   loading.value = true
   loadMore()
-}
-
-function scrollToCategory() {
-  const el = document.getElementById('categoryTabs')
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth' })
-  }
 }
 
 async function loadMore() {

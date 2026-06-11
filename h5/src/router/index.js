@@ -12,6 +12,7 @@ const routes = [
   { path: '/orders/:id', component: () => import('@/views/order/Detail.vue'), meta: { title: '订单详情' } },
   { path: '/user', component: () => import('@/views/user/Index.vue'), meta: { title: '个人中心', tabbar: true } },
   { path: '/product/:id', component: () => import('@/views/product/Detail.vue'), meta: { title: '商品详情', public: true } },
+  { path: '/activity', component: () => import('@/views/activity/Index.vue'), meta: { title: '热门活动', public: true } },
   { path: '/product/:id/exchange', component: () => import('@/views/product/Exchange.vue'), meta: { title: '兑换确认' } },
   { path: '/points/detail', component: () => import('@/views/points/Detail.vue'), meta: { title: '积分明细' } },
   { path: '/address', component: () => import('@/views/address/List.vue'), meta: { title: '收货地址' } },
