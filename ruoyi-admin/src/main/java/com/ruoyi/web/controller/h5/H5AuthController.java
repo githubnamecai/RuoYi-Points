@@ -38,14 +38,14 @@ public class H5AuthController extends BaseController
     @PostMapping("/login")
     public AjaxResult login(@Validated @RequestBody LoginBodyDTO body)
     {
-        // 图形验证码校验
-        sysLoginService.validateCaptcha(body.getPhone(), body.getCaptchaCode(), body.getUuid());
-
         String ip = IpUtils.getIpAddr(ServletUtils.getRequest());
         String token;
         if ("password".equals(body.getLoginType())) {
+            // 密码登录需要图形验证码校验
+            sysLoginService.validateCaptcha(body.getPhone(), body.getCaptchaCode(), body.getUuid());
             token = h5LoginService.loginByPassword(body.getPhone(), body.getPassword(), ip);
         } else {
+            // 短信登录使用短信验证码校验，无需图形验证码
             token = h5LoginService.loginByCode(body.getPhone(), body.getCode(), ip);
         }
         AjaxResult r = AjaxResult.success();

@@ -11,6 +11,12 @@
         <van-icon name="info-o" /> 请先登录
       </div>
 
+      <!-- 短信和密码登录 -->
+      <!-- <van-tabs v-model:active="loginType" title-active-color="#ff8c00" color="#ff8c00" background="transparent">
+        <van-tab title="短信登录" name="sms"></van-tab>
+        <van-tab title="密码登录" name="password"></van-tab>
+      </van-tabs> -->
+     
       <div class="form-title">账号登录</div>
 
       <van-cell-group inset>
@@ -23,6 +29,23 @@
           :rules="[{ pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号' }]"
         />
         <van-field
+          v-if="loginType === 'sms'"
+          v-model="smsCode"
+          center
+          label="验证码"
+          placeholder="请输入验证码"
+          maxlength="6"
+          :rules="[{ required: true, message: '请输入验证码' }]"
+        >
+          <template #button>
+            <van-button size="small" type="primary" :disabled="counting" @click="sendCode">
+              {{ counting ? `${count}s 后重发` : '获取验证码' }}
+            </van-button>
+          </template>
+        </van-field>
+       
+        <van-field
+          v-if="loginType === 'password'"
           v-model="password"
           type="password"
           label="密码"
@@ -30,6 +53,7 @@
           :rules="[{ required: true, message: '请输入密码' }]"
         />
         <van-field
+          v-if="loginType === 'password'"
           v-model="captchaCode"
           center
           label="验证码"
@@ -47,6 +71,8 @@
           </template>
         </van-field>
       </van-cell-group>
+      <div class="tip" v-if="loginType === 'sms'">未注册手机号将自动注册，开发环境可使用万能码 <b>123456</b></div>
+     
 
       <div class="submit">
         <van-button block round type="primary" native-type="submit" :loading="loading">
@@ -65,7 +91,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { showToast } from 'vant'
-import { login, getCaptchaImage } from '@/api/auth'
+import { login, getCaptchaImage, sendSms } from '@/api/auth'
 import { useUserStore } from '@/stores/user'
 
 const route = useRoute()
@@ -77,6 +103,29 @@ const captchaCode = ref('')
 const captchaImg = ref('')
 const captchaUuid = ref('')
 const loading = ref(false)
+
+const loginType = ref('password')
+const smsCode = ref('')
+const counting = ref(false)
+const count = ref(60)
+
+/** 发送短信验证码 */
+async function sendCode() {
+  if (!/^1[3-9]\d{9}$/.test(phone.value)) {
+    showToast({ message: '请输入正确的手机号', className: 'my-toast' })
+    return
+  }
+  try {
+    await sendSms(phone.value)
+    showToast({ message: '验证码已发送', className: 'my-toast' })
+    counting.value = true
+    count.value = 60
+    const timer = setInterval(() => {
+      count.value--
+      if (count.value <= 0) { clearInterval(timer); counting.value = false }
+    }, 1000)
+  } catch (e) {}
+}
 
 /** 加载验证码 */
 async function loadCaptcha() {
@@ -103,9 +152,10 @@ async function onSubmit() {
   loading.value = true
   try {
     const res = await login({
-      loginType: 'password',
+      loginType: loginType.value,
       phone: phone.value,
       password: password.value,
+      code: smsCode.value,
       captchaCode: captchaCode.value,
       uuid: captchaUuid.value
     })
@@ -171,6 +221,8 @@ function goRegister() {
   cursor: pointer;
 }
 .submit { padding: 24px 16px 12px; }
+.tip { padding: 8px 24px; font-size: 12px; color: #999; }
+.tip b { color: #ff8c00; }
 .register-link {
   text-align: center;
   font-size: 14px;
