@@ -10,7 +10,6 @@
             <van-icon name="edit" size="14" class="edit-icon" />
             <span class="edit-profile-text">个人资料</span>   <!-- 新增文字 -->
           </div>
-          <div class="phone">{{ maskedPhone }}</div>
         </div>
       </div>
       <div @click="goEditPassword" class="change-pwd-btn">     <!-- 新增 class 便于样式 -->
@@ -147,11 +146,6 @@ const userInfo = computed(() => userStore.userInfo || {})
 const nickname = computed(() => userStore.nickname || '未设置昵称')
 const avatar = computed(() => userStore.avatar || '')
 const points = computed(() => userStore.points)
-const maskedPhone = computed(() => {
-  const p = userInfo.value.phone || ''
-  if (p.length === 11) return p.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
-  return p
-})
 
 async function loadStats() {
   try {

@@ -23,7 +23,7 @@
         >
           <div class="row1">
             <span class="consignee">{{ item.consignee }}</span>
-            <span class="phone">{{ item.phone }}</span>
+            <span class="phone">{{ maskPhone(item.phone) }}</span>
             <van-tag v-if="item.isDefault === '1'" type="primary" plain class="tag">默认</van-tag>
           </div>
           <div class="row2">
@@ -72,6 +72,7 @@ import { ref, computed, onMounted, onActivated } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { showToast, showConfirmDialog } from 'vant'
 import { listAddresses, deleteAddress, setDefaultAddress } from '@/api/user'
+import { maskPhone } from '@/utils/mask'
 
 const router = useRouter()
 const route = useRoute()

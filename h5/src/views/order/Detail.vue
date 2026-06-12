@@ -8,7 +8,7 @@
       </div>
 
       <div v-if="order.address" class="card">
-        <div class="addr-line"><b>{{ order.consignee }}</b> {{ order.phone }}</div>
+        <div class="addr-line"><b>{{ order.consignee }}</b> {{ maskPhone(order.phone) }}</div>
         <div class="addr-line">{{ order.address }}</div>
       </div>
 
@@ -45,6 +45,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { showDialog, showToast } from 'vant'
 import { orderDetail, confirmReceipt } from '@/api/user'
+import { maskPhone } from '@/utils/mask'
 
 const route = useRoute()
 const router = useRouter()

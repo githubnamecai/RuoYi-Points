@@ -24,7 +24,11 @@
       <el-table-column label="ID" prop="userId" width="100" />
       <el-table-column label="昵称" prop="nickname" />
       <el-table-column label="姓名" prop="name" />
-      <el-table-column label="手机号" prop="phone" width="130" />
+      <el-table-column label="手机号" prop="phone" width="130">
+        <template #default="{ row }">
+          {{ maskPhone(row.phone) }}
+        </template>
+      </el-table-column>
       <el-table-column label="积分余额" prop="pointsBalance" width="100" />
       <el-table-column label="累计获得" prop="totalEarned" width="100" />
       <el-table-column label="累计消耗" prop="totalConsumed" width="100" />
@@ -61,7 +65,7 @@
     <!-- 调整积分弹窗 -->
     <el-dialog title="调整积分" :visible.sync="adjOpen" width="450px" append-to-body>
       <el-form ref="adjRef" :model="adj" :rules="adjRules" label-width="100px">
-        <el-form-item label="用户"><span>{{ adj.nickname }} ({{ adj.phone }})</span></el-form-item>
+        <el-form-item label="用户"><span>{{ adj.nickname }} ({{ maskPhone(adj.phone) }})</span></el-form-item>
         <el-form-item label="当前余额"><span>{{ adj.currentBalance }}</span></el-form-item>
         <el-form-item label="调整方向" prop="changeType">
           <el-radio-group v-model="adj.changeType">
@@ -85,6 +89,9 @@
     <!-- 新增/修改用户弹窗 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
+        <!-- <el-form-item label="手机号" prop="phone">
+          <el-input v-model="form.phone" placeholder="请输入手机号" />
+        </el-form-item> -->
         <el-form-item label="手机号" prop="phone">
           <el-input v-model="form.phone" placeholder="请输入手机号" />
         </el-form-item>
@@ -108,7 +115,8 @@
     <!-- 重置密码弹窗 -->
     <el-dialog title="重置密码" :visible.sync="resetPwdOpen" width="450px" append-to-body>
       <el-form ref="resetPwdForm" :model="resetPwdData" :rules="resetPwdRules" label-width="100px">
-        <el-form-item label="用户"><span>{{ resetPwdData.nickname }} ({{ resetPwdData.phone }})</span></el-form-item>
+        <el-form-item label="用户"><span>{{ resetPwdData.nickname }} ({{ maskPhone(resetPwdData.phone)
+            }})</span></el-form-item>
         <el-form-item label="新密码" prop="newPassword">
           <el-input v-model="resetPwdData.newPassword" type="password" placeholder="请输入新密码" show-password />
         </el-form-item>
@@ -164,7 +172,7 @@ export default {
         // idNumber: [{ validator: validateIdNumber, trigger: "blur" }],
         password: [
           { required: true, message: "密码不能为空", trigger: "blur" },
-          { min: 6, max: 20, message: "密码长度在6到20个字符之间", trigger: "blur" }
+          { min: 6, message: "密码长度不能少于6个字符", trigger: "blur" }
         ]
       },
       // 重置密码
@@ -201,6 +209,11 @@ export default {
     this.getList()
   },
   methods: {
+    // 脱敏手机号：只保留前3位和后4位
+    maskPhone(phone) {
+      if (!phone) return ''
+      return phone.slice(0, 3) + '****' + phone.slice(-4)
+    },
     getList() {
       this.loading = true
       listH5User(this.q).then(res => {

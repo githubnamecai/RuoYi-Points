@@ -7,7 +7,7 @@
         <template v-if="address">
           <div class="addr-top">
             <span class="consignee">{{ address.consignee }}</span>
-            <span class="phone">{{ address.phone }}</span>
+            <span class="phone">{{ maskPhone(address.phone) }}</span>
           </div>
           <div class="addr-detail">
             {{ address.province }} {{ address.city }} {{ address.district }} {{ address.detail }}
@@ -118,6 +118,7 @@ import { goodsDetail, exchange } from '@/api/goods'
 import { listAddresses } from '@/api/user'
 import { getAvailableCoupons } from '@/api/coupon'
 import { useUserStore } from '@/stores/user'
+import { maskPhone } from '@/utils/mask'
 
 const route = useRoute()
 const router = useRouter()

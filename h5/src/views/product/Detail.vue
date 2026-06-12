@@ -83,7 +83,7 @@ function formatImg(url) {
 function formatDescription(html) {
   if (!html) return '<div style="color:#999">暂无详情</div>'
   // 将 src="/dev-api 替换为 src="baseApiIp + /dev-api
-  return html.replace(/src="\/dev-api/g, `src="${baseApiIp}/dev-api`)
+  return html.replace(/src="\/prod-api/g, `src="${baseApiIp}/prod-api`)
 }
 
 async function load() {
