@@ -124,7 +124,7 @@ springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
-    enabled: true
+    enabled: false
     path: /swagger-ui.html
     tags-sorter: alpha
   group-configs:
