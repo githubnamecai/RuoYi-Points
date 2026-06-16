@@ -107,9 +107,23 @@
             <el-radio v-for="dict in dict.type.points_coupon_use_type" :key="dict.value" :label="dict.value">{{dict.label}}</el-radio>
           </el-radio-group>
         </el-form-item>
-        <!-- 当非全场通用时，需要选择商品或分类ID -->
-        <el-form-item label="关联商品/分类" v-if="form.useType === '1' || form.useType === '2'">
-          <el-input v-model="refIdsStr" placeholder="请输入关联的ID，多个逗号隔开" />
+        <el-form-item label="关联范围" v-if="form.useType === '1' || form.useType === '2'">
+          <el-button type="primary" plain size="mini" @click="openRefSelector">
+            {{ form.useType === '1' ? '选择分类' : '选择商品' }}
+          </el-button>
+          <div v-if="refSelectedList.length" class="selected-users" style="display:inline-block; margin-left: 10px;">
+            <el-tag
+              v-for="item in refSelectedList"
+              :key="item.id"
+              size="small"
+              closable
+              @close="removeRefItem(item.id)"
+              style="margin-right: 6px; margin-bottom: 6px;"
+            >
+              {{ item.name }}
+            </el-tag>
+          </div>
+          <span v-else class="selected-placeholder" style="margin-left: 10px;">未选择</span>
         </el-form-item>
 
         <el-form-item label="有效期类型" prop="timeType">
@@ -201,12 +215,73 @@
         <el-button @click="issueOpen=false">取 消</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog title="选择分类" :visible.sync="categorySelectOpen" width="700px" append-to-body>
+      <el-tree
+        ref="categoryTree"
+        :data="categoryTreeData"
+        node-key="categoryId"
+        show-checkbox
+        default-expand-all
+        :props="{ children: 'children', label: 'categoryName' }"
+      />
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="confirmCategorySelect">确 定</el-button>
+        <el-button @click="categorySelectOpen=false">取 消</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog title="选择商品" :visible.sync="goodsSelectOpen" width="900px" append-to-body>
+      <el-form :inline="true" :model="goodsQuery" size="small">
+        <el-form-item label="商品名称">
+          <el-input v-model="goodsQuery.goodsName" clearable placeholder="请输入商品名称" @keyup.enter.native="handleGoodsQuery" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="el-icon-search" @click="handleGoodsQuery">搜索</el-button>
+          <el-button icon="el-icon-refresh" @click="resetGoodsQuery">重置</el-button>
+        </el-form-item>
+      </el-form>
+
+      <el-table
+        ref="goodsTable"
+        v-loading="goodsLoading"
+        :data="goodsList"
+        height="360"
+        @selection-change="handleGoodsSelectionChange"
+      >
+        <el-table-column type="selection" width="55" align="center" />
+        <el-table-column label="商品ID" prop="goodsId" width="90" />
+        <el-table-column label="商品名称" prop="goodsName" min-width="220" />
+        <el-table-column label="所需积分" prop="points" width="100" />
+        <el-table-column label="状态" width="100">
+          <template slot-scope="scope">
+            <el-tag :type="scope.row.status === '1' ? 'success' : 'info'">
+              {{ scope.row.status === '1' ? '上架' : '下架' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <pagination
+        v-show="goodsTotal > 0"
+        :total="goodsTotal"
+        :page.sync="goodsQuery.pageNum"
+        :limit.sync="goodsQuery.pageSize"
+        @pagination="getGoodsList"
+      />
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="confirmGoodsSelect">确 定</el-button>
+        <el-button @click="goodsSelectOpen=false">取 消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { listCoupon, getCoupon, delCoupon, addCoupon, updateCoupon, issueCoupon } from "@/api/points/coupon";
 import { listH5User } from "@/api/points/h5user";
+import { treeCategory } from "@/api/points/category";
+import { listGoods, getGoods } from "@/api/points/goods";
 
 export default {
   name: "Coupon",
@@ -221,6 +296,15 @@ export default {
       issueUserTotal: 0,
       issueSelectedMap: {},
       issueQuery: { pageNum: 1, pageSize: 10, phone: "", nickname: "", status: "0" },
+      refSelectedList: [],
+      categorySelectOpen: false,
+      categoryTreeData: [],
+      goodsSelectOpen: false,
+      goodsLoading: false,
+      goodsList: [],
+      goodsTotal: 0,
+      goodsSelectedMap: {},
+      goodsQuery: { pageNum: 1, pageSize: 10, goodsName: "", status: "1" },
       queryParams: { pageNum: 1, pageSize: 10, couponName: undefined, status: undefined },
       form: {},
       rules: {
@@ -266,21 +350,20 @@ export default {
       const couponId = row.couponId || this.ids;
       getCoupon(couponId).then(response => {
         this.form = response.data;
-        if (this.form.refIds) {
-          this.refIdsStr = this.form.refIds.join(',');
-        }
+        this.refSelectedList = [];
+        if (this.form.refIds) this.refIdsStr = this.form.refIds.join(',');
         this.open = true;
         this.title = "修改优惠券";
+        this.$nextTick(() => {
+          this.syncRefSelectedNames();
+        });
       });
     },
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          if (this.refIdsStr) {
-             this.form.refIds = this.refIdsStr.split(',').map(Number);
-          } else {
-             this.form.refIds = [];
-          }
+          if (this.refIdsStr) this.form.refIds = this.refIdsStr.split(',').map(Number);
+          else this.form.refIds = [];
           if (this.form.couponId != null) {
             updateCoupon(this.form).then(res => {
               this.$modal.msgSuccess("修改成功");
@@ -296,6 +379,121 @@ export default {
           }
         }
       });
+    },
+    openRefSelector() {
+      if (this.form.useType === '1') {
+        this.openCategorySelector();
+      } else if (this.form.useType === '2') {
+        this.openGoodsSelector();
+      }
+    },
+    openCategorySelector() {
+      this.categorySelectOpen = true;
+      treeCategory({ status: '0' }).then(res => {
+        this.categoryTreeData = res.data || [];
+        this.$nextTick(() => {
+          if (this.$refs.categoryTree) {
+            const ids = this.refIdsStr ? this.refIdsStr.split(',').map(Number) : [];
+            this.$refs.categoryTree.setCheckedKeys(ids);
+          }
+        });
+      });
+    },
+    confirmCategorySelect() {
+      if (!this.$refs.categoryTree) return;
+      const nodes = this.$refs.categoryTree.getCheckedNodes(false, true) || [];
+      const list = nodes.map(n => ({ id: n.categoryId, name: n.categoryName }));
+      this.refSelectedList = list;
+      this.refIdsStr = list.map(i => i.id).join(',');
+      this.categorySelectOpen = false;
+    },
+    openGoodsSelector() {
+      this.goodsSelectOpen = true;
+      this.goodsSelectedMap = {};
+      const ids = this.refIdsStr ? this.refIdsStr.split(',').map(Number) : [];
+      if (ids.length) {
+        Promise.all(ids.map(id => getGoods(id).then(r => r.data).catch(() => null))).then(items => {
+          items.filter(Boolean).forEach(g => {
+            this.$set(this.goodsSelectedMap, g.goodsId, g);
+          });
+          this.getGoodsList();
+        });
+      } else {
+        this.getGoodsList();
+      }
+    },
+    handleGoodsQuery() {
+      this.goodsQuery.pageNum = 1;
+      this.getGoodsList();
+    },
+    resetGoodsQuery() {
+      this.goodsQuery = { pageNum: 1, pageSize: 10, goodsName: "", status: "1" };
+      this.getGoodsList();
+    },
+    getGoodsList() {
+      this.goodsLoading = true;
+      listGoods(this.goodsQuery).then(res => {
+        this.goodsList = res.rows || [];
+        this.goodsTotal = res.total || 0;
+        this.goodsLoading = false;
+        this.$nextTick(() => {
+          this.restoreGoodsSelection();
+        });
+      }).catch(() => {
+        this.goodsLoading = false;
+      });
+    },
+    restoreGoodsSelection() {
+      if (!this.$refs.goodsTable) return;
+      this.goodsList.forEach(row => {
+        const checked = !!this.goodsSelectedMap[row.goodsId];
+        this.$refs.goodsTable.toggleRowSelection(row, checked);
+      });
+    },
+    handleGoodsSelectionChange(selection) {
+      const pageIds = this.goodsList.map(item => item.goodsId);
+      pageIds.forEach(id => {
+        delete this.goodsSelectedMap[id];
+      });
+      selection.forEach(item => {
+        this.$set(this.goodsSelectedMap, item.goodsId, item);
+      });
+    },
+    confirmGoodsSelect() {
+      const list = Object.values(this.goodsSelectedMap).map(g => ({ id: g.goodsId, name: g.goodsName }));
+      this.refSelectedList = list;
+      this.refIdsStr = list.map(i => i.id).join(',');
+      this.goodsSelectOpen = false;
+    },
+    removeRefItem(id) {
+      this.refSelectedList = this.refSelectedList.filter(i => i.id !== id);
+      this.refIdsStr = this.refSelectedList.map(i => i.id).join(',');
+    },
+    syncRefSelectedNames() {
+      const ids = this.refIdsStr ? this.refIdsStr.split(',').map(Number) : [];
+      if (!ids.length) {
+        this.refSelectedList = [];
+        return;
+      }
+      if (this.form.useType === '1') {
+        treeCategory({ status: '0' }).then(res => {
+          const map = {};
+          const walk = (arr) => {
+            (arr || []).forEach(n => {
+              map[n.categoryId] = n.categoryName;
+              if (n.children && n.children.length) walk(n.children);
+            });
+          };
+          walk(res.data || []);
+          this.refSelectedList = ids.map(id => ({ id, name: map[id] || `分类${id}` }));
+        });
+      } else if (this.form.useType === '2') {
+        Promise.all(ids.map(id => getGoods(id).then(r => r.data).catch(() => null))).then(items => {
+          const map = {};
+          items.filter(Boolean).forEach(g => { map[g.goodsId] = g.goodsName; });
+          this.refSelectedList = ids.map(id => ({ id, name: map[id] || `商品${id}` }));
+        });
+      }
     },
     handleDelete(row) {
       const couponIds = row.couponId || this.ids;
