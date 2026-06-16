@@ -136,12 +136,66 @@
     </el-dialog>
 
     <!-- 发放弹窗 -->
-    <el-dialog title="发放优惠券" :visible.sync="issueOpen" width="500px" append-to-body>
-      <el-form>
-        <el-form-item label="接收用户ID(多个用逗号隔开)">
-          <el-input type="textarea" v-model="issueUserIds" rows="4"></el-input>
+    <el-dialog title="发放优惠券" :visible.sync="issueOpen" width="900px" append-to-body>
+      <el-form :inline="true" :model="issueQuery" size="small">
+        <el-form-item label="手机号">
+          <el-input v-model="issueQuery.phone" clearable placeholder="请输入手机号" @keyup.enter.native="getIssueUserList" />
+        </el-form-item>
+        <el-form-item label="昵称">
+          <el-input v-model="issueQuery.nickname" clearable placeholder="请输入昵称" @keyup.enter.native="getIssueUserList" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="el-icon-search" @click="handleIssueQuery">搜索</el-button>
+          <el-button icon="el-icon-refresh" @click="resetIssueQuery">重置</el-button>
         </el-form-item>
       </el-form>
+
+      <el-form label-width="90px">
+        <el-form-item label="已选用户">
+          <div v-if="issueSelectedNames.length" class="selected-users">
+            <el-tag
+              v-for="(name, index) in issueSelectedNames"
+              :key="index"
+              size="small"
+              closable
+              @close="removeIssueUserByName(name)"
+            >
+              {{ name }}
+            </el-tag>
+          </div>
+          <span v-else class="selected-placeholder">请选择要发放的用户</span>
+        </el-form-item>
+      </el-form>
+
+      <el-table
+        ref="issueUserTable"
+        v-loading="issueLoading"
+        :data="issueUserList"
+        height="360"
+        @selection-change="handleIssueSelectionChange"
+      >
+        <el-table-column type="selection" width="55" align="center" />
+        <el-table-column label="用户ID" prop="userId" width="90" />
+        <el-table-column label="昵称" prop="nickname" min-width="120" />
+        <el-table-column label="姓名" prop="name" min-width="120" />
+        <el-table-column label="手机号" prop="phone" min-width="140" />
+        <el-table-column label="状态" width="100">
+          <template slot-scope="scope">
+            <el-tag :type="scope.row.status === '0' ? 'success' : 'danger'">
+              {{ scope.row.status === '0' ? '正常' : '冻结' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <pagination
+        v-show="issueUserTotal > 0"
+        :total="issueUserTotal"
+        :page.sync="issueQuery.pageNum"
+        :limit.sync="issueQuery.pageSize"
+        @pagination="getIssueUserList"
+      />
+
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitIssue">确 定</el-button>
         <el-button @click="issueOpen=false">取 消</el-button>
@@ -152,6 +206,7 @@
 
 <script>
 import { listCoupon, getCoupon, delCoupon, addCoupon, updateCoupon, issueCoupon } from "@/api/points/coupon";
+import { listH5User } from "@/api/points/h5user";
 
 export default {
   name: "Coupon",
@@ -159,8 +214,13 @@ export default {
   data() {
     return {
       loading: true, showSearch: true, ids: [], single: true, multiple: true, total: 0,
-      couponList: [], title: "", open: false, issueOpen: false, currentIssueId: null, issueUserIds: "",
+      couponList: [], title: "", open: false, issueOpen: false, currentIssueId: null,
       refIdsStr: "",
+      issueLoading: false,
+      issueUserList: [],
+      issueUserTotal: 0,
+      issueSelectedMap: {},
+      issueQuery: { pageNum: 1, pageSize: 10, phone: "", nickname: "", status: "0" },
       queryParams: { pageNum: 1, pageSize: 10, couponName: undefined, status: undefined },
       form: {},
       rules: {
@@ -170,6 +230,14 @@ export default {
     };
   },
   created() { this.getList(); },
+  computed: {
+    issueSelectedIds() {
+      return Object.keys(this.issueSelectedMap).map(id => Number(id));
+    },
+    issueSelectedNames() {
+      return Object.values(this.issueSelectedMap).map(item => item.nickname || item.phone || `用户${item.userId}`);
+    }
+  },
   methods: {
     getList() {
       this.loading = true;
@@ -238,15 +306,63 @@ export default {
     },
     handleIssue(row) {
       this.currentIssueId = row.couponId;
-      this.issueUserIds = "";
+      this.issueSelectedMap = {};
+      this.issueQuery.pageNum = 1;
+      this.issueQuery.phone = "";
+      this.issueQuery.nickname = "";
       this.issueOpen = true;
+      this.getIssueUserList();
+    },
+    handleIssueQuery() {
+      this.issueQuery.pageNum = 1;
+      this.getIssueUserList();
+    },
+    resetIssueQuery() {
+      this.issueQuery = { pageNum: 1, pageSize: 10, phone: "", nickname: "", status: "0" };
+      this.getIssueUserList();
+    },
+    getIssueUserList() {
+      this.issueLoading = true;
+      listH5User(this.issueQuery).then(res => {
+        this.issueUserList = res.rows || [];
+        this.issueUserTotal = res.total || 0;
+        this.issueLoading = false;
+        this.$nextTick(() => {
+          this.restoreIssueSelection();
+        });
+      }).catch(() => {
+        this.issueLoading = false;
+      });
+    },
+    restoreIssueSelection() {
+      if (!this.$refs.issueUserTable) return;
+      this.issueUserList.forEach(row => {
+        const checked = !!this.issueSelectedMap[row.userId];
+        this.$refs.issueUserTable.toggleRowSelection(row, checked);
+      });
+    },
+    handleIssueSelectionChange(selection) {
+      const pageIds = this.issueUserList.map(item => item.userId);
+      pageIds.forEach(id => {
+        delete this.issueSelectedMap[id];
+      });
+      selection.forEach(item => {
+        this.$set(this.issueSelectedMap, item.userId, item);
+      });
+    },
+    removeIssueUserByName(name) {
+      const target = Object.values(this.issueSelectedMap).find(item => (item.nickname || item.phone || `用户${item.userId}`) === name);
+      if (!target) return;
+      this.$delete(this.issueSelectedMap, target.userId);
+      this.$nextTick(() => {
+        this.restoreIssueSelection();
+      });
     },
     submitIssue() {
-      if (!this.issueUserIds) {
-        this.$modal.msgError("请输入用户ID"); return;
+      if (!this.issueSelectedIds.length) {
+        this.$modal.msgError("请选择发放用户"); return;
       }
-      const uids = this.issueUserIds.split(',').map(Number);
-      issueCoupon(this.currentIssueId, uids).then(res => {
+      issueCoupon(this.currentIssueId, this.issueSelectedIds).then(res => {
         this.$modal.msgSuccess(res.msg || "发放成功");
         this.issueOpen = false;
         this.getList();
