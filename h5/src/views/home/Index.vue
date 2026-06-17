@@ -64,8 +64,16 @@
       </div>
 
       <!-- 商品瀑布流 -->
-      <van-list v-model:loading="loading" :finished="finished" finished-text="没有更多了"
-                @load="loadMore" class="goods-list">
+      <van-list
+        v-model:loading="loading"
+        v-model:error="error"
+        :finished="finished"
+        :immediate-check="false"
+        error-text="加载失败，点击重试"
+        finished-text="没有更多了"
+        @load="loadMore"
+        class="goods-list"
+      >
         <div class="goods-grid">
           <goods-card v-for="g in list" :key="g.goodsId" :goods="g" />
         </div>
@@ -77,7 +85,7 @@
 <script setup>
 // 商城页已添加组件名称定义
 defineOptions({ name: 'Home' })
-import { ref, onMounted,onActivated  } from 'vue'
+import { ref, onMounted, onActivated } from 'vue'
 import { listGoods, listCategories } from '@/api/goods'
 import GoodsCard from '@/components/GoodsCard.vue'
 
@@ -89,6 +97,10 @@ const pageNum = ref(1)
 const pageSize = 10
 const loading = ref(false)
 const finished = ref(false)
+const error = ref(false)
+const initialized = ref(false)
+const categoryLoaded = ref(false)
+const requesting = ref(false)
 
 const banners = [
   { img: 'https://img.yzcdn.cn/vant/ipad.jpeg', bg: 'linear-gradient(135deg, #ff8c00, #ffb84d)' },
@@ -99,27 +111,35 @@ const banners = [
  * 根据关键词重新搜索商品。
  */
 function onSearch() {
-  list.value = []
-  pageNum.value = 1
-  finished.value = false
-  loading.value = true
-  loadMore()
+  resetListState()
+  startFirstLoad()
 }
 
 /**
  * 加载商品分页数据。
  */
 async function loadMore() {
+  if (requesting.value || finished.value) return
   try {
+    requesting.value = true
+    error.value = false
+    loading.value = true
     const res = await listGoods({
       pageNum: pageNum.value, pageSize,
       categoryId: catActive.value || undefined,
       goodsName: keyword.value || undefined
     })
-    list.value.push(...(res.rows || []))
-    finished.value = list.value.length >= res.total
+    const rows = res.rows || []
+    list.value.push(...rows)
+    // H5 首页按“本次返回条数”判断是否还有下一页，避免 total 异常导致第一页直接结束
+    finished.value = rows.length < pageSize
     pageNum.value++
+    initialized.value = true
+  } catch (e) {
+    // 失败后进入错误态，避免 van-list 与激活钩子反复触发请求
+    error.value = true
   } finally {
+    requesting.value = false
     loading.value = false
   }
 }
@@ -128,11 +148,8 @@ async function loadMore() {
  * 切换分类后重置并重新加载。
  */
 function onCatChange() {
-  list.value = []
-  pageNum.value = 1
-  finished.value = false
-  loading.value = true
-  loadMore()
+  resetListState()
+  startFirstLoad()
 }
 
 /**
@@ -143,19 +160,39 @@ async function loadCategories() {
     const res = await listCategories()
     // 只展示一级分类（最多 8 个）
     categories.value = (res.data || []).slice(0, 8)
+    categoryLoaded.value = true
   } catch (e) {}
+}
+
+/**
+ * 重置首页商品列表状态。
+ */
+function resetListState() {
+  list.value = []
+  pageNum.value = 1
+  finished.value = false
+  error.value = false
+}
+
+/**
+ * 首次或主动搜索时启动一次加载。
+ */
+function startFirstLoad() {
+  if (loading.value) return
+  loadMore()
 }
 // 首次加载
 onMounted(async () => {
-  loadCategories()
+  if (!categoryLoaded.value) {
+    await loadCategories()
+  }
+  startFirstLoad()
 })
 // 关键：从其他页面返回时（keep-alive 缓存激活），重新检测并加载
 onActivated(() => {
-  // 如果列表为空，重新加载数据
-  if (list.value.length === 0 && !loading.value) {
-    finished.value = false
-    loading.value = true
-    loadMore()
+  // 仅在从未成功初始化过且当前也不在错误态时补拉一次，避免失败后无限重试
+  if (!initialized.value && list.value.length === 0 && !loading.value && !error.value) {
+    startFirstLoad()
   }
 })
 </script>
