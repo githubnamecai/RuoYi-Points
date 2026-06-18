@@ -26,8 +26,8 @@
           <div class="goods-type">{{ goods.goodsType === '0' ? '实物权益' : '数字权益' }}</div>
           <div class="name">{{ goods.goodsName }}</div>
           <div v-if="goods.goodsType === '0'" class="price">
-            <span>¥{{ goods.price || 0 }}</span> /件
-            <span v-if="goods.discountPrice" class="discount-info">优惠价¥{{ goods.discountPrice }}</span>
+            <span>¥{{ unitPayPrice }}</span> /件
+            <span v-if="goods.discountPrice" class="discount-info">原价¥{{ unitOriginalPrice }}</span>
           </div>
           <div v-else class="price"><span>{{ goods.points }}</span> 积分 × {{ qty }}</div>
         </div>
@@ -61,7 +61,8 @@
         </template>
         <!-- 实物商品：金额信息 -->
         <template v-else>
-          <div class="row"><span>商品金额</span><b class="cash">¥{{ totalPrice.toFixed(2) }}</b></div>
+          <div class="row"><span>商品金额</span><b class="cash">¥{{ displayGoodsAmount.toFixed(2) }}</b></div>
+          <div v-if="!selectedCoupon && goods.discountPrice" class="row"><span>原价合计</span><b class="cash-origin">¥{{ totalOriginalPrice.toFixed(2) }}</b></div>
           <div v-if="couponDiscountAmount > 0" class="row"><span>优惠券抵扣</span><b class="cash-discount">-¥{{ couponDiscountAmount.toFixed(2) }}</b></div>
           <div class="row"><span>实付金额</span><b class="cash-final">¥{{ payAmount.toFixed(2) }}</b></div>
         </template>
@@ -128,6 +129,7 @@ const qty = ref(1)
 const remark = ref('')
 const address = ref(null)
 const loading = ref(false)
+const defaultImg = 'https://via.placeholder.com/300x300?text=Goods'
 
 const showCouponPopup = ref(false)
 const availableCoupons = ref([])
@@ -135,17 +137,37 @@ const selectedCoupon = ref(null)
 
 const originalTotalPoints = computed(() => (goods.value?.points || 0) * qty.value)
 
-// 实物商品：计算总金额
-const totalPrice = computed(() => {
+const unitOriginalPrice = computed(() => {
   if (!goods.value || goods.value.goodsType !== '0') return 0
-  return (goods.value.price || 0) * qty.value
+  return +((goods.value.price ?? 0) || 0)
+})
+
+const unitPayPrice = computed(() => {
+  if (!goods.value || goods.value.goodsType !== '0') return 0
+  return +(((goods.value.discountPrice ?? goods.value.price) ?? 0) || 0)
+})
+
+// 实物商品：计算总金额
+const totalOriginalPrice = computed(() => {
+  if (!goods.value || goods.value.goodsType !== '0') return 0
+  return unitOriginalPrice.value * qty.value
+})
+
+const totalDiscountPrice = computed(() => {
+  if (!goods.value || goods.value.goodsType !== '0') return 0
+  return unitPayPrice.value * qty.value
+})
+
+const displayGoodsAmount = computed(() => {
+  if (!goods.value || goods.value.goodsType !== '0') return 0
+  return selectedCoupon.value ? totalOriginalPrice.value : totalDiscountPrice.value
 })
 
 // 实物商品：计算优惠券抵扣金额
 const couponDiscountAmount = computed(() => {
   if (!selectedCoupon.value || !goods.value || goods.value.goodsType !== '0') return 0
   const c = selectedCoupon.value.coupon
-  const tp = totalPrice.value
+  const tp = totalOriginalPrice.value
   if (c.couponType === '0') { // 满减
     return Math.min(tp, c.discountValue)
   } else if (c.couponType === '1') { // 折扣
@@ -159,7 +181,10 @@ const couponDiscountAmount = computed(() => {
 // 实物商品：实付金额 = 总金额 - 优惠券抵扣
 const payAmount = computed(() => {
   if (!goods.value || goods.value.goodsType !== '0') return 0
-  return Math.max(0, +(totalPrice.value - couponDiscountAmount.value).toFixed(2))
+  if (selectedCoupon.value) {
+    return Math.max(0, +(totalOriginalPrice.value - couponDiscountAmount.value).toFixed(2))
+  }
+  return Math.max(0, +totalDiscountPrice.value.toFixed(2))
 })
 
 const totalPoints = computed(() => {
@@ -183,6 +208,9 @@ const canSubmit = computed(() => {
 
 const baseApi = import.meta.env.VITE_APP_BASE_API
 
+/**
+ * 格式化商品图片地址。
+ */
 function formatImg(url) {
   if (!url) return defaultImg
   if (url.startsWith('/profile')) {
@@ -191,6 +219,9 @@ function formatImg(url) {
   return url
 }
 
+/**
+ * 初始化加载商品、地址与可用优惠券。
+ */
 async function load() {
   const [g, addrs] = await Promise.all([
     goodsDetail(route.params.id),
@@ -217,29 +248,37 @@ async function load() {
   // 加载优惠券（仅实物商品）
   if (goods.value && goods.value.goodsType === '0') {
     try {
-      const cRes = await getAvailableCoupons(goods.value.goodsId, totalPrice.value)
+      const cRes = await getAvailableCoupons(goods.value.goodsId, totalOriginalPrice.value)
       availableCoupons.value = cRes.data || []
-      // 默认选择第一张可用的优惠券
-      if (availableCoupons.value.length > 0) {
-        selectedCoupon.value = availableCoupons.value[0]
-      }
     } catch (e) {}
   }
 }
 
+/**
+ * 选择优惠券（传 null 表示不使用）。
+ */
 function selectCoupon(item) {
   selectedCoupon.value = item
   if (item === null) showCouponPopup.value = false
 }
 
+/**
+ * 获取优惠券展示文案。
+ */
 function getCouponDiscountText(c) {
   if (!c) return ''
   if (c.couponType === '1') return `${c.discountValue}%折`
   return `￥${c.discountValue}`
 }
 
+/**
+ * 跳转到地址选择页（picker 模式）。
+ */
 function goAddress() { router.push('/address?picker=1') }
 
+/**
+ * 提交兑换（保持现有业务逻辑，仅增强确认提示信息）。
+ */
 async function submit() {
   if (!goods.value) return
   const isReal = goods.value.goodsType === '0'
@@ -260,8 +299,8 @@ async function submit() {
   // 确认弹窗
   try {
     const msg = isReal
-      ? `支付金额 ¥${payAmount.value.toFixed(2)}`
-      : `将扣除 ${totalPoints.value} 积分`
+      ? `支付金额：¥${payAmount.value.toFixed(2)}\n支付方式：上门收费`
+      : `将扣除 ${totalPoints.value} 积分\n支付方式：积分`
     await showDialog({ title: '确认兑换？', message: msg, showCancelButton: true })
   } catch (e) { return }
 
@@ -370,6 +409,7 @@ onActivated(load)
 .total.is-warning { border-color: rgba(230, 107, 125, 0.2); }
 .points { color: #0d5bd7; font-weight: 700; }
 .cash { color: #d85267; font-weight: 700; }
+.cash-origin { color: #8a95a9; font-weight: 600; text-decoration: line-through; }
 .cash-discount { color: #0d5bd7; font-weight: 700; }
 .cash-final { color: #d85267; font-weight: 700; font-size: 18px; }
 

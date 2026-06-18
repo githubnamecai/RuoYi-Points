@@ -13,11 +13,11 @@
         <!-- 实物商品：显示金额 + 优惠价 -->
         <template v-if="goods.goodsType === '0'">
           <div class="price">
-            <span class="num cash-num">¥{{ goods.price || 0 }}</span>
-            <span class="unit-cash">金额</span>
-            <span v-if="goods.discountPrice" class="discount-tag">东方有线优惠价 ¥{{ goods.discountPrice }}</span>
+            <span class="num cash-num">¥{{ (goods.discountPrice ?? goods.price) || 0 }}</span>
+            <span class="unit-cash">{{ goods.discountPrice ? '优惠价' : '金额' }}</span>
+            <span v-if="goods.discountPrice" class="discount-tag">原价¥{{ goods.price || 0 }}</span>
           </div>
-          <div v-if="goods.originalPrice > 0" class="original-line">原价 ¥{{ goods.originalPrice }}</div>
+          <div v-if="goods.originalPrice > 0 && !goods.discountPrice" class="original-line">原价 ¥{{ goods.originalPrice }}</div>
         </template>
         <!-- 虚拟商品：显示积分 -->
         <template v-else>
@@ -44,8 +44,8 @@
     <div class="bottom-bar">
       <div class="bar-info">
         <template v-if="goods?.goodsType === '0'">
-          <span class="bar-price">¥{{ goods?.price || 0 }}</span>
-          <span v-if="goods?.discountPrice" class="bar-discount">优惠价¥{{ goods.discountPrice }}</span>
+          <span class="bar-price">¥{{ (goods?.discountPrice ?? goods?.price) || 0 }}</span>
+          <span v-if="goods?.discountPrice" class="bar-discount">原价¥{{ goods?.price || 0 }}</span>
         </template>
         <template v-else>
           <span class="bar-price points-color">{{ goods?.points || 0 }}</span>
