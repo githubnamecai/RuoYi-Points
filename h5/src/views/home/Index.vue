@@ -56,11 +56,38 @@
           <div class="section-title">精选权益</div>
           <div class="section-note">积分兑好礼</div>
         </div>
-        <van-tabs v-model:active="catActive" sticky offset-top="0" line-height="2"
-                  title-active-color="var(--primary-color)" color="var(--primary-color)" @change="onCatChange" id="categoryTabs" shrink>
-          <van-tab title="全部" name="" />
-          <van-tab v-for="c in categories" :key="c.categoryId" :title="c.categoryName" :name="c.categoryId" />
+        <van-tabs
+          v-model:active="catActive"
+          sticky
+          offset-top="0"
+          line-height="2"
+          title-active-color="var(--primary-color)"
+          color="var(--primary-color)"
+          @change="onCatChange"
+          id="categoryTabs"
+          shrink
+        >
+          <van-tab v-for="tab in topTabs" :key="tab.key" :title="tab.label" :name="tab.key" />
         </van-tabs>
+
+        <div v-if="showSubTabs" class="sub-tabs-row">
+          <div
+            class="sub-tab"
+            :class="{ active: !subCatActive }"
+            @click="onSubCatChange('')"
+          >
+            全部
+          </div>
+          <div
+            v-for="sub in currentSubCategories"
+            :key="sub.categoryId"
+            class="sub-tab"
+            :class="{ active: subCatActive === sub.categoryId }"
+            @click="onSubCatChange(sub.categoryId)"
+          >
+            {{ sub.categoryName }}
+          </div>
+        </div>
       </div>
 
       <!-- 商品瀑布流 -->
@@ -85,13 +112,14 @@
 <script setup>
 // 商城页已添加组件名称定义
 defineOptions({ name: 'Home' })
-import { ref, onMounted, onActivated } from 'vue'
+import { ref, computed, onMounted, onActivated } from 'vue'
 import { listGoods, listCategories } from '@/api/goods'
 import GoodsCard from '@/components/GoodsCard.vue'
 
 const list = ref([])
 const categories = ref([])
-const catActive = ref('')
+const catActive = ref('all')
+const subCatActive = ref('')
 const keyword = ref('')
 const pageNum = ref(1)
 const pageSize = 10
@@ -106,6 +134,33 @@ const banners = [
   { img: 'https://img.yzcdn.cn/vant/ipad.jpeg', bg: 'linear-gradient(135deg, #ff8c00, #ffb84d)' },
   { img: 'https://img.yzcdn.cn/vant/apple-1.jpg', bg: 'linear-gradient(135deg, #4facfe, #00f2fe)' }
 ]
+
+const topTabs = [
+  { key: 'all', label: '全部', names: [] },
+  { key: 'operator', label: '运营商', names: ['运营商'] },
+  { key: 'digital', label: '数码电器', names: ['数码电器'] },
+  { key: 'jinshan', label: '金山好物', names: ['金山好物', '生活日用'] }
+]
+
+const currentTopCategory = computed(() => {
+  const currentTab = topTabs.find(tab => tab.key === catActive.value)
+  if (!currentTab || currentTab.key === 'all') return null
+  return categories.value.find(item => currentTab.names.includes(item.categoryName)) || null
+})
+
+const currentSubCategories = computed(() => {
+  return currentTopCategory.value?.children || []
+})
+
+const showSubTabs = computed(() => {
+  return catActive.value !== 'all' && currentSubCategories.value.length > 0
+})
+
+const currentCategoryId = computed(() => {
+  if (subCatActive.value) return subCatActive.value
+  if (currentTopCategory.value) return currentTopCategory.value.categoryId
+  return undefined
+})
 
 /**
  * 根据关键词重新搜索商品。
@@ -126,7 +181,7 @@ async function loadMore() {
     loading.value = true
     const res = await listGoods({
       pageNum: pageNum.value, pageSize,
-      categoryId: catActive.value || undefined,
+      categoryId: currentCategoryId.value,
       goodsName: keyword.value || undefined
     })
     const rows = res.rows || []
@@ -148,6 +203,16 @@ async function loadMore() {
  * 切换分类后重置并重新加载。
  */
 function onCatChange() {
+  subCatActive.value = ''
+  resetListState()
+  startFirstLoad()
+}
+
+/**
+ * 切换二级分类后重置并重新加载。
+ */
+function onSubCatChange(categoryId) {
+  subCatActive.value = categoryId
   resetListState()
   startFirstLoad()
 }
@@ -207,11 +272,7 @@ onActivated(() => {
 
 .header-bg {
   padding: 10px 12px 0;
-  position: sticky;
-  top: 0;
-  z-index: 99;
-  background: linear-gradient(180deg, rgba(241, 247, 255, 0.98) 0%, rgba(241, 247, 255, 0.9) 72%, rgba(241, 247, 255, 0) 100%);
-  backdrop-filter: blur(14px);
+  background: transparent;
 }
 
 .hero-card {
@@ -412,6 +473,38 @@ onActivated(() => {
 
 .tabs-panel :deep(.van-tab) {
   color: #62708a;
+}
+
+.sub-tabs-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 10px 4px 2px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.sub-tabs-row::-webkit-scrollbar {
+  display: none;
+}
+
+.sub-tab {
+  flex: 0 0 auto;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  color: #62708a;
+  font-size: 12px;
+  line-height: 1;
+  border: 1px solid rgba(124, 147, 187, 0.12);
+  box-shadow: 0 8px 18px rgba(22, 53, 110, 0.05);
+}
+
+.sub-tab.active {
+  background: linear-gradient(135deg, rgba(13, 91, 215, 0.12), rgba(87, 185, 255, 0.18));
+  color: #0d5bd7;
+  border-color: rgba(13, 91, 215, 0.18);
+  font-weight: 700;
 }
 
 .goods-list {
