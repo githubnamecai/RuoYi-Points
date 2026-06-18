@@ -14,8 +14,7 @@
         <template v-if="goods.goodsType === '0'">
           <div class="price">
             <span class="num cash-num">¥{{ (goods.discountPrice ?? goods.price) || 0 }}</span>
-            <span class="unit-cash">{{ goods.discountPrice ? '优惠价' : '金额' }}</span>
-            <span v-if="goods.discountPrice" class="discount-tag">原价¥{{ goods.price || 0 }}</span>
+            <span v-if="goods.discountPrice" class="original-tag">原价¥{{ goods.price || 0 }}</span>
           </div>
           <div v-if="goods.originalPrice > 0 && !goods.discountPrice" class="original-line">原价 ¥{{ goods.originalPrice }}</div>
         </template>
@@ -45,7 +44,7 @@
       <div class="bar-info">
         <template v-if="goods?.goodsType === '0'">
           <span class="bar-price">¥{{ (goods?.discountPrice ?? goods?.price) || 0 }}</span>
-          <span v-if="goods?.discountPrice" class="bar-discount">原价¥{{ goods?.price || 0 }}</span>
+          <!-- <span v-if="goods?.discountPrice" class="bar-discount">原价¥{{ goods?.price || 0 }}</span> -->
         </template>
         <template v-else>
           <span class="bar-price points-color">{{ goods?.points || 0 }}</span>
@@ -160,15 +159,15 @@ onMounted(load)
 .price .num { font-size: 30px; font-weight: 700; color: #0d5bd7; }
 .price .num.cash-num { color: #d85267; font-size: 30px; }
 .price .unit { font-size: 14px; color: #0d5bd7; }
-.price .unit-cash { font-size: 13px; color: #8a95a9; margin-left: 4px; }
 .price .original { text-decoration: line-through; color: #8a95a9; font-size: 13px; margin-left: 10px; }
-.discount-tag {
-  color: #0d5bd7;
+.original-tag {
+  color: #8a95a9;
   font-size: 12px;
-  background: rgba(13, 91, 215, 0.08);
+  background: rgba(166, 175, 191, 0.16);
   padding: 4px 10px;
   border-radius: 999px;
   margin-left: 8px;
+  text-decoration: line-through;
 }
 
 .original-line { font-size: 12px; color: #8a95a9; text-decoration: line-through; margin-top: 6px; }

@@ -374,7 +374,13 @@ onActivated(load)
 .goods-card .name { font-size: 15px; color: #1a2640; line-height: 1.45; font-weight: 700; margin-top: 8px; }
 .goods-card .price { color: #0d5bd7; font-size: 13px; margin-top: 6px; }
 .goods-card .price span { font-weight: 700; font-size: 16px; }
-.goods-card .price .discount-info { font-size: 11px; color: #7a88a2; margin-left: 4px; font-weight: 500; }
+.goods-card .price .discount-info {
+  font-size: 11px;
+  color: #8a95a9;
+  margin-left: 6px;
+  font-weight: 600;
+  text-decoration: line-through;
+}
 
 .coupon-entry {
   display: flex;
