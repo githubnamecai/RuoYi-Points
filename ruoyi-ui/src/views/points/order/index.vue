@@ -29,7 +29,7 @@
       <el-table-column label="数量" prop="quantity" width="70" />
       <el-table-column label="消耗积分" prop="pointsUsed" width="100" />
       <el-table-column label="支付金额" prop="payAmount" width="100" />
-      <el-table-column label="用户手机" prop="userPhone" width="120" />
+      <el-table-column label="用户手机" prop="phone" width="120" />
       <el-table-column label="类型" width="80">
         <template slot-scope="scope">
           <el-tag :type="scope.row.goodsType === '1' ? 'success' : ''">

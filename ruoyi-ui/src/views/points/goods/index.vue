@@ -10,6 +10,12 @@
           <el-option label="下架" value="0" />
         </el-select>
       </el-form-item>
+
+      <el-form-item label="分类" prop="categoryId">
+        <el-cascader v-model="queryParams.categoryId" :options="categoryOptions"
+          :props="{ value: 'id', label: 'label', children: 'children', checkStrictly: true, emitPath: false }"
+          placeholder="选择分类" clearable style="width: 100%" />
+      </el-form-item>
       <el-form-item label="类型" prop="goodsType">
         <el-select v-model="queryParams.goodsType" placeholder="全部" clearable style="width: 140px">
           <el-option label="实物" value="0" />
@@ -42,7 +48,7 @@
           <el-image v-if="scope.row.coverImg" :src="scope.row.coverImg"
             style="width:48px;height:48px;border-radius:4px" />
         </template>
-      </el-table-column> -->
+</el-table-column> -->
       <el-table-column label="封面图" align="center" prop="coverImg" width="100">
         <template slot-scope="scope">
           <image-preview :src="scope.row.coverImg" :width="50" :height="50" :border-radius="4" />
