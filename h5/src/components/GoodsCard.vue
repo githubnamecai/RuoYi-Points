@@ -16,7 +16,7 @@
     <div class="info">
       <div class="title">{{ goods.goodsName }}</div>
       <div class="meta-row">
-        <span class="metric">
+        <span class="metric stock">
           <van-icon name="inventory-o" />
           库存 {{ goods.stock ?? 0 }}
         </span>
@@ -25,18 +25,25 @@
       <div class="bottom">
         <!-- 实物商品：显示金额 + 优惠价 -->
         <template v-if="goods.goodsType === '0'">
-          <span class="price cash">
-            <span class="unit">¥</span>
-            <span class="num">{{ goods.price || 0 }}</span>
-          </span>
-          <span v-if="goods.discountPrice" class="discount-tag">优惠价¥{{ goods.discountPrice }}</span>
+          <div class="price-stack">
+            <div class="price promo">
+              <span class="label">优惠价</span>
+              <span class="unit">¥</span>
+              <span class="num">{{ goods.discountPrice || goods.price || 0 }}</span>
+            </div>
+            <div v-if="goods.price" class="origin-price">
+              原价 ¥{{ goods.price }}
+            </div>
+          </div>
         </template>
         <!-- 虚拟商品：显示积分 -->
         <template v-else>
-          <span class="price">
-            <span class="unit">积分</span>
-            <span class="num">{{ goods.points }}</span>
-          </span>
+          <div class="price-stack">
+            <div class="price">
+              <span class="unit">积分</span>
+              <span class="num">{{ goods.points }}</span>
+            </div>
+          </div>
         </template>
         <van-icon name="shopping-cart-o" class="cart-icon" />
       </div>
@@ -161,7 +168,6 @@ function formatImg(url) {
   font-size: 14px;
   font-weight: 600;
   line-height: 1.5;
-  height: 42px;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -173,7 +179,7 @@ function formatImg(url) {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 .metric {
@@ -187,6 +193,11 @@ function formatImg(url) {
   font-size: 11px;
 }
 
+.metric.stock {
+  background: rgba(102, 118, 144, 0.08);
+  color: #6d7a93;
+}
+
 .metric.accent {
   background: rgba(242, 186, 104, 0.14);
   color: #9b6212;
@@ -196,35 +207,32 @@ function formatImg(url) {
   margin-top: 12px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   gap: 8px;
 }
 
-.discount-tag {
-  font-size: 12px;
-  color: #0d5bd7;
-  background: rgba(13, 91, 215, 0.08);
-  padding: 4px 8px;
-  border-radius: 999px;
-  line-height: 1.3;
-  max-width: 100px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.price-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
 }
 
 .price {
   color: #0d5bd7;
   display: flex;
   align-items: baseline;
+  flex-wrap: wrap;
 }
 
-.price.cash {
-  color: #d85267;
+.price.promo {
+  color: #e34b4b;
 }
 
-.price.cash .num {
-  font-size: 20px;
+.price .label {
+  font-size: 11px;
+  margin-right: 4px;
+  font-weight: 600;
 }
 
 .price .unit {
@@ -235,6 +243,24 @@ function formatImg(url) {
 .price .num {
   font-size: 18px;
   font-weight: 700;
+}
+
+.price.promo .unit {
+  font-size: 13px;
+}
+
+.price.promo .num {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.origin-price {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #9aa5b5;
+  text-decoration: line-through;
+  line-height: 1.2;
 }
 
 .cart-icon {
