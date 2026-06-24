@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.qrcode.mapper.BizQrcodeStoreMapper">
+    
+    <resultMap type="BizQrcodeStore" id="BizQrcodeStoreResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="address"    column="address"    />
+        <result property="phone"    column="phone"    />
+        <result property="purpose"    column="purpose"    />
+        <result property="qrcodeUrl"    column="qrcode_url"    />
+        <result property="qrPhoto"    column="qr_photo"    />
+        <result property="contactPerson"    column="contact_person"    />
+        <result property="scanCount"    column="scan_count"    />
+        <result property="sortNum"    column="sort_num"    />
+        <result property="extInfo"    column="ext_info"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectBizQrcodeStoreVo">
+        select id, name, address, phone, purpose, qrcode_url, qr_photo, contact_person, scan_count, sort_num, ext_info, create_by, create_time, update_by, update_time, remark, del_flag from biz_qrcode_store
+    </sql>
+
+    <select id="selectBizQrcodeStoreList" parameterType="BizQrcodeStore" resultMap="BizQrcodeStoreResult">
+        <include refid="selectBizQrcodeStoreVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="address != null  and address != ''"> and address = #{address}</if>
+            <if test="phone != null  and phone != ''"> and phone = #{phone}</if>
+            <if test="contactPerson != null  and contactPerson != ''"> and contact_person = #{contactPerson}</if>
+            and del_flag='0'
+        </where>
+    </select>
+    
+    <select id="selectBizQrcodeStoreById" parameterType="Long" resultMap="BizQrcodeStoreResult">
+        <include refid="selectBizQrcodeStoreVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertBizQrcodeStore" parameterType="BizQrcodeStore" useGeneratedKeys="true" keyProperty="id">
+        insert into biz_qrcode_store
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">name,</if>
+            <if test="address != null">address,</if>
+            <if test="phone != null">phone,</if>
+            <if test="purpose != null">purpose,</if>
+            <if test="qrcodeUrl != null">qrcode_url,</if>
+            <if test="qrPhoto != null">qr_photo,</if>
+            <if test="contactPerson != null">contact_person,</if>
+            <if test="scanCount != null">scan_count,</if>
+            <if test="sortNum != null">sort_num,</if>
+            <if test="extInfo != null">ext_info,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="address != null">#{address},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="purpose != null">#{purpose},</if>
+            <if test="qrcodeUrl != null">#{qrcodeUrl},</if>
+            <if test="qrPhoto != null">#{qrPhoto},</if>
+            <if test="contactPerson != null">#{contactPerson},</if>
+            <if test="scanCount != null">#{scanCount},</if>
+            <if test="sortNum != null">#{sortNum},</if>
+            <if test="extInfo != null">#{extInfo},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateBizQrcodeStore" parameterType="BizQrcodeStore">
+        update biz_qrcode_store
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="purpose != null">purpose = #{purpose},</if>
+            <if test="qrcodeUrl != null">qrcode_url = #{qrcodeUrl},</if>
+            <if test="qrPhoto != null">qr_photo = #{qrPhoto},</if>
+            <if test="contactPerson != null">contact_person = #{contactPerson},</if>
+            <if test="scanCount != null">scan_count = #{scanCount},</if>
+            <if test="sortNum != null">sort_num = #{sortNum},</if>
+            <if test="extInfo != null">ext_info = #{extInfo},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where id = #{id}
+    </update>
+    <!-- 单条逻辑删除 -->
+    <update id="deleteBizQrcodeStoreById" parameterType="Long">
+        UPDATE biz_qrcode_store
+        SET del_flag = '1'
+        WHERE id = #{id}
+    </update>
+
+    <!-- 批量逻辑删除 -->
+    <update id="deleteBizQrcodeStoreByIds" parameterType="String">
+        UPDATE biz_qrcode_store
+        SET del_flag = '1'
+        WHERE id IN
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+<!--    <delete id="deleteBizQrcodeStoreById" parameterType="Long">-->
+<!--        delete from biz_qrcode_store where id = #{id}-->
+<!--    </delete>-->
+
+<!--    <delete id="deleteBizQrcodeStoreByIds" parameterType="String">-->
+<!--        delete from biz_qrcode_store where id in -->
+<!--        <foreach item="id" collection="array" open="(" separator="," close=")">-->
+<!--            #{id}-->
+<!--        </foreach>-->
+<!--    </delete>-->
+
+
+</mapper>

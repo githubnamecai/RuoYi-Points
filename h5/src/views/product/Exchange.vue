@@ -25,6 +25,7 @@
         <div class="info">
           <div class="goods-type">{{ goods.goodsType === '0' ? '实物权益' : '数字权益' }}</div>
           <div class="name">{{ goods.goodsName }}</div>
+          <div v-if="goods.specification" class="specification">规格：{{ goods.specification }}</div>
           <div v-if="goods.goodsType === '0'" class="price">
             <span>¥{{ unitPayPrice }}</span> /件
             <span v-if="goods.discountPrice" class="discount-info">原价¥{{ unitOriginalPrice }}</span>
@@ -372,6 +373,12 @@ onActivated(load)
 }
 
 .goods-card .name { font-size: 15px; color: #1a2640; line-height: 1.45; font-weight: 700; margin-top: 8px; }
+.goods-card .specification {
+  margin-top: 5px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #6f7d95;
+}
 .goods-card .price { color: #0d5bd7; font-size: 13px; margin-top: 6px; }
 .goods-card .price span { font-weight: 700; font-size: 16px; }
 .goods-card .price .discount-info {

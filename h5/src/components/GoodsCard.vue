@@ -15,6 +15,7 @@
     </div>
     <div class="info">
       <div class="title">{{ goods.goodsName }}</div>
+      <div v-if="goods.specification" class="specification">{{ goods.specification }}</div>
       <div class="meta-row">
         <span class="metric stock">
           <van-icon name="inventory-o" />
@@ -173,6 +174,17 @@ function formatImg(url) {
   -webkit-line-clamp: 2;
   overflow: hidden;
   color: #182237;
+}
+
+.specification {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #7b89a3;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
 }
 
 .meta-row {

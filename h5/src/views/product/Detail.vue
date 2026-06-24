@@ -27,6 +27,7 @@
           </div>
         </template>
         <div class="name">{{ goods.goodsName }}</div>
+        <div v-if="goods.specification" class="specification">规格：{{ goods.specification }}</div>
         <div class="meta">
           <span>库存: {{ goods.stock }}</span>
           <span>已兑: {{ goods.sales || 0 }}</span>
@@ -202,6 +203,12 @@ onMounted(load)
 }
 .bar-btn.is-loading { opacity: 0.6; pointer-events: none; }
 .name { font-size: 18px; font-weight: 700; margin: 10px 0 8px; color: #1a2640; line-height: 1.5; }
+.specification {
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: #6f7d95;
+  line-height: 1.6;
+}
 .meta { display: flex; gap: 10px; flex-wrap: wrap; color: #7b89a3; font-size: 12px; }
 .meta span { padding: 5px 10px; border-radius: 999px; background: rgba(13, 91, 215, 0.06); }
 .desc { font-size: 14px; color: #516078; line-height: 1.7; word-break: break-all; }

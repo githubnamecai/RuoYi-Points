@@ -135,17 +135,19 @@ const banners = [
   { img: 'https://img.yzcdn.cn/vant/apple-1.jpg', bg: 'linear-gradient(135deg, #4facfe, #00f2fe)' }
 ]
 
-const topTabs = [
-  { key: 'all', label: '全部', names: [] },
-  { key: 'operator', label: '运营商', names: ['运营商'] },
-  { key: 'digital', label: '数码电器', names: ['数码电器'] },
-  { key: 'jinshan', label: '金山好物', names: ['金山好物', '生活日用'] }
-]
+const topTabs = computed(() => {
+  const categoryTabs = (categories.value || []).map(item => ({
+    key: String(item.categoryId),
+    label: item.categoryName,
+    categoryId: item.categoryId
+  }))
+  return [{ key: 'all', label: '全部', categoryId: undefined }, ...categoryTabs]
+})
 
 const currentTopCategory = computed(() => {
-  const currentTab = topTabs.find(tab => tab.key === catActive.value)
+  const currentTab = topTabs.value.find(tab => tab.key === catActive.value)
   if (!currentTab || currentTab.key === 'all') return null
-  return categories.value.find(item => currentTab.names.includes(item.categoryName)) || null
+  return categories.value.find(item => String(item.categoryId) === String(currentTab.categoryId)) || null
 })
 
 const currentSubCategories = computed(() => {
@@ -223,8 +225,14 @@ function onSubCatChange(categoryId) {
 async function loadCategories() {
   try {
     const res = await listCategories()
-    // 只展示一级分类（最多 8 个）
-    categories.value = (res.data || []).slice(0, 8)
+    categories.value = res.data || []
+    if (catActive.value !== 'all') {
+      const exists = categories.value.some(item => String(item.categoryId) === String(catActive.value))
+      if (!exists) {
+        catActive.value = 'all'
+        subCatActive.value = ''
+      }
+    }
     categoryLoaded.value = true
   } catch (e) {}
 }

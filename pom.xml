@@ -170,6 +170,13 @@
                 <version>${ruoyi.version}</version>
             </dependency>
 
+            <!-- 积分权益平台-->
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>jsocn-gift</artifactId>
+                <version>${ruoyi.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -180,6 +187,7 @@
         <module>ruoyi-quartz</module>
         <module>ruoyi-generator</module>
         <module>ruoyi-common</module>
+        <module>jsocn-gift</module>
     </modules>
     <packaging>pom</packaging>
 

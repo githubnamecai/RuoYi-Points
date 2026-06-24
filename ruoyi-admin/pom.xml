@@ -54,6 +54,12 @@
             <artifactId>ruoyi-generator</artifactId>
         </dependency>
 
+        <!-- 权益平台-->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>jsocn-gift</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
