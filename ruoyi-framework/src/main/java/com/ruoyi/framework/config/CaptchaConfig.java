@@ -43,41 +43,77 @@ public class CaptchaConfig
         return defaultKaptcha;
     }
 
+//    @Bean(name = "captchaProducerMath")
+//    public DefaultKaptcha getKaptchaBeanMath()
+//    {
+//        DefaultKaptcha defaultKaptcha = new DefaultKaptcha();
+//        Properties properties = new Properties();
+//        // 是否有边框 默认为true 我们可以自己设置yes，no
+//        properties.setProperty(KAPTCHA_BORDER, "yes");
+//        // 边框颜色 默认为Color.BLACK
+//        properties.setProperty(KAPTCHA_BORDER_COLOR, "105,179,90");
+//        // 验证码文本字符颜色 默认为Color.BLACK
+//        properties.setProperty(KAPTCHA_TEXTPRODUCER_FONT_COLOR, "blue");
+//        // 验证码图片宽度 默认为200
+//        properties.setProperty(KAPTCHA_IMAGE_WIDTH, "160");
+//        // 验证码图片高度 默认为50
+//        properties.setProperty(KAPTCHA_IMAGE_HEIGHT, "60");
+//        // 验证码文本字符大小 默认为40
+//        properties.setProperty(KAPTCHA_TEXTPRODUCER_FONT_SIZE, "35");
+//        // KAPTCHA_SESSION_KEY
+//        properties.setProperty(KAPTCHA_SESSION_CONFIG_KEY, "kaptchaCodeMath");
+//        // 验证码文本生成器
+//        properties.setProperty(KAPTCHA_TEXTPRODUCER_IMPL, "com.ruoyi.framework.config.KaptchaTextCreator");
+//        // 验证码文本字符间距 默认为2
+//        properties.setProperty(KAPTCHA_TEXTPRODUCER_CHAR_SPACE, "3");
+//        // 验证码文本字符长度 默认为5
+//        properties.setProperty(KAPTCHA_TEXTPRODUCER_CHAR_LENGTH, "6");
+//        // 验证码文本字体样式 默认为new Font("Arial", 1, fontSize), new Font("Courier", 1, fontSize)
+//        properties.setProperty(KAPTCHA_TEXTPRODUCER_FONT_NAMES, "Arial,Courier");
+//        // 验证码噪点颜色 默认为Color.BLACK
+//        properties.setProperty(KAPTCHA_NOISE_COLOR, "white");
+//        // 干扰实现类
+//        properties.setProperty(KAPTCHA_NOISE_IMPL, "com.google.code.kaptcha.impl.NoNoise");
+//        // 图片样式 水纹com.google.code.kaptcha.impl.WaterRipple 鱼眼com.google.code.kaptcha.impl.FishEyeGimpy 阴影com.google.code.kaptcha.impl.ShadowGimpy
+//        properties.setProperty(KAPTCHA_OBSCURIFICATOR_IMPL, "com.google.code.kaptcha.impl.ShadowGimpy");
+//        Config config = new Config(properties);
+//        defaultKaptcha.setConfig(config);
+//        return defaultKaptcha;
+//    }
+
+
+
     @Bean(name = "captchaProducerMath")
     public DefaultKaptcha getKaptchaBeanMath()
     {
         DefaultKaptcha defaultKaptcha = new DefaultKaptcha();
         Properties properties = new Properties();
-        // 是否有边框 默认为true 我们可以自己设置yes，no
+        // 边框优化：浅灰细边框，不花哨
         properties.setProperty(KAPTCHA_BORDER, "yes");
-        // 边框颜色 默认为Color.BLACK
-        properties.setProperty(KAPTCHA_BORDER_COLOR, "105,179,90");
-        // 验证码文本字符颜色 默认为Color.BLACK
-        properties.setProperty(KAPTCHA_TEXTPRODUCER_FONT_COLOR, "blue");
-        // 验证码图片宽度 默认为200
+        properties.setProperty(KAPTCHA_BORDER_COLOR, "150,150,150");
+        properties.setProperty("kaptcha.border.thickness", "1");
+
+        // 文字配置：方正字体、纯黑清晰、加大间距
+        properties.setProperty(KAPTCHA_TEXTPRODUCER_FONT_COLOR, "0,0,0");
         properties.setProperty(KAPTCHA_IMAGE_WIDTH, "160");
-        // 验证码图片高度 默认为50
         properties.setProperty(KAPTCHA_IMAGE_HEIGHT, "60");
-        // 验证码文本字符大小 默认为40
-        properties.setProperty(KAPTCHA_TEXTPRODUCER_FONT_SIZE, "35");
-        // KAPTCHA_SESSION_KEY
+        properties.setProperty(KAPTCHA_TEXTPRODUCER_FONT_SIZE, "38");
         properties.setProperty(KAPTCHA_SESSION_CONFIG_KEY, "kaptchaCodeMath");
-        // 验证码文本生成器
         properties.setProperty(KAPTCHA_TEXTPRODUCER_IMPL, "com.ruoyi.framework.config.KaptchaTextCreator");
-        // 验证码文本字符间距 默认为2
-        properties.setProperty(KAPTCHA_TEXTPRODUCER_CHAR_SPACE, "3");
-        // 验证码文本字符长度 默认为5
+        properties.setProperty(KAPTCHA_TEXTPRODUCER_CHAR_SPACE, "5"); // 加宽字符间距，避免拥挤显歪
         properties.setProperty(KAPTCHA_TEXTPRODUCER_CHAR_LENGTH, "6");
-        // 验证码文本字体样式 默认为new Font("Arial", 1, fontSize), new Font("Courier", 1, fontSize)
-        properties.setProperty(KAPTCHA_TEXTPRODUCER_FONT_NAMES, "Arial,Courier");
-        // 验证码噪点颜色 默认为Color.BLACK
-        properties.setProperty(KAPTCHA_NOISE_COLOR, "white");
-        // 干扰实现类
+        // 方正无倾斜中文字体
+        properties.setProperty(KAPTCHA_TEXTPRODUCER_FONT_NAMES, "Microsoft YaHei,SimHei,Arial");
+
+        // 完全关闭噪点，消除杂色
         properties.setProperty(KAPTCHA_NOISE_IMPL, "com.google.code.kaptcha.impl.NoNoise");
-        // 图片样式 水纹com.google.code.kaptcha.impl.WaterRipple 鱼眼com.google.code.kaptcha.impl.FishEyeGimpy 阴影com.google.code.kaptcha.impl.ShadowGimpy
-        properties.setProperty(KAPTCHA_OBSCURIFICATOR_IMPL, "com.google.code.kaptcha.impl.ShadowGimpy");
+
+        // 核心：使用自定义无扭曲滤镜，彻底解决歪斜
+        properties.setProperty(KAPTCHA_OBSCURIFICATOR_IMPL, "com.ruoyi.framework.config.PlainGimpy");
+
         Config config = new Config(properties);
         defaultKaptcha.setConfig(config);
         return defaultKaptcha;
     }
+
 }

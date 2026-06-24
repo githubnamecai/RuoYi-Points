@@ -2,7 +2,7 @@
   <div class="login-page">
     <div class="logo">
       <div class="icon">★</div>
-      <div class="title">积分商城</div>
+      <div class="title">金山好物</div>
       <div class="subtitle">签到 · 兑换 · 福利</div>
     </div>
 
@@ -232,7 +232,7 @@ function goRegister() {
   gap: 4px;
 }
 .captcha-img {
-  height: 32px;
+  height: 42px;
   border-radius: 8px;
   cursor: pointer;
   border: 1px solid rgba(124, 147, 187, 0.16);

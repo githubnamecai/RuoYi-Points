@@ -169,7 +169,7 @@ function goLogin() {
 }
 
 .captcha-img {
-  height: 32px;
+  height: 39px;
   border-radius: 8px;
   cursor: pointer;
   border: 1px solid rgba(124, 147, 187, 0.16);

@@ -4,6 +4,12 @@
       <el-form-item label="商品名称" prop="goodsName">
         <el-input v-model="queryParams.goodsName" placeholder="请输入" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
+      <el-form-item label="商品供应商" prop="goodsVendor" label-width="100px">
+        <el-input v-model="queryParams.goodsVendor" placeholder="请输入" clearable @keyup.enter.native="handleQuery" />
+      </el-form-item>
+      <el-form-item label="商品规格" prop="specification">
+        <el-input v-model="queryParams.specification" placeholder="请输入" clearable @keyup.enter.native="handleQuery" />
+      </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="全部" clearable style="width: 140px">
           <el-option label="上架" value="1" />
@@ -42,20 +48,30 @@
 
     <el-table v-loading="loading" :data="list" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" />
-      <el-table-column label="ID" prop="goodsId" width="80" />
-      <!-- <el-table-column label="封面" width="80">
-        <template slot-scope="scope">
-          <el-image v-if="scope.row.coverImg" :src="scope.row.coverImg"
-            style="width:48px;height:48px;border-radius:4px" />
-        </template>
-</el-table-column> -->
+      <!-- <el-table-column label="ID" prop="goodsId" width="80" /> -->
       <el-table-column label="封面图" align="center" prop="coverImg" width="100">
         <template slot-scope="scope">
           <image-preview :src="scope.row.coverImg" :width="50" :height="50" :border-radius="4" />
         </template>
       </el-table-column>
+      <el-table-column label="商品名称" prop="goodsName" min-width="180">
+        <template slot-scope="scope">
+          <!-- white-space: normal 实现文字自动换行 -->
+          <div style="white-space: normal; line-height: 1.5;">
+            {{ scope.row.goodsName }}
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="商品规格" prop="specification" min-width="100">
+        <template slot-scope="scope">
+          <!-- white-space: normal 实现文字自动换行 -->
+          <div style="white-space: normal; line-height: 1.5;">
+            {{ scope.row.specification }}
+          </div>
+        </template>
+      </el-table-column>
 
-      <el-table-column label="商品名称" prop="goodsName" min-width="180" show-overflow-tooltip />
+      <el-table-column label="商品供应商" prop="goodsVendor" min-width="100" />
       <el-table-column label="分类" prop="categoryName" width="120" />
       <el-table-column label="类型" width="80">
         <template slot-scope="scope">
@@ -67,7 +83,7 @@
       <el-table-column label="积分" prop="points" width="90" />
       <el-table-column label="金额" prop="price" width="100" />
       <el-table-column label="优惠金额" prop="discountPrice" width="100" />
-      <el-table-column label="原价" prop="originalPrice" width="100" />
+      <!-- <el-table-column label="原价" prop="originalPrice" width="100" /> -->
       <el-table-column label="库存" prop="stock" width="90" />
       <el-table-column label="销量" prop="sales" width="90" />
       <el-table-column label="状态" width="100">
@@ -95,47 +111,82 @@
         <el-form-item label="商品名称" prop="goodsName">
           <el-input v-model="form.goodsName" />
         </el-form-item>
-        <el-form-item label="分类" prop="categoryId">
-          <el-cascader v-model="form.categoryId" :options="categoryOptions"
-            :props="{ value: 'id', label: 'label', children: 'children', checkStrictly: true, emitPath: false }"
-            placeholder="选择分类" clearable style="width: 100%" />
-        </el-form-item>
-        <el-form-item label="类型" prop="goodsType">
-          <el-radio-group v-model="form.goodsType">
-            <el-radio label="0">实物</el-radio>
-            <el-radio label="1">虚拟</el-radio>
-          </el-radio-group>
-        </el-form-item>
+        <el-row :gutter="20">
+          <!-- 占12份宽度，两个各一半 -->
+          <el-col :span="12">
+            <el-form-item label="商品规格" prop="specification">
+              <el-input v-model="form.specification" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="商品供应商" prop="goodsVendor">
+              <el-input v-model="form.goodsVendor" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <!-- 占12份宽度，两个各一半 -->
+          <el-col :span="12">
+            <el-form-item label="分类" prop="categoryId">
+              <el-cascader v-model="form.categoryId" :options="categoryOptions"
+                :props="{ value: 'id', label: 'label', children: 'children', checkStrictly: true, emitPath: false }"
+                placeholder="选择分类" clearable style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="类型" prop="goodsType">
+              <el-radio-group v-model="form.goodsType">
+                <el-radio label="0">实物</el-radio>
+                <el-radio label="1">虚拟</el-radio>
+              </el-radio-group>
+            </el-form-item></el-col>
+        </el-row>
+
         <el-form-item label="封面图">
           <image-upload v-model="form.coverImg" :limit="1" />
         </el-form-item>
         <el-form-item v-if="form.goodsType === '1'" label="积分" prop="points">
           <el-input-number v-model="form.points" :min="0" />
         </el-form-item>
-        <el-form-item v-if="form.goodsType === '0'" label="金额" prop="price">
-          <el-input-number v-model="form.price" :min="0" :precision="2" :step="0.01" />
-        </el-form-item>
-        <el-form-item v-if="form.goodsType === '0'" label="优惠金额" prop="discountPrice">
-          <el-input-number v-model="form.discountPrice" :min="0" :precision="2" :step="0.01" />
-        </el-form-item>
-        <el-form-item label="原价" prop="originalPrice">
+        <el-row :gutter="20">
+          <!-- 占12份宽度，两个各一半 -->
+          <el-col :span="12">
+            <el-form-item v-if="form.goodsType === '0'" label="金额" prop="price">
+              <el-input-number v-model="form.price" :min="0" :precision="2" :step="0.01" />
+            </el-form-item></el-col>
+          <el-col :span="12">
+            <el-form-item v-if="form.goodsType === '0'" label="优惠金额" prop="discountPrice">
+              <el-input-number v-model="form.discountPrice" :min="0" :precision="2" :step="0.01" />
+            </el-form-item></el-col>
+        </el-row>
+        <!-- <el-form-item label="原价" prop="originalPrice">
           <el-input-number v-model="form.originalPrice" :min="0" :precision="2" :step="0.01" />
-        </el-form-item>
-        <el-form-item label="库存">
-          <el-input-number v-model="form.stock" :min="0" />
-        </el-form-item>
-        <el-form-item label="限兑数量">
-          <el-input-number v-model="form.limitPerUser" :min="0" /> <span style="margin-left:8px;color:#999">0=不限制</span>
-        </el-form-item>
-        <el-form-item label="排序">
-          <el-input-number v-model="form.sort" :min="0" />
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-radio-group v-model="form.status">
-            <el-radio label="1">上架</el-radio>
-            <el-radio label="0">下架</el-radio>
-          </el-radio-group>
-        </el-form-item>
+        </el-form-item> -->
+        <el-row :gutter="20">
+          <!-- 占12份宽度，两个各一半 -->
+          <el-col :span="12">
+            <el-form-item label="库存">
+              <el-input-number v-model="form.stock" :min="0" />
+            </el-form-item></el-col>
+          <el-col :span="12">
+            <el-form-item label="限兑数量">
+              <el-input-number v-model="form.limitPerUser" :min="0" />
+              <span style="margin-left:8px;color:#999">0=不限制</span>
+            </el-form-item></el-col></el-row>
+        <el-row :gutter="20">
+          <!-- 占12份宽度，两个各一半 -->
+          <el-col :span="12">
+            <el-form-item label="排序">
+              <el-input-number v-model="form.sort" :min="0" />
+            </el-form-item></el-col>
+          <el-col :span="12">
+            <el-form-item label="状态">
+              <el-radio-group v-model="form.status">
+                <el-radio label="1">上架</el-radio>
+                <el-radio label="0">下架</el-radio>
+              </el-radio-group>
+            </el-form-item></el-col>
+        </el-row>
         <el-form-item label="详情">
           <editor v-model="form.description" :min-height="200" />
         </el-form-item>
@@ -169,6 +220,8 @@ export default {
         pageNum: 1,
         pageSize: 10,
         goodsName: '',
+        goodsVendor: '',
+        specification: '',
         status: '',
         goodsType: ''
       },

@@ -1,6 +1,8 @@
 package com.ruoyi.web.controller.points;
 
 import java.util.List;
+
+import com.ruoyi.common.utils.crypto.SensitiveCryptoUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,7 +27,15 @@ public class PointsDetailController extends BaseController
     public TableDataInfo list(PointsDetail detail)
     {
         startPage();
-        return getDataTable(detailService.selectDetailList(detail));
+        List<PointsDetail> detailList=detailService.selectDetailList(detail);
+        for (int i = 0; i < detailList.size(); i++) {
+            String phone=detailList.get(i).getPhone();
+            String phone2=SensitiveCryptoUtils.decrypt(phone);
+            if (phone2!=null){
+                detailList.get(i).setPhone(phone2);
+            }
+        }
+        return getDataTable(detailList);
     }
 
     @GetMapping("/stat")

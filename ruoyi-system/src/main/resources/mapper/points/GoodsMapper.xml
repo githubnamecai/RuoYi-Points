@@ -9,6 +9,8 @@
         <result property="categoryName"   column="category_name"/>
         <result property="goodsName"      column="goods_name"/>
         <result property="goodsType"      column="goods_type"/>
+        <result property="goodsVendor"      column="goods_vendor"/>
+        <result property="specification"       column="specification"/>
         <result property="deptId"       column="dept_id"/>
         <result property="parentId"       column="parent_id"/>
         <result property="coverImg"       column="cover_img"/>
@@ -33,7 +35,7 @@
     </resultMap>
 
     <sql id="selectGoodsVo">
-        select g.goods_id, g.category_id, c.category_name, g.goods_name, g.goods_type, g.dept_id,g.parent_id,g.cover_img,
+        select g.goods_id, g.category_id, c.category_name, g.goods_name, g.goods_type, g.goods_vendor,g.specification,g.dept_id,g.parent_id,g.cover_img,
                g.images, g.points, g.original_price, g.price, g.discount_price, g.stock, g.sales, g.limit_per_user, g.description,
                g.status, g.sort, g.del_flag, g.version, g.create_by, g.create_time,
                g.update_by, g.update_time, g.remark
@@ -48,6 +50,12 @@
             g.del_flag = '0'
             <if test="goodsName != null and goodsName != ''">
                 and g.goods_name like concat('%', #{goodsName}, '%')
+            </if>
+            <if test="goodsVendor != null and goodsVendor != ''">
+                and g.vendor like concat('%', #{goodsVendor}, '%')
+            </if>
+            <if test="specification != null and specification != ''">
+                and g.specification like concat('%', #{specification}, '%')
             </if>
             <if test="categoryId != null">
                 and (g.category_id = #{categoryId} or g.category_id in ( select t.category_id from t_goods_category t where find_in_set(#{categoryId}, ancestors) ))
@@ -77,6 +85,12 @@
             <if test="goodsName != null and goodsName != ''">
                 and g.goods_name like concat('%', #{goodsName}, '%')
             </if>
+            <if test="goodsVendor != null and goodsVendor != ''">
+                and g.vendor like concat('%', #{goodsVendor}, '%')
+            </if>
+            <if test="specification != null and specification != ''">
+                and g.specification like concat('%', #{specification}, '%')
+            </if>
         </where>
         order by g.sort desc, g.goods_id desc
     </select>
@@ -91,6 +105,8 @@
         <trim prefix="(" suffix=")" suffixOverrides=",">
             category_id, goods_name,
             <if test="goodsType != null">goods_type,</if>
+            <if test="goodsVendor != null">goods_vendor,</if>
+            <if test="specification != null">specification,</if>
             <if test="deptId != null">dept_id,</if>
             <if test="parentId != null">parent_id,</if>
             <if test="coverImg != null">cover_img,</if>
@@ -111,6 +127,8 @@
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             #{categoryId}, #{goodsName},
             <if test="goodsType != null">#{goodsType},</if>
+            <if test="goodsVendor != null">#{goodsVendor},</if>
+            <if test="specification != null">#{specification},</if>
             <if test="deptId != null">#{deptId},</if>
             <if test="parentId != null">#{parentId},</if>
             <if test="coverImg != null">#{coverImg},</if>
@@ -136,6 +154,8 @@
             <if test="categoryId != null">category_id=#{categoryId},</if>
             <if test="goodsName != null">goods_name=#{goodsName},</if>
             <if test="goodsType != null">goods_type=#{goodsType},</if>
+            <if test="goodsVendor != null">goods_vendor=#{goodsVendor},</if>
+            <if test="specification != null">specification=#{specification},</if>
             <if test="deptId != null">dept_id=#{deptId},</if>
             <if test="parentId != null">parent_id=#{parentId},</if>
             <if test="coverImg != null">cover_img=#{coverImg},</if>

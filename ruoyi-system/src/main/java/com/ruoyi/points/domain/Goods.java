@@ -35,6 +35,13 @@ public class Goods extends BaseEntity
     /** 商品类型 0实物 1虚拟 */
     @Excel(name = "类型", readConverterExp = "0=实物,1=虚拟")
     private String goodsType;
+    /** 商品供应商 */
+    @Excel(name = "商品供应商")
+    private String goodsVendor;
+    /** 商品规格 */
+    @Excel(name = "商品规格")
+    private String specification;
+
     private Long deptId;
 
     private Long parentId;
@@ -100,6 +107,22 @@ public class Goods extends BaseEntity
     public void setGoodsName(String goodsName) { this.goodsName = goodsName; }
     public String getGoodsType() { return goodsType; }
     public void setGoodsType(String goodsType) { this.goodsType = goodsType; }
+
+    public String getGoodsVendor() {
+        return goodsVendor;
+    }
+
+    public void setGoodsVendor(String goodsVendor) {
+        this.goodsVendor = goodsVendor;
+    }
+
+    public String getSpecification() {
+        return specification;
+    }
+
+    public void setSpecification(String specification) {
+        this.specification = specification;
+    }
 
     public Long getDeptId() {
         return deptId;

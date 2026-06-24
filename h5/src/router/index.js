@@ -6,7 +6,7 @@ const routes = [
   { path: '/', redirect: '/home' },
   { path: '/login', component: () => import('@/views/login/Index.vue'), meta: { title: '登录', public: true } },
   { path: '/register', component: () => import('@/views/login/Register.vue'), meta: { title: '注册', public: true } },
-  { path: '/home', component: () => import('@/views/home/Index.vue'), meta: { title: '积分商城', tabbar: true, public: true } },
+  { path: '/home', component: () => import('@/views/home/Index.vue'), meta: { title: '金山好物', tabbar: true, public: true } },
   { path: '/sign', component: () => import('@/views/sign/Index.vue'), meta: { title: '每日签到', tabbar: true } },
   { path: '/orders', component: () => import('@/views/order/List.vue'), meta: { title: '我的订单', tabbar: true } },
   { path: '/orders/:id', component: () => import('@/views/order/Detail.vue'), meta: { title: '订单详情' } },
@@ -28,7 +28,7 @@ const router = createRouter({
 
 // 全局守卫：未登录跳转登录页
 router.beforeEach((to, from, next) => {
-  document.title = to.meta.title || '积分商城'
+  document.title = to.meta.title || '金山好物'
   if (to.meta.public) return next()
   const userStore = useUserStore()
   if (!userStore.token) {
