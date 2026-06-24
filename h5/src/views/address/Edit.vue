@@ -92,16 +92,19 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { showToast, showConfirmDialog } from 'vant'
 import { areaList } from '@vant/area-data'
+import { useUserStore } from '@/stores/user'
 import {
   listAddresses,
   addAddress,
   updateAddress,
   deleteAddress,
-  setDefaultAddress
+  setDefaultAddress,
+  updateProfile
 } from '@/api/user'
 
 const router = useRouter()
 const route = useRoute()
+const userStore = useUserStore()
 
 const form = reactive({
   addressId: null,
@@ -124,6 +127,9 @@ const areaText = computed(() => {
   return parts.join(' / ')
 })
 
+/**
+ * 编辑态加载当前地址数据。
+ */
 async function loadEdit() {
   if (!isEdit.value) return
   // 通过列表接口取出当前地址
@@ -150,6 +156,9 @@ async function loadEdit() {
   }
 }
 
+/**
+ * 选择省市区后回填表单。
+ */
 function onAreaConfirm({ selectedOptions }) {
   if (!selectedOptions || selectedOptions.length < 3) return
   form.province = selectedOptions[0]?.text || ''
@@ -159,6 +168,20 @@ function onAreaConfirm({ selectedOptions }) {
   showArea.value = false
 }
 
+/**
+ * 若个人资料姓名为空，则用收货人姓名自动补全。
+ */
+async function syncProfileNameIfNeeded() {
+  const consignee = form.consignee.trim()
+  const profileName = (userStore.userInfo?.name || '').trim()
+  if (!consignee || profileName) return
+  await updateProfile({ name: consignee })
+  await userStore.fetchUserInfo().catch(() => {})
+}
+
+/**
+ * 提交地址表单。
+ */
 async function onSubmit() {
   submitting.value = true
   try {
@@ -181,6 +204,7 @@ async function onSubmit() {
         await setDefaultAddress(res.data.addressId).catch(() => {})
       }
     }
+    await syncProfileNameIfNeeded()
     setTimeout(() => {
       showToast({
       message: isEdit.value ? '修改成功' : '新增成功',
@@ -193,6 +217,9 @@ async function onSubmit() {
   }
 }
 
+/**
+ * 删除当前地址。
+ */
 async function onDelete() {
   try {
     await showConfirmDialog({ title: '提示', message: '确定删除该地址？' })
