@@ -113,9 +113,15 @@
 // 商城页已添加组件名称定义
 defineOptions({ name: 'Home' })
 import { ref, computed, onMounted, onActivated } from 'vue'
+import { useRoute } from 'vue-router'
 import { listGoods, listCategories } from '@/api/goods'
+import { addScan } from '@/api/scan'
 import GoodsCard from '@/components/GoodsCard.vue'
+import { collectClientInfo, formatDateYYYYMMDD } from '@/utils/clientInfo'
+import { useUserStore } from '@/stores/user'
 
+const route = useRoute()
+const userStore = useUserStore()
 const list = ref([])
 const categories = ref([])
 const catActive = ref('all')
@@ -163,6 +169,31 @@ const currentCategoryId = computed(() => {
   if (currentTopCategory.value) return currentTopCategory.value.categoryId
   return undefined
 })
+
+/**
+ * 页面访问/扫码进入统计上报。
+ */
+async function reportScan() {
+  const idParam = route.query?.id
+  const hasId = idParam !== undefined && idParam !== null && String(idParam).trim() !== ''
+  const qrcodeId = hasId ? Number(idParam) : null
+  const visitType = hasId ? 1 : 0
+  const { deviceModel, osVersion, browserName, userAgent } = await collectClientInfo()
+
+  await addScan({
+    qrcodeId: Number.isFinite(qrcodeId) ? qrcodeId : null,
+    visitType,
+    startTime: formatDateYYYYMMDD(new Date()),
+    ip: '',
+    deviceModel,
+    osVersion,
+    browserName,
+    userAgent,
+    userId: userStore.userInfo?.userId,
+    userName: userStore.userInfo?.name,
+    nickName: userStore.userInfo?.nickname
+  }).catch(() => {})
+}
 
 /**
  * 根据关键词重新搜索商品。
@@ -256,6 +287,7 @@ function startFirstLoad() {
 }
 // 首次加载
 onMounted(async () => {
+  reportScan()
   if (!categoryLoaded.value) {
     await loadCategories()
   }

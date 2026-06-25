@@ -3,6 +3,9 @@ package com.ruoyi.scan.controller;
 import java.util.List;
 
 import com.ruoyi.common.annotation.Anonymous;
+import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.ip.IpUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,8 +81,20 @@ public class JsocnMarketShopScanController extends BaseController
 //    @Log(title = "扫码统计", businessType = BusinessType.INSERT)
     @Anonymous
     @PostMapping
-    public AjaxResult add(@RequestBody JsocnMarketShopScan jsocnMarketShopScan)
+    public AjaxResult add(@RequestBody JsocnMarketShopScan jsocnMarketShopScan, HttpServletRequest request)
     {
+        if (StringUtils.isEmpty(jsocnMarketShopScan.getIp()))
+        {
+            jsocnMarketShopScan.setIp(IpUtils.getIpAddr(request));
+        }
+        if (jsocnMarketShopScan.getStartTime() == null)
+        {
+            jsocnMarketShopScan.setStartTime(new java.util.Date());
+        }
+        if (StringUtils.isEmpty(jsocnMarketShopScan.getUserAgent()))
+        {
+            jsocnMarketShopScan.setUserAgent(request.getHeader("User-Agent"));
+        }
         return toAjax(jsocnMarketShopScanService.insertJsocnMarketShopScan(jsocnMarketShopScan));
     }
 
