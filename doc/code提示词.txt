@@ -1,0 +1,14 @@
+页面运行出来是ip加端口加home，会进入到home页面，现在有一个需求VITE_APP_BASE_API拼接scan/scan请求post，后台方法是public AjaxResult add(@RequestBody JsocnMarketShopScan jsocnMarketShopScan)，需要有Long qrcodeId（ 从home？id=1中链接获取qrcodeid=id），Integer visitType判断如果home？id=1则是1，不是则默认是0，Date startTime用户扫码的时间，String ip获取用户的IP地址， String deviceModel获取用户的设备型号，String osVersion系统版本，browserName浏览器名称，userAgentnavigator获取标识
+
+当前页面存在正常路由逻辑：当访问地址为「IP+端口/home」时可成功进入Home页面，现需完成以下接口开发与参数处理功能开发：
+1. 接口请求配置：使用环境变量`VITE_APP_BASE_API`拼接请求路径`scan/scan`，发起POST类型的网络请求，对接后台提供的接口方法`public AjaxResult add(@RequestBody JsocnMarketShopScan jsocnMarketShopScan)`
+2. 路由参数提取：从当前Home页面的访问链接`home?id=1`中提取路由参数`id`，将其赋值为接口所需的`qrcodeId`（Long类型）
+3. 访问类型参数赋值：判断当前链接是否携带`id`参数，若存在`id`参数则`visitType`（Integer类型）设为1，不存在则默认赋值为0
+4. 时间参数赋值：将用户进入页面（触发扫码）的当前时间赋值给`startTime`（Date类型）
+5. 客户端信息采集与赋值：
+   - 通过请求头或服务端能力获取用户的真实IP地址，赋值给`ip`（String类型）
+   - 调用前端浏览器API获取用户的设备型号，赋值给`deviceModel`（String类型）
+   - 获取用户的操作系统版本信息，赋值给`osVersion`（String类型）
+   - 提取用户的浏览器名称，赋值给`browserName`（String类型）
+   - 调用浏览器原生`navigator`对象获取完整的用户代理标识，补充传入接口
+6. 开发完成后需完成功能验证：确认所有参数类型符合后台接口要求、参数取值逻辑正确、POST请求可成功发起并正常接收后台返回结果

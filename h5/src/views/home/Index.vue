@@ -117,8 +117,9 @@ import { useRoute } from 'vue-router'
 import { listGoods, listCategories } from '@/api/goods'
 import { addScan } from '@/api/scan'
 import GoodsCard from '@/components/GoodsCard.vue'
-import { collectClientInfo, formatDateYYYYMMDD } from '@/utils/clientInfo'
+import { collectClientInfo, formatDateTimeYYYYMMDDHHMMSS, formatDateYYYYMMDDHH } from '@/utils/clientInfo'
 import { useUserStore } from '@/stores/user'
+import { getPublicIp } from '@/utils/publicIp'
 
 const route = useRoute()
 const userStore = useUserStore()
@@ -178,21 +179,45 @@ async function reportScan() {
   const hasId = idParam !== undefined && idParam !== null && String(idParam).trim() !== ''
   const qrcodeId = hasId ? Number(idParam) : 1
   const visitType = hasId ? 1 : 0
-  const { deviceModel, osVersion, browserName, userAgent } = await collectClientInfo()
 
-  await addScan({
-    qrcodeId: Number.isFinite(qrcodeId) ? qrcodeId : 1,
-    visitType,
-    startTime: formatDateYYYYMMDD(new Date()),
-    ip: '',
-    deviceModel,
-    osVersion,
-    browserName,
-    userAgent,
-    userId: userStore.userInfo?.userId,
-    userName: userStore.userInfo?.name,
-    nickName: userStore.userInfo?.nickname
-  }).catch(() => {})
+  const idKey = hasId ? String(idParam).trim() : 'no-id'
+  const now = Date.now()
+  const lastAtKey = `scan:lastAt:${idKey}`
+  const lastAt = Number(sessionStorage.getItem(lastAtKey) || '0')
+  if (Number.isFinite(lastAt) && lastAt > 0 && now - lastAt < 2 * 60 * 60 * 1000) return
+
+  const hourKey = formatDateYYYYMMDDHH(new Date())
+  const scanKey = `scan:reported:${hourKey}:${idKey}`
+  try {
+    if (sessionStorage.getItem(scanKey) === 'done' || sessionStorage.getItem(scanKey) === 'pending') return
+    sessionStorage.setItem(scanKey, 'pending')
+    sessionStorage.setItem(lastAtKey, String(now))
+  } catch (e) {}
+
+  const [{ deviceModel, osVersion, browserName, userAgent }, ip] = await Promise.all([
+    collectClientInfo(),
+    getPublicIp()
+  ])
+
+  try {
+    await addScan({
+      qrcodeId: Number.isFinite(qrcodeId) ? qrcodeId : 1,
+      visitType,
+      startTime: formatDateTimeYYYYMMDDHHMMSS(new Date()),
+      ip,
+      deviceModel,
+      osVersion,
+      browserName,
+      userAgent,
+      userId: userStore.userInfo?.userId,
+      userName: userStore.userInfo?.name,
+      nickName: userStore.userInfo?.nickname
+    })
+    try { sessionStorage.setItem(scanKey, 'done') } catch (e) {}
+  } catch (e) {
+    try { sessionStorage.removeItem(scanKey) } catch (e2) {}
+    try { sessionStorage.removeItem(lastAtKey) } catch (e3) {}
+  }
 }
 
 /**

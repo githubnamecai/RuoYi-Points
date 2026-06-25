@@ -12,6 +12,36 @@ export function formatDateYYYYMMDD(date) {
 }
 
 /**
+ * 格式化为 yyyy-MM-dd HH:mm:ss。
+ * @param {Date} date 日期对象
+ * @returns {string} 格式化后的日期时间字符串
+ */
+export function formatDateTimeYYYYMMDDHHMMSS(date) {
+  const d = date instanceof Date ? date : new Date(date)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mm = String(d.getMinutes()).padStart(2, '0')
+  const ss = String(d.getSeconds()).padStart(2, '0')
+  return `${y}-${m}-${day} ${hh}:${mm}:${ss}`
+}
+
+/**
+ * 格式化为 yyyyMMddHH（用于生成“年月日+小时”的 Key）。
+ * @param {Date} date 日期对象
+ * @returns {string} yyyyMMddHH
+ */
+export function formatDateYYYYMMDDHH(date) {
+  const d = date instanceof Date ? date : new Date(date)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  const hh = String(d.getHours()).padStart(2, '0')
+  return `${y}${m}${day}${hh}`
+}
+
+/**
  * 基于 UA 字符串粗略识别浏览器名称。
  * @param {string} ua userAgent
  * @returns {string} 浏览器名称
@@ -91,4 +121,3 @@ export async function collectClientInfo() {
 
   return { deviceModel, osVersion, browserName, userAgent }
 }
-
