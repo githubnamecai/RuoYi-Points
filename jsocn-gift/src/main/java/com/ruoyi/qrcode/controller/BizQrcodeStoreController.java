@@ -103,4 +103,38 @@ public class BizQrcodeStoreController extends BaseController
     {
         return toAjax(bizQrcodeStoreService.deleteBizQrcodeStoreByIds(ids));
     }
+
+    @PreAuthorize("@ss.hasPermi('qrcode:qrcodestore:exportzips')")
+    @Log(title = "下载", businessType = BusinessType.EXPORT)
+    @PostMapping("/downloadZip")
+    public void downloadZip(Long[] ids, HttpServletResponse response)
+    {
+
+        bizQrcodeStoreService.downloadImagesAsZip(ids, response);
+    }
+
+    /**
+     * 批量生成二维码点位信息
+     */
+    @PreAuthorize("@ss.hasPermi('qrcode:qrcodestore:editQRcodeids')")
+    @Log(title = "二维码点位信息", businessType = BusinessType.UPDATE)
+    @PutMapping("/generate/{ids}")
+    public AjaxResult updateQRcodeByIds(@PathVariable Long[] ids)
+    {
+        return toAjax(bizQrcodeStoreService.updateQRcodeByIds(ids));
+    }
+
+    /**
+     * 生成二维码
+     */
+    @PreAuthorize("@ss.hasPermi('qrcode:qrcodestore:editQRcode')")
+    @Log(title = "二维码点位信息", businessType = BusinessType.UPDATE)
+    @PutMapping("/generate")
+    public AjaxResult updateQRcode(@RequestBody BizQrcodeStore bizQrcodeStore)
+    {
+        bizQrcodeStore.setUpdateBy(getUsername());
+        return toAjax(bizQrcodeStoreService.updateQRcode(bizQrcodeStore));
+    }
+
+
 }

@@ -38,6 +38,15 @@
         <el-button type="success" plain icon="el-icon-edit" size="mini" :disabled="single" @click="handleUpdate"
           v-hasPermi="['qrcode:qrcodestore:edit']">修改</el-button>
       </el-col>
+
+      <!-- <el-col :span="1.5">
+        <el-button type="success" plain icon="el-icon-edit" size="mini" :disabled="single" @click="handleGenerateids"
+          v-hasPermi="['qrcode:qrcodestore:editQRcodeids']">批量生成二维码</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button type="warning" plain icon="el-icon-download" size="mini" @click="downloadZip"
+          v-hasPermi="['qrcode:qrcodestore:exportzips']">导出压缩包</el-button>
+      </el-col> -->
       <el-col :span="1.5">
         <el-button type="danger" plain icon="el-icon-delete" size="mini" :disabled="multiple" @click="handleDelete"
           v-hasPermi="['qrcode:qrcodestore:remove']">删除</el-button>
@@ -61,7 +70,7 @@
         <template slot-scope="scope">
           <image-preview :src="scope.row.qrPhoto" :width="50" :height="50" />
         </template>
-      </el-table-column> -->
+</el-table-column> -->
       <!-- <el-table-column label="对接人" align="center" prop="contactPerson" /> -->
       <el-table-column label="扫码次数" align="center" prop="scanCount" />
       <el-table-column label="排序号" align="center" prop="sortNum" />
@@ -74,6 +83,10 @@
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)"
             v-hasPermi="['qrcode:qrcodestore:edit']">修改</el-button>
+          <el-button size="mini" type="text" icon="el-icon-picture"
+            @click="handleSelectPhoto(scope.row)">查看二维码</el-button>
+          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleGenerate(scope.row)"
+            v-hasPermi="['qrcode:qrcodestore:editQRcode']">重新生成二维码</el-button>
           <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)"
             v-hasPermi="['qrcode:qrcodestore:remove']">删除</el-button>
         </template>
@@ -141,11 +154,22 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog title="查看二维码" :visible.sync="openphoto" width="300px" append-to-body>
+      <el-row :gutter="20">
+        <div class="demo-image" style="text-align: center;">
+          <el-image style="width: 250px; height: 250px" :src="url" :title="title" :fit="fit"></el-image>
+        </div>
+      </el-row>
+      <el-row :gutter="20" style="text-align: center; margin-top: 5px;">
+        <el-button type="info" icon="el-icon-download" circle @click="downloadIamge"></el-button>
+      </el-row>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { listQrcodestore, getQrcodestore, delQrcodestore, addQrcodestore, updateQrcodestore } from "@/api/qrcode/qrcodestore"
+import { listQrcodestore, getQrcodestore, delQrcodestore, addQrcodestore, updateQrcodestore, generateQrcode, generateQrcodeids } from "@/api/qrcode/qrcodestore"
 
 export default {
   name: "Qrcodestore",
@@ -169,6 +193,11 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      // 显示二维码弹出层
+      openphoto: false,
+      url: null,
+      fit: 'contain',
+      downloadQrcodeName: null,
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -263,6 +292,48 @@ export default {
         this.title = "修改二维码点位信息"
       })
     },
+    /** 生成二维码按钮操作 */
+    handleGenerate(row) {
+      this.reset()
+      const id = row.id || this.ids
+      if (!id) {
+        this.$modal.msgWarning("请选择一条数据！")
+        return
+      }
+      // 弹出确认框
+      this.$modal.confirm('是否确认重新生成二维码，重新生成后之前的二维码将过期？').then(() => {
+        this.loading = true
+        // 先查询详情
+        getQrcodestore(id).then(response => {
+          this.form = response.data
+          // 详情赋值完再调用生成接口
+          generateQrcode(this.form).then(() => {
+            this.$modal.msgSuccess("生成完成！")
+            this.getList()
+            this.loading = false
+          }).catch(err => {
+            this.$modal.msgError("生成失败：" + (err.msg || err))
+            this.loading = false
+          })
+        }).catch(err => {
+          this.$modal.msgError("获取数据失败：" + (err.msg || err))
+          this.loading = false
+        })
+      }).catch(() => {
+        // 点击取消，不做任何操作
+      })
+    },
+    handleSelectPhoto(row) {
+      this.reset();
+      const id = row.id || this.ids
+      getQrcodestore(id).then(response => {
+        this.form = response.data;
+        this.url = process.env.VUE_APP_BASE_API + response.data.qrPhoto;
+        this.downloadQrcodeName = response.data.name;
+        this.openphoto = true;
+        this.title = "查看二维码";
+      });
+    },
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
@@ -293,12 +364,42 @@ export default {
         this.$modal.msgSuccess("删除成功")
       }).catch(() => { })
     },
+    /** 生成二维码按钮操作 */
+    handleGenerateids(row) {
+      const ids = row.id || this.ids
+      this.$modal.confirm('是否确认生成二维码编号为"' + ids + '"的数据项？').then(function () {
+        return generateQrcodeids(ids)
+      }).then(() => {
+        this.getList()
+        this.$modal.msgSuccess("生成成功")
+      }).catch(() => { })
+    },
     /** 导出按钮操作 */
     handleExport() {
       this.download('qrcode/qrcodestore/export', {
         ...this.queryParams
       }, `qrcodestore_${new Date().getTime()}.xlsx`)
-    }
+    },
+    downloadZip(row) {
+      const id = row.id || this.ids
+      if (!id) {
+        this.$modal.msgWarning("请至少选择一条数据导出压缩包！")
+        return
+      }
+      this.$modal.confirm('是否确认导出数据项为压缩包？').then(() => {
+        this.download('qrcode/qrcodestore/downloadZip', this.queryParams, `二维码_${new Date().getTime()}.zip`)
+      }).catch(() => { });
+    },
+        // 下载二维码
+    downloadIamge() {
+      const link = document.createElement('a');
+      link.href = this.url;
+      link.download = this.downloadQrcodeName; // 图片的文件名  
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    },
   }
 }
 </script>

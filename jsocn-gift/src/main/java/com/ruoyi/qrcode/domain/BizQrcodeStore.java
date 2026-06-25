@@ -27,23 +27,23 @@ public class BizQrcodeStore extends BaseEntity
     private String address;
 
     /** 联系电话 */
-    @Excel(name = "联系电话")
+
     private String phone;
 
     /** 用途 */
-    @Excel(name = "用途")
+
     private String purpose;
 
     /** 二维码访问链接 */
-    @Excel(name = "二维码访问链接")
+
     private String qrcodeUrl;
 
     /** 二码照片 */
-    @Excel(name = "二码照片")
+
     private String qrPhoto;
 
     /** 对接人 */
-    @Excel(name = "对接人")
+
     private String contactPerson;
 
     /** 扫码次数 */
@@ -51,11 +51,11 @@ public class BizQrcodeStore extends BaseEntity
     private Long scanCount;
 
     /** 排序号，数字越小越靠前 */
-    @Excel(name = "排序号，数字越小越靠前")
+    @Excel(name = "排序号")
     private Long sortNum;
 
     /** 扩展字段1 */
-    @Excel(name = "扩展字段1")
+
     private String extInfo;
 
 

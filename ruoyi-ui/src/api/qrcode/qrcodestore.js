@@ -42,3 +42,20 @@ export function delQrcodestore(id) {
     method: 'delete'
   })
 }
+
+// 删除二维码点位信息
+export function generateQrcodeids(id) {
+  return request({
+    url: '/qrcode/qrcodestore/generate/' + id,
+    method: 'put'
+  })
+}
+
+// 生成二维码
+export function generateQrcode(data) {
+  return request({
+    url: '/qrcode/qrcodestore/generate',
+    method: 'put',
+    data: data
+  })
+}

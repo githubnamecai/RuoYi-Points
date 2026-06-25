@@ -2,6 +2,7 @@ package com.ruoyi.qrcode.service;
 
 import java.util.List;
 import com.ruoyi.qrcode.domain.BizQrcodeStore;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * 二维码点位信息Service接口
@@ -51,6 +52,8 @@ public interface IBizQrcodeStoreService
      */
     public int deleteBizQrcodeStoreByIds(Long[] ids);
 
+    public void downloadImagesAsZip(Long[] ids, HttpServletResponse response);
+
     /**
      * 删除二维码点位信息信息
      * 
@@ -58,4 +61,8 @@ public interface IBizQrcodeStoreService
      * @return 结果
      */
     public int deleteBizQrcodeStoreById(Long id);
+
+    int updateQRcode(BizQrcodeStore bizQrcodeStore);
+
+    int updateQRcodeByIds(Long[] ids);
 }

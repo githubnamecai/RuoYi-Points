@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.scan.mapper.JsocnMarketShopScanMapper">
+    
+    <resultMap type="JsocnMarketShopScan" id="JsocnMarketShopScanResult">
+        <result property="id"    column="id"    />
+        <result property="qrcodeId"    column="qrcode_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="userName"    column="user_name"    />
+        <result property="nickName"    column="nick_name"    />
+        <result property="phone"    column="phone"    />
+        <result property="visitType"    column="visit_type"    />
+        <result property="startTime"    column="start_time"    />
+        <result property="ip"    column="ip"    />
+        <result property="deviceModel"    column="device_model"    />
+        <result property="osVersion"    column="os_version"    />
+        <result property="browserName"    column="browser_name"    />
+        <result property="userAgent"    column="user_agent"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectJsocnMarketShopScanVo">
+        select id, qrcode_id, user_id, user_name, nick_name, phone, visit_type, start_time, ip, device_model, os_version, browser_name, user_agent, remark from jsocn_market_shop_scan
+    </sql>
+
+    <select id="selectJsocnMarketShopScanList" parameterType="JsocnMarketShopScan" resultMap="JsocnMarketShopScanResult">
+        <include refid="selectJsocnMarketShopScanVo"/>
+        <where>  
+            <if test="qrcodeId != null "> and qrcode_id = #{qrcodeId}</if>
+            <if test="visitType != null "> and visit_type = #{visitType}</if>
+            <if test="deviceModel != null  and deviceModel != ''"> and device_model like concat('%', #{deviceModel}, '%')</if>
+            <if test="osVersion != null  and osVersion != ''"> and os_version = #{osVersion}</if>
+            <if test="browserName != null  and browserName != ''"> and browser_name like concat('%', #{browserName}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectJsocnMarketShopScanById" parameterType="Long" resultMap="JsocnMarketShopScanResult">
+        <include refid="selectJsocnMarketShopScanVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertJsocnMarketShopScan" parameterType="JsocnMarketShopScan" useGeneratedKeys="true" keyProperty="id">
+        insert into jsocn_market_shop_scan
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="qrcodeId != null">qrcode_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="userName != null">user_name,</if>
+            <if test="nickName != null">nick_name,</if>
+            <if test="phone != null">phone,</if>
+            <if test="visitType != null">visit_type,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="ip != null">ip,</if>
+            <if test="deviceModel != null">device_model,</if>
+            <if test="osVersion != null">os_version,</if>
+            <if test="browserName != null">browser_name,</if>
+            <if test="userAgent != null">user_agent,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="qrcodeId != null">#{qrcodeId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="userName != null">#{userName},</if>
+            <if test="nickName != null">#{nickName},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="visitType != null">#{visitType},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="ip != null">#{ip},</if>
+            <if test="deviceModel != null">#{deviceModel},</if>
+            <if test="osVersion != null">#{osVersion},</if>
+            <if test="browserName != null">#{browserName},</if>
+            <if test="userAgent != null">#{userAgent},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJsocnMarketShopScan" parameterType="JsocnMarketShopScan">
+        update jsocn_market_shop_scan
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="qrcodeId != null">qrcode_id = #{qrcodeId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="userName != null">user_name = #{userName},</if>
+            <if test="nickName != null">nick_name = #{nickName},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="visitType != null">visit_type = #{visitType},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="ip != null">ip = #{ip},</if>
+            <if test="deviceModel != null">device_model = #{deviceModel},</if>
+            <if test="osVersion != null">os_version = #{osVersion},</if>
+            <if test="browserName != null">browser_name = #{browserName},</if>
+            <if test="userAgent != null">user_agent = #{userAgent},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteJsocnMarketShopScanById" parameterType="Long">
+        delete from jsocn_market_shop_scan where id = #{id}
+    </delete>
+
+    <delete id="deleteJsocnMarketShopScanByIds" parameterType="String">
+        delete from jsocn_market_shop_scan where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
