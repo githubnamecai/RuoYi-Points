@@ -1,6 +1,9 @@
 package com.ruoyi.scan.service.impl;
 
 import java.util.List;
+
+import com.ruoyi.qrcode.domain.BizQrcodeStore;
+import com.ruoyi.qrcode.mapper.BizQrcodeStoreMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.scan.mapper.JsocnMarketShopScanMapper;
@@ -18,6 +21,8 @@ public class JsocnMarketShopScanServiceImpl implements IJsocnMarketShopScanServi
 {
     @Autowired
     private JsocnMarketShopScanMapper jsocnMarketShopScanMapper;
+    @Autowired
+    private BizQrcodeStoreMapper bizQrcodeStoreMapper;
 
     /**
      * 查询扫码统计
@@ -52,6 +57,9 @@ public class JsocnMarketShopScanServiceImpl implements IJsocnMarketShopScanServi
     @Override
     public int insertJsocnMarketShopScan(JsocnMarketShopScan jsocnMarketShopScan)
     {
+        BizQrcodeStore bizQrcodeStore = bizQrcodeStoreMapper.selectBizQrcodeStoreById(jsocnMarketShopScan.getQrcodeId());
+        bizQrcodeStore.setScanCount(bizQrcodeStore.getScanCount() + 1);
+        bizQrcodeStoreMapper.updateBizQrcodeStore(bizQrcodeStore);
         return jsocnMarketShopScanMapper.insertJsocnMarketShopScan(jsocnMarketShopScan);
     }
 

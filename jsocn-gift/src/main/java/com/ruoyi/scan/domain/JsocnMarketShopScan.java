@@ -28,19 +28,19 @@ public class JsocnMarketShopScan extends BaseEntity
     private Long userId;
 
     /** 用户姓名 */
-    @Excel(name = "用户姓名")
+//    @Excel(name = "用户姓名")
     private String userName;
 
     /** 用户昵称 */
-    @Excel(name = "用户昵称")
+//    @Excel(name = "用户昵称")
     private String nickName;
 
     /** 手机号 */
-    @Excel(name = "手机号")
+//    @Excel(name = "手机号")
     private String phone;
 
     /** 访问方式 0-链接跳转 1-扫码访问 */
-    @Excel(name = "访问方式 0-链接跳转 1-扫码访问")
+//    @Excel(name = "访问方式 0-链接跳转 1-扫码访问")
     private Integer visitType;
 
     /** 扫码时间 */

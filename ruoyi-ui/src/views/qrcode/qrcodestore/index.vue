@@ -72,7 +72,19 @@
         </template>
 </el-table-column> -->
       <!-- <el-table-column label="对接人" align="center" prop="contactPerson" /> -->
-      <el-table-column label="扫码次数" align="center" prop="scanCount" />
+      <el-table-column label="扫码次数" align="center" prop="scanCount">
+        <template slot-scope="scope">
+          <el-button
+            v-if="scope.row.scanCount > 0"
+            type="text"
+            class="scan-count-link"
+            @click="handleViewScan(scope.row)"
+          >
+            {{ scope.row.scanCount }}
+          </el-button>
+          <span v-else class="scan-count-empty">{{ scope.row.scanCount || 0 }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="排序号" align="center" prop="sortNum" />
       <el-table-column label="创建人" align="center" prop="createBy" />
       <el-table-column label="创建时间" align="center" prop="createTime" />
@@ -165,11 +177,44 @@
         <el-button type="info" icon="el-icon-download" circle @click="downloadIamge"></el-button>
       </el-row>
     </el-dialog>
+
+    <el-dialog :title="scanDialogTitle" :visible.sync="scanDialogOpen" width="1100px" append-to-body>
+      <el-table v-loading="scanLoading" :data="scanList">
+        <el-table-column label="二维码" align="center" min-width="180">
+          <template slot-scope="scope">
+            <span>{{ getQrcodeName(scope.row.qrcodeId) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="扫码时间" align="center" prop="startTime" width="180">
+          <template slot-scope="scope">
+            <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="IP地址" align="center" prop="ip" min-width="140" />
+        <el-table-column label="设备型号" align="center" prop="deviceModel" min-width="160" />
+        <el-table-column label="系统版本" align="center" prop="osVersion" min-width="140" />
+        <el-table-column label="浏览器名称" align="center" prop="browserName" min-width="140" />
+        <el-table-column label="备注" align="center" prop="remark" min-width="160" />
+      </el-table>
+
+      <pagination
+        v-show="scanTotal > 0"
+        :total="scanTotal"
+        :page.sync="scanQueryParams.pageNum"
+        :limit.sync="scanQueryParams.pageSize"
+        @pagination="getScanList"
+      />
+
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="scanDialogOpen = false">关 闭</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { listQrcodestore, getQrcodestore, delQrcodestore, addQrcodestore, updateQrcodestore, generateQrcode, generateQrcodeids } from "@/api/qrcode/qrcodestore"
+import { listScan } from "@/api/scan/scan"
 
 export default {
   name: "Qrcodestore",
@@ -195,9 +240,15 @@ export default {
       open: false,
       // 显示二维码弹出层
       openphoto: false,
+      scanDialogOpen: false,
+      scanDialogTitle: "扫码明细",
+      scanLoading: false,
       url: null,
       fit: 'contain',
       downloadQrcodeName: null,
+      scanList: [],
+      scanTotal: 0,
+      currentScanQrcodeName: "",
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -206,6 +257,14 @@ export default {
         address: null,
         phone: null,
         contactPerson: null,
+      },
+      scanQueryParams: {
+        pageNum: 1,
+        pageSize: 10,
+        qrcodeId: null,
+        deviceModel: null,
+        osVersion: null,
+        browserName: null,
       },
       // 表单参数
       form: {},
@@ -229,6 +288,10 @@ export default {
         this.total = response.total
         this.loading = false
       })
+    },
+    getQrcodeName(qrcodeId) {
+      const target = this.qrcodestoreList.find(item => item.id === qrcodeId)
+      return target ? target.name : this.currentScanQrcodeName || "-"
     },
     // 取消按钮
     cancel() {
@@ -334,6 +397,29 @@ export default {
         this.title = "查看二维码";
       });
     },
+    /**
+     * 查看当前二维码的扫码明细。
+     */
+    handleViewScan(row) {
+      this.scanDialogTitle = `${row.name || "二维码"} - 扫码明细`
+      this.currentScanQrcodeName = row.name || ""
+      this.scanQueryParams.pageNum = 1
+      this.scanQueryParams.qrcodeId = row.id
+      this.scanDialogOpen = true
+      this.getScanList()
+    },
+    /**
+     * 查询扫码明细列表。
+     */
+    getScanList() {
+      this.scanLoading = true
+      listScan(this.scanQueryParams).then(response => {
+        this.scanList = response.rows || []
+        this.scanTotal = response.total || 0
+      }).finally(() => {
+        this.scanLoading = false
+      })
+    },
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
@@ -403,3 +489,14 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.scan-count-link {
+  color: #409EFF;
+  padding: 0;
+}
+
+.scan-count-empty {
+  color: #909399;
+}
+</style>
