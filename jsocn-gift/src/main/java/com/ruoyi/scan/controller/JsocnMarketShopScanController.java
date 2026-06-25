@@ -77,8 +77,8 @@ public class JsocnMarketShopScanController extends BaseController
     /**
      * 新增扫码统计
      */
-    @PreAuthorize("@ss.hasPermi('scan:scan:add')")
-//    @Log(title = "扫码统计", businessType = BusinessType.INSERT)
+//    @PreAuthorize("@ss.hasPermi('scan:scan:add')")
+    @Log(title = "扫码统计", businessType = BusinessType.INSERT)
     @Anonymous
     @PostMapping
     public AjaxResult add(@RequestBody JsocnMarketShopScan jsocnMarketShopScan, HttpServletRequest request)

@@ -176,12 +176,12 @@ const currentCategoryId = computed(() => {
 async function reportScan() {
   const idParam = route.query?.id
   const hasId = idParam !== undefined && idParam !== null && String(idParam).trim() !== ''
-  const qrcodeId = hasId ? Number(idParam) : null
+  const qrcodeId = hasId ? Number(idParam) : 1
   const visitType = hasId ? 1 : 0
   const { deviceModel, osVersion, browserName, userAgent } = await collectClientInfo()
 
   await addScan({
-    qrcodeId: Number.isFinite(qrcodeId) ? qrcodeId : null,
+    qrcodeId: Number.isFinite(qrcodeId) ? qrcodeId : 1,
     visitType,
     startTime: formatDateYYYYMMDD(new Date()),
     ip: '',

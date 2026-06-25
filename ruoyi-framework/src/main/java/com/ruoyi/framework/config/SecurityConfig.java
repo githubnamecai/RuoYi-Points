@@ -106,6 +106,8 @@ public class SecurityConfig
                     .requestMatchers("/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**", "/druid/**").permitAll()
                     // H5 端接口由 H5TokenInterceptor 鉴权
                     .requestMatchers("/h5-api/**").permitAll()
+                    // 扫码统计上报：允许匿名访问
+                    .requestMatchers("/scan/scan/**").permitAll()
                     // 除上面外的所有请求全部需要鉴权认证
                     .anyRequest().authenticated();
             })
