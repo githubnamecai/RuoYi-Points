@@ -86,36 +86,70 @@
 
     <el-dialog title="修改订单" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-form-item label="收货人" prop="consignee">
-          <el-input v-model="form.consignee" placeholder="请输入收货人" />
-        </el-form-item>
-        <el-form-item label="联系电话" prop="phone">
-          <el-input v-model="form.phone" placeholder="请输入联系电话" />
-        </el-form-item>
+
+        <el-form :model="form" label-width="80px">
+          <el-row>
+            <!-- 第一行：商品、数量 -->
+            <el-col :span="12">
+              <el-form-item label="商品" prop="goodsName">
+                <el-input v-model="form.goodsName" placeholder="请输入商品名称" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="数量" prop="quantity">
+                <el-input v-model="form.quantity" placeholder="请输入数量" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row>
+            <!-- 第二行：收货人、联系电话 -->
+            <el-col :span="12">
+              <el-form-item label="收货人" prop="consignee">
+                <el-input v-model="form.consignee" placeholder="请输入收货人" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="联系电话" prop="phone">
+                <el-input v-model="form.phone" placeholder="请输入联系电话" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
         <el-form-item label="收货地址" prop="address">
           <el-input v-model="form.address" type="textarea" placeholder="请输入详细收货地址" />
         </el-form-item>
-        <el-form-item label="物流公司" prop="expressCompany">
-          <el-input v-model="form.expressCompany" placeholder="请输入物流公司" />
-        </el-form-item>
-        <el-form-item label="物流单号" prop="expressNo">
-          <el-input v-model="form.expressNo" placeholder="请输入物流单号" />
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-select v-model="form.status" placeholder="状态" clearable>
-            <el-option v-for="dict in dict.type.points_order_status" :key="dict.value" :label="dict.label"
-              :value="dict.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item v-if="form.goodsType === '0'" label="支付金额" prop="payAmount">
-          <el-input-number v-model="form.payAmount" :min="0" :precision="2" :step="0.01" />
-        </el-form-item>
+        <el-row> <el-col :span="12">
+            <el-form-item label="物流公司" prop="expressCompany">
+              <el-input v-model="form.expressCompany" placeholder="请输入物流公司" />
+            </el-form-item></el-col> <el-col :span="12">
+            <el-form-item label="物流单号" prop="expressNo">
+              <el-input v-model="form.expressNo" placeholder="请输入物流单号" />
+            </el-form-item></el-col>
+        </el-row>
+        <el-row :gutter="16">
+          <el-col :span="12" :xs="24">
+            <!-- 单独缩小这一项标签宽度 -->
+            <el-form-item label="状态" prop="status" label-width="65px">
+              <el-select v-model="form.status" placeholder="状态" clearable style="width:100%">
+                <el-option v-for="dict in dict.type.points_order_status" :key="dict.value" :label="dict.label"
+                  :value="dict.value" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12" :xs="24">
+            <el-form-item v-if="form.goodsType === '0'" label="支付金额" prop="payAmount" label-width="75px">
+              <el-input-number v-model="form.payAmount" :min="0" :precision="2" :step="0.01" style="width:100%" />
+            </el-form-item>
+          </el-col>
+        </el-row>
         <el-form-item v-if="form.goodsType === '0'" label="线下支付" prop="offlinePaid">
           <el-radio-group v-model="form.offlinePaid">
             <el-radio label="1">已完成线下支付</el-radio>
             <el-radio label="0">其他支付</el-radio>
           </el-radio-group>
         </el-form-item>
+
         <el-form-item label="订单取消原因" prop="closeReason">
           <el-input v-model="form.closeReason" type="textarea" placeholder="请输入订单取消原因" />
         </el-form-item>
@@ -241,8 +275,8 @@ export default {
           // 实物订单根据线下支付状态追加 remark
           if (data.goodsType === '0') {
             const payRemark = data.offlinePaid === '1' ? '已完成线下支付' : '其他支付'
-            data.remark=payRemark
-          //   data.remark = data.remark ? data.remark + '；' + payRemark : payRemark
+            data.remark = payRemark
+            //   data.remark = data.remark ? data.remark + '；' + payRemark : payRemark
           }
           delete data.offlinePaid
           updateOrder(data).then(response => {

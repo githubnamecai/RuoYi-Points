@@ -1,7 +1,7 @@
 <template>
   <div class="order-list page-content">
-    <van-tabs v-model:active="activeTab" sticky offset-top="0"
-              title-active-color="#ff8c00" color="#ff8c00" @change="onTabChange">
+    <van-tabs v-model:active="activeTab" sticky offset-top="0" title-active-color="#ff8c00" color="#ff8c00"
+      @change="onTabChange">
       <van-tab title="全部" name="" />
       <van-tab title="待发货" name="0" />
       <van-tab title="已发货" name="1" />
@@ -26,7 +26,7 @@
               <div class="name">{{ o.goodsName }}</div>
               <div class="meta">数量: {{ o.quantity }} · {{ o.goodsType === '1' ? '虚拟' : '实物' }}</div>
             </div>
-            <div class="points">-{{ o.pointsUsed }}积分</div>
+            <div class="points" v-if="o.goodsType === '1'">-{{ o.pointsUsed }}积分</div>
           </div>
           <div v-if="o.payAmount != null" class="pay-amount">支付金额: <span>¥{{ o.payAmount }}</span></div>
           <div class="actions" v-if="o.status === '1'">
@@ -39,7 +39,7 @@
 </template>
 
 <script setup>
-import { ref,onMounted  } from 'vue'
+import { ref, onMounted } from 'vue'
 import { showDialog, showToast } from 'vant'
 import { listOrders, confirmReceipt } from '@/api/user'
 
@@ -75,7 +75,7 @@ function formatImg(url) {
  * 获取订单状态文案。
  */
 function statusText(s) {
-  return { '0':'待发货','1':'已发货','2':'已完成','3':'已关闭' }[s] || s
+  return { '0': '待发货', '1': '已发货', '2': '已完成', '3': '已关闭' }[s] || s
 }
 
 /**
@@ -105,10 +105,10 @@ async function loadMore() {
 /**
  * 切换订单状态标签后重新加载数据。
  */
-function onTabChange() { 
-  reset(); 
+function onTabChange() {
+  reset();
   loading.value = true;
-  loadMore(); 
+  loadMore();
 }
 
 /**
@@ -128,11 +128,11 @@ async function confirm(o) {
     await showDialog({ title: '确认收货？', message: '确认已收到商品？', showCancelButton: true })
     await confirmReceipt(o.orderId)
     showToast({
-    message: '已确认收货',
-    className: 'my-toast'
-})
+      message: '已确认收货',
+      className: 'my-toast'
+    })
     onRefresh()
-  } catch (e) {}
+  } catch (e) { }
 }
 </script>
 
@@ -147,7 +147,9 @@ async function confirm(o) {
   backdrop-filter: blur(14px);
 }
 
-.empty { padding-top: 60px; }
+.empty {
+  padding-top: 60px;
+}
 
 .order-card {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(249, 251, 255, 0.82));
@@ -159,9 +161,12 @@ async function confirm(o) {
 }
 
 .order-no {
-  display: flex; justify-content: space-between;
-  font-size: 12px; color: #7f8ba0;
-  padding-bottom: 10px; border-bottom: 1px dashed rgba(124, 147, 187, 0.2);
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #7f8ba0;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed rgba(124, 147, 187, 0.2);
 }
 
 .order-no .status {
@@ -182,7 +187,13 @@ async function confirm(o) {
   color: #8f98ab;
 }
 
-.goods { display: flex; gap: 10px; padding: 10px 0; align-items: center; }
+.goods {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  align-items: center;
+}
+
 .goods img {
   width: 68px;
   height: 68px;
@@ -190,9 +201,24 @@ async function confirm(o) {
   object-fit: cover;
   background: linear-gradient(180deg, #f6f9ff, #edf4ff);
 }
-.goods .info { flex: 1; }
-.goods .name { font-size: 14px; color: #1a2640; line-height: 1.45; font-weight: 700; }
-.goods .meta { font-size: 12px; color: #7f8ba0; margin-top: 6px; }
+
+.goods .info {
+  flex: 1;
+}
+
+.goods .name {
+  font-size: 14px;
+  color: #1a2640;
+  line-height: 1.45;
+  font-weight: 700;
+}
+
+.goods .meta {
+  font-size: 12px;
+  color: #7f8ba0;
+  margin-top: 6px;
+}
+
 .goods .points {
   color: #0d5bd7;
   font-weight: 700;
@@ -200,8 +226,18 @@ async function confirm(o) {
   border-radius: 999px;
   background: rgba(13, 91, 215, 0.08);
 }
-.pay-amount { font-size: 12px; color: #7f8ba0; text-align: right; padding-top: 6px; }
-.pay-amount span { color: #d85267; font-weight: 700; }
+
+.pay-amount {
+  font-size: 12px;
+  color: #7f8ba0;
+  text-align: right;
+  padding-top: 6px;
+}
+
+.pay-amount span {
+  color: #d85267;
+  font-weight: 700;
+}
 
 .actions {
   text-align: right;

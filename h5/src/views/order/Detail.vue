@@ -19,7 +19,7 @@
           <div class="name">{{ order.goodsName }}</div>
           <div class="qty">数量: {{ order.quantity }}</div>
         </div>
-        <div class="points">-{{ order.pointsUsed }}</div>
+        <div class="points" v-if="order.goodsType === '1'">-{{ order.pointsUsed }}积分</div>
       </div>
 
       <div class="card info-list">

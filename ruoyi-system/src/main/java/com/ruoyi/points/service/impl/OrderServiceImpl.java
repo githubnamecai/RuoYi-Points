@@ -212,7 +212,9 @@ public class OrderServiceImpl implements IOrderService
         order.setGoodsType(goods.getGoodsType());
         order.setQuantity(dto.getQuantity());
         order.setPointsUsed(totalPoints);
-        order.setPayAmount(payAmount);
+        // 实物商品：支付金额 = 商品总价 - 优惠券抵扣,后端有计算但是前端已经传过来了，导致有些数据不对，采用前端传递的数据
+//        order.setPayAmount(payAmount);
+        order.setPayAmount(dto.getPayAmount() != null ? dto.getPayAmount() : payAmount);
         order.setStatus(PointsConstants.ORDER_STATUS_PENDING);
         order.setConsignee(consignee);
         order.setPhone(phone);

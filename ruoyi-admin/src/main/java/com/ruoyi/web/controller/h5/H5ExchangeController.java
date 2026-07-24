@@ -1,5 +1,6 @@
 package com.ruoyi.web.controller.h5;
 
+import io.lettuce.core.ScriptOutputType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
