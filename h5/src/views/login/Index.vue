@@ -71,7 +71,7 @@
           </template>
         </van-field>
       </van-cell-group>
-      <div class="tip" v-if="loginType === 'sms'">未注册手机号将自动注册，开发环境可使用万能码 <b>123456</b></div>
+      <div class="tip" v-if="loginType === 'sms'">未注册手机号将自动注册</div>
      
 
       <div class="submit">

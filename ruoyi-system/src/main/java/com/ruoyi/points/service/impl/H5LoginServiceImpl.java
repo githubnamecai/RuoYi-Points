@@ -49,12 +49,12 @@ public class H5LoginServiceImpl implements IH5LoginService
     public void sendSmsCode(String phone)
     {
         if (StringUtils.isEmpty(phone)) throw new ServiceException("手机号不能为空");
-        // Mock：随机 6 位验证码 -> Redis（5 分钟过期）
+        // 随机 6 位验证码 -> Redis（5 分钟过期）
         String code = String.format("%06d", (int) (Math.random() * 1000000));
         redisTemplate.opsForValue().set(PointsConstants.H5_SMS_CODE_PREFIX + phone, code,
             PointsConstants.SMS_EXPIRE_MINUTES, TimeUnit.MINUTES);
-        // 真实环境对接短信服务商，此处仅打印日志
-        log.info("[SMS-MOCK] 向手机号 {} 发送验证码: {}（5分钟有效）", phone, code);
+        // TODO 生产环境需对接短信服务商下发验证码；日志仅 debug 级别留痕，避免验证码泄露
+        log.debug("H5 短信验证码已生成并发送: phone={}", phone);
     }
 
     @Override
@@ -64,8 +64,8 @@ public class H5LoginServiceImpl implements IH5LoginService
             throw new ServiceException("参数不完整");
         String key = PointsConstants.H5_SMS_CODE_PREFIX + phone;
         String real = redisTemplate.opsForValue().get(key);
-        // 测试便利：万能码 123456 始终有效
-        if (!"123456".equals(code) && !code.equals(real))
+        // 严格校验：必须与 Redis 中已发送的验证码完全一致（一次性，校验后立即删除）
+        if (StringUtils.isEmpty(real) || !real.equals(code))
             throw new ServiceException("验证码错误或已过期");
         redisTemplate.delete(key);
 
