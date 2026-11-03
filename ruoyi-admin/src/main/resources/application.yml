@@ -7,8 +7,8 @@ ruoyi:
   # 版权年份
   copyrightYear: 2026
   # 文件路径 示例（ Windows配置D:/ruoyi/uploadPath，Linux配置 /home/ruoyi/uploadPath）
-  profile: D:/ruoyi/uploadPath
-#  profile: /home/ruoyi/uploadQuanyi
+#  profile: D:/ruoyi/uploadPath
+  profile: /home/ruoyi/uploadQuanyi
   # 获取ip地址开关
   addressEnabled: false
   # 验证码类型 math 数字计算 char 字符验证
@@ -100,7 +100,8 @@ token:
   # 令牌自定义标识
   header: Authorization
   # 令牌密钥
-  secret: abcdefghijklmnopqrstuvwxyz
+  secret: Z5TBr1vx2EwtALsEx8R9kHO9O7uKOCsv
+
   # 令牌有效期（默认30分钟）
   expireTime: 300
 
@@ -119,19 +120,24 @@ pagehelper:
   supportMethodsArguments: true
   params: count=countSql
 
-# Springdoc配置
+# Springdoc（Swagger / OpenAPI）配置
+# 安全要求：生产环境不对外暴露任何接口文档，以下两项必须保持 false
 springdoc:
+  # 关闭 api-docs 接口文档（默认开启，必须显式关闭），关闭后 /v3/api-docs、/v3/api-docs/** 均不可访问
   api-docs:
+    enabled: false
     path: /v3/api-docs
+  # 关闭 Swagger UI 页面，关闭后 /swagger-ui.html、/swagger-ui/index.html 均不可访问
   swagger-ui:
     enabled: false
     path: /swagger-ui.html
     tags-sorter: alpha
-  group-configs:
-    - group: 'default'
-      display-name: '测试模块'
-      paths-to-match: '/**'
-      packages-to-scan: com.ruoyi.web.controller.tool
+  # 分组配置仅在需要开放文档时使用，默认关闭 api-docs 后无需启用
+  # group-configs:
+  #   - group: 'default'
+  #     display-name: '测试模块'
+  #     paths-to-match: '/**'
+  #     packages-to-scan: com.ruoyi.web.controller.tool
 
 # 防盗链配置
 referer:
@@ -145,6 +151,15 @@ xss:
   # 过滤开关
   enabled: true
   # 排除链接（多个用逗号分隔）
-  excludes: /system/notice
+  # /h5-api/auth/*：登录/注册接口只接收手机号、密码、验证码，密码属凭证不应被转义（含 < > 等字符的密码会被改写导致登录失败）
+  # /h5-api/user/resetpwd：改密接口同样只接收密码，理由同上
+  excludes: /system/notice,/h5-api/auth/*,/h5-api/user/resetpwd
   # 匹配链接
-  urlPatterns: /system/*,/monitor/*,/tool/*
+  urlPatterns: /system/*,/monitor/*,/tool/*,/h5-api/*
+
+# H5 端配置
+h5:
+  # token 有效期（分钟），默认 7 天；JWT exp 与 Redis 缓存 TTL 共用此值，如需缩短直接改这里
+  token-expire-minutes: 10080
+  # 密码登录：同一 IP 每分钟最大尝试次数（防止同一出口轮询多个手机号，阈值比单账号宽松以兼容 NAT）
+  login-ip-max-per-minute: 20

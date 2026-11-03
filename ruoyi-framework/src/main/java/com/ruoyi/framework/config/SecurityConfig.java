@@ -103,7 +103,8 @@ public class SecurityConfig
                 requests.requestMatchers("/login", "/register", "/captchaImage").permitAll()
                     // 静态资源，可匿名访问
                     .requestMatchers(HttpMethod.GET, "/", "/*.html", "/**.html", "/**.css", "/**.js", "/profile/**").permitAll()
-                    .requestMatchers("/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**", "/druid/**").permitAll()
+                    // 接口文档（Swagger UI / api-docs）已在 application.yml 中关闭，此处不再放行，避免配置被误开启后匿名可访问
+//                    .requestMatchers("/druid/**").permitAll()
                     // H5 端接口由 H5TokenInterceptor 鉴权
                     .requestMatchers("/h5-api/**").permitAll()
                     // 扫码统计上报：允许匿名访问

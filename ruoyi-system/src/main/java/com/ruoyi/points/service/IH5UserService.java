@@ -11,13 +11,21 @@ public interface IH5UserService
     H5User selectUserById(Long userId);
     H5User selectUserByPhone(String phone);
 
-    /** 首次登录自动注册 */
-    H5User registerOrGet(String phone, String loginIp);
-
     int insertUser(H5User user);
     int updateUser(H5User user);
     // ... 已有方法
     int resetPassword(Long userId, String newPassword);
+
+    /**
+     * H5 用户自助修改密码（校验原密码 + 新密码复杂度）
+     *
+     * @param userId 当前登录用户ID
+     * @param oldPassword 原密码（明文）
+     * @param newPassword 新密码（明文）
+     * @return 影响行数
+     */
+    int changePassword(Long userId, String oldPassword, String newPassword);
+
     int deleteUserByIds(Long[] userIds);
     int changeStatus(Long userId, String status);
 

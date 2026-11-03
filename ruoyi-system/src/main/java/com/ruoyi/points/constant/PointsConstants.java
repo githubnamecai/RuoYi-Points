@@ -10,8 +10,17 @@ public class PointsConstants
     /** H5 用户 LoginUser 缓存 key 前缀（与 RuoYi token 体系隔离，但复用相同的 JWT/Redis 机制） */
     public static final String H5_TOKEN_PREFIX = "h5_login_tokens:";
 
-    /** H5 短信验证码 Redis key 前缀 */
-    public static final String H5_SMS_CODE_PREFIX = "h5:sms:code:";
+    /** H5 用户维度 token 索引 key 前缀（Set<uuid>），用于「改密后下线该用户全部会话」 */
+    public static final String H5_USER_TOKENS_PREFIX = "h5:user:tokens:";
+
+    /** H5 修改密码原密码错误次数 key 前缀（按用户维度计数） */
+    public static final String H5_PWD_RETRY_PREFIX = "h5:pwd:retry:";
+
+    /** H5 密码登录失败次数 key 前缀（按手机号维度计数） */
+    public static final String H5_LOGIN_FAIL_PREFIX = "h5:login:fail:";
+
+    /** H5 密码登录 IP 限流 key 前缀 */
+    public static final String H5_LOGIN_IP_RATE_PREFIX = "h5:login:ip:";
 
     /** H5 兑换分布式锁 key 前缀 */
     public static final String H5_EXCHANGE_LOCK_PREFIX = "exchange:lock:";
@@ -22,11 +31,22 @@ public class PointsConstants
     /** 商品库存 Redis key 前缀（预减库存） */
     public static final String GOODS_STOCK_PREFIX = "points:stock:";
 
-    /** 验证码默认 5 分钟有效期 */
-    public static final long SMS_EXPIRE_MINUTES = 5L;
-
-    /** H5 token 有效期（分钟） */
+    /** H5 token 有效期（分钟）默认值，实际取值见配置 h5.token-expire-minutes */
     public static final long H5_TOKEN_EXPIRE_MINUTES = 7 * 24 * 60L;
+
+    // ============ 参数配置键（系统管理-参数设置） ============
+
+    /** H5 登录开关：值为 true 时正常登录，其他值一律关闭登录 */
+    public static final String CONFIG_H5_LOGIN_ENABLED = "h5.login.enabled";
+
+    /** H5 注册开关：值为 true 时开放注册，其他值隐藏注册入口且禁止注册 */
+    public static final String CONFIG_H5_REGISTER_ENABLED = "h5.register.enabled";
+
+    /** H5 登录关闭时的提示语 */
+    public static final String H5_LOGIN_CLOSED_MSG = "系统关闭登录";
+
+    /** H5 注册关闭时的提示语 */
+    public static final String H5_REGISTER_CLOSED_MSG = "系统未开启注册功能";
 
     // ============ 积分来源类型 ============
     public static final String SOURCE_SIGN_IN = "SIGN_IN";

@@ -6,17 +6,11 @@
       <div class="subtitle">签到 · 兑换 · 福利</div>
     </div>
 
-    <van-form @submit="onSubmit" class="form">
+    <van-form v-if="configReady && loginEnabled" @submit="onSubmit" class="form">
       <div v-if="route.query.redirect" class="login-tip">
         <van-icon name="info-o" /> 请先登录
       </div>
 
-      <!-- 短信和密码登录 -->
-      <!-- <van-tabs v-model:active="loginType" title-active-color="#ff8c00" color="#ff8c00" background="transparent">
-        <van-tab title="短信登录" name="sms"></van-tab>
-        <van-tab title="密码登录" name="password"></van-tab>
-      </van-tabs> -->
-     
       <div class="form-title">账号登录</div>
 
       <van-cell-group inset>
@@ -29,23 +23,6 @@
           :rules="[{ pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号' }]"
         />
         <van-field
-          v-if="loginType === 'sms'"
-          v-model="smsCode"
-          center
-          label="验证码"
-          placeholder="请输入验证码"
-          maxlength="6"
-          :rules="[{ required: true, message: '请输入验证码' }]"
-        >
-          <template #button>
-            <van-button size="small" type="primary" :disabled="counting" @click="sendCode">
-              {{ counting ? `${count}s 后重发` : '获取验证码' }}
-            </van-button>
-          </template>
-        </van-field>
-       
-        <van-field
-          v-if="loginType === 'password'"
           v-model="password"
           type="password"
           label="密码"
@@ -53,7 +30,6 @@
           :rules="[{ required: true, message: '请输入密码' }]"
         />
         <van-field
-          v-if="loginType === 'password'"
           v-model="captchaCode"
           center
           label="验证码"
@@ -71,8 +47,6 @@
           </template>
         </van-field>
       </van-cell-group>
-      <div class="tip" v-if="loginType === 'sms'">未注册手机号将自动注册</div>
-     
 
       <div class="submit">
         <van-button block round type="primary" native-type="submit" :loading="loading">
@@ -80,52 +54,44 @@
         </van-button>
       </div>
 
-      <div class="register-link" @click="goRegister">
+      <div v-if="registerEnabled" class="register-link" @click="goRegister">
         没有账号？<span>立即注册</span>
       </div>
     </van-form>
+
+    <!-- 后台「H5端-登录开关」关闭时展示 -->
+    <div v-if="configReady && !loginEnabled" class="closed-box">
+      <div class="closed-icon">!</div>
+      <div class="closed-title">系统关闭登录</div>
+      <div class="closed-tip">当前暂未开放登录，请稍后再试</div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { showToast } from 'vant'
-import { login, getCaptchaImage, sendSms } from '@/api/auth'
+import { login, getCaptchaImage } from '@/api/auth'
 import { useUserStore } from '@/stores/user'
+import { useAppStore } from '@/stores/app'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const appStore = useAppStore()
 const phone = ref('')
 const password = ref('')
 const captchaCode = ref('')
 const captchaImg = ref('')
 const captchaUuid = ref('')
 const loading = ref(false)
-
-const loginType = ref('password')
-const smsCode = ref('')
-const counting = ref(false)
-const count = ref(60)
-
-/** 发送短信验证码 */
-async function sendCode() {
-  if (!/^1[3-9]\d{9}$/.test(phone.value)) {
-    showToast({ message: '请输入正确的手机号', className: 'my-toast' })
-    return
-  }
-  try {
-    await sendSms(phone.value)
-    showToast({ message: '验证码已发送', className: 'my-toast' })
-    counting.value = true
-    count.value = 60
-    const timer = setInterval(() => {
-      count.value--
-      if (count.value <= 0) { clearInterval(timer); counting.value = false }
-    }, 1000)
-  } catch (e) {}
-}
+/** 开关配置是否已拉取完成（避免先渲染表单再切换的闪烁） */
+const configReady = ref(false)
+/** 登录开关：true 正常登录，false 系统关闭登录 */
+const loginEnabled = computed(() => appStore.loginEnabled)
+/** 注册开关：false 时隐藏注册入口 */
+const registerEnabled = computed(() => appStore.registerEnabled)
 
 /** 加载验证码 */
 async function loadCaptcha() {
@@ -144,19 +110,24 @@ async function loadCaptcha() {
   }
 }
 
-onMounted(() => {
-  loadCaptcha()
+onMounted(async () => {
+  await appStore.loadH5Config()
+  configReady.value = true
+  // 登录已关闭时不再请求验证码
+  if (loginEnabled.value) loadCaptcha()
 })
 
 /** 提交登录表单 */
 async function onSubmit() {
+  if (!loginEnabled.value) {
+    showToast({ message: '系统关闭登录', className: 'my-toast' })
+    return
+  }
   loading.value = true
   try {
     const res = await login({
-      loginType: loginType.value,
       phone: phone.value,
       password: password.value,
-      code: smsCode.value,
       captchaCode: captchaCode.value,
       uuid: captchaUuid.value
     })
@@ -175,6 +146,7 @@ async function onSubmit() {
 
 /** 跳转注册页 */
 function goRegister() {
+  if (!registerEnabled.value) return
   router.push({ path: '/register', query: route.query.redirect ? { redirect: route.query.redirect } : {} })
 }
 </script>
@@ -249,6 +221,36 @@ function goRegister() {
     color: #0d5bd7;
     font-weight: 600;
   }
+}
+
+/* 系统关闭登录 */
+.closed-box {
+  margin: 8px 18px 0;
+  padding: 40px 24px;
+  border-radius: 28px;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(249, 251, 255, 0.84));
+  box-shadow: 0 22px 42px rgba(22, 53, 110, 0.08);
+  border: 1px solid rgba(124, 147, 187, 0.12);
+}
+.closed-icon {
+  width: 64px; height: 64px; line-height: 64px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: rgba(13, 91, 215, 0.08);
+  color: #0d5bd7;
+  font-size: 32px;
+  font-weight: 700;
+}
+.closed-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a2640;
+}
+.closed-tip {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #8a95a9;
 }
 
 .form :deep(.van-cell-group) {

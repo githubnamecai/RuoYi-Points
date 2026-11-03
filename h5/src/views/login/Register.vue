@@ -72,13 +72,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { showToast } from 'vant'
 import { register, getCaptchaImage } from '@/api/auth'
+import { useAppStore } from '@/stores/app'
 
 const route = useRoute()
 const router = useRouter()
+const appStore = useAppStore()
 const phone = ref('')
 const password = ref('')
 const confirmPwd = ref('')
@@ -86,6 +88,8 @@ const captchaCode = ref('')
 const captchaImg = ref('')
 const captchaUuid = ref('')
 const loading = ref(false)
+/** 注册开关：false 时不允许注册 */
+const registerEnabled = computed(() => appStore.loginEnabled && appStore.registerEnabled)
 
 /** 加载验证码 */
 async function loadCaptcha() {
@@ -103,12 +107,26 @@ async function loadCaptcha() {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await appStore.loadH5Config()
+  // 后台关闭注册（或关闭登录）时不允许停留在注册页
+  if (!registerEnabled.value) {
+    showToast({
+      message: appStore.loginEnabled ? '系统未开启注册功能' : '系统关闭登录',
+      className: 'my-toast'
+    })
+    goLogin()
+    return
+  }
   loadCaptcha()
 })
 
 /** 提交注册表单 */
 async function onSubmit() {
+  if (!registerEnabled.value) {
+    showToast({ message: '系统未开启注册功能', className: 'my-toast' })
+    return
+  }
   if (password.value !== confirmPwd.value) {
     showToast({ message: '两次密码不一致', className: 'my-toast' })
     return

@@ -6,6 +6,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.points.domain.H5ResetPwdDTO;
 import com.ruoyi.points.domain.H5User;
 import com.ruoyi.points.domain.Order;
 import com.ruoyi.points.domain.PointsDetail;
@@ -48,20 +50,22 @@ public class H5UserCenterController extends H5BaseController
         return toAjax(h5UserService.updateUser(u));
     }
 
-    /** 更新密码 */
+    /**
+     * 修改密码
+     *
+     * 安全要求：必须携带原密码，且新密码需满足复杂度策略（8 位以上 + 大小写字母 + 数字），
+     * 防止 token 被窃取后直接改密接管账号。
+     *
+     * 入参：{ "oldPassword": "旧密码", "newPassword": "新密码" }
+     */
     @PutMapping("/resetpwd")
-    public AjaxResult resetpwd(@RequestBody H5User user)
+    public AjaxResult resetpwd(@RequestBody H5ResetPwdDTO dto)
     {
-        user.setUserId(currentUserId());
-        // 仅允许更新少量字段
-        H5User u = new H5User();
-        u.setUserId(currentUserId());
-//        u.setNickname(user.getNickname());
-//        u.setName(user.getName());
-//        u.setAvatar(user.getAvatar());
-        // H5调用方法更新密码
-        u.setPassword(user.getPassword());
-        return toAjax(h5UserService.updateUser(u));
+        if (dto == null || StringUtils.isEmpty(dto.getOldPassword()) || StringUtils.isEmpty(dto.getNewPassword()))
+        {
+            return error("参数不完整");
+        }
+        return toAjax(h5UserService.changePassword(currentUserId(), dto.getOldPassword(), dto.getNewPassword()));
     }
 
     /** 我的积分明细（分页） */

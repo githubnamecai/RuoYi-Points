@@ -94,9 +94,16 @@
     </van-dialog>
 
     <!-- 修改密码 -->
-    <van-dialog v-model:show="showPassword" title="修改密码" show-cancel-button @confirm="savePasswordProfile">
+    <van-dialog
+      v-model:show="showPassword"
+      title="修改密码"
+      show-cancel-button
+      :before-close="beforeClosePassword"
+    >
       <div class="profile-form">
-        <van-field v-model="form.password" label="密码" placeholder="请输入密码" maxlength="20" />
+        <van-field v-model="form.oldPassword" type="password" label="原密码" placeholder="请输入原密码" maxlength="20" />
+        <van-field v-model="form.password" type="password" label="新密码" placeholder="8位以上，含大小写字母和数字" maxlength="20" />
+        <van-field v-model="form.confirmPassword" type="password" label="确认密码" placeholder="请再次输入新密码" maxlength="20" />
       </div>
     </van-dialog>
 
@@ -140,7 +147,14 @@ const showPassword = ref(false)
 const showRule = ref(false)
 const showAbout = ref(false)
 const stats = reactive({ toShip: 0, shipping: 0 })
-const form = reactive({ nickname: '', avatar: '' })
+const form = reactive({
+  nickname: '',
+  name: '',
+  avatar: '',
+  oldPassword: '',
+  password: '',
+  confirmPassword: ''
+})
 
 const userInfo = computed(() => userStore.userInfo || {})
 const nickname = computed(() => userStore.nickname || '未设置昵称')
@@ -173,9 +187,9 @@ function goEditProfile() {
 }
 
 function goEditPassword() {
-  form.nickname = userInfo.value.nickname || ''
-  form.avatar = userInfo.value.avatar || ''
-  form.name = userInfo.value.name || ''
+  form.oldPassword = ''
+  form.password = ''
+  form.confirmPassword = ''
   showPassword.value = true
 }
 
@@ -196,20 +210,56 @@ async function saveProfile() {
   await userStore.fetchUserInfo()
 }
 
-async function savePasswordProfile() {
-  if (!form.password || !form.password.trim()) {
-  showToast({
-  message: '密码不能为空',
-  className: 'my-toast'
-})
-    return
+/**
+ * 修改密码弹窗关闭前校验并提交
+ * 返回 false 时弹窗保持打开，便于用户修改
+ */
+async function beforeClosePassword(action) {
+  if (action !== 'confirm') return true
+
+  const oldPassword = (form.oldPassword || '').trim()
+  const newPassword = (form.password || '').trim()
+
+  if (!oldPassword) {
+    tip('请输入原密码')
+    return false
   }
-  await updateResetpwd({ password: form.password.trim() })
-  showToast({
-  message: '保存成功',
-  className: 'my-toast'
-})
-  await userStore.fetchUserInfo()
+  if (!newPassword) {
+    tip('请输入新密码')
+    return false
+  }
+  // 与后端 PasswordPolicy 保持一致：8 位以上，含大小写字母和数字
+  if (newPassword.length < 8 || !/[a-z]/.test(newPassword) || !/[A-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
+    tip('新密码需8位以上并包含大小写字母和数字')
+    return false
+  }
+  if (newPassword !== (form.confirmPassword || '').trim()) {
+    tip('两次输入的新密码不一致')
+    return false
+  }
+  if (newPassword === oldPassword) {
+    tip('新密码不能与原密码相同')
+    return false
+  }
+
+  try {
+    await updateResetpwd({ oldPassword, newPassword })
+    tip('密码修改成功，请重新登录')
+    form.oldPassword = ''
+    form.password = ''
+    form.confirmPassword = ''
+    // 后端已强制下线该用户全部会话，本地 token 同步清除并回到登录页
+    await userStore.logout()
+    router.replace('/login')
+    return true
+  } catch (e) {
+    // 原密码错误等业务异常已由 request 拦截器统一提示，保持弹窗打开
+    return false
+  }
+}
+
+function tip(message) {
+  showToast({ message, className: 'my-toast' })
 }
 
 function goPointsDetail() { router.push('/points/detail') }

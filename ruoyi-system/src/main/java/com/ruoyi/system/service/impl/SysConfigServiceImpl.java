@@ -11,6 +11,7 @@ import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.points.constant.PointsConstants;
 import com.ruoyi.system.domain.SysConfig;
 import com.ruoyi.system.mapper.SysConfigMapper;
 import com.ruoyi.system.service.ISysConfigService;
@@ -91,6 +92,41 @@ public class SysConfigServiceImpl implements ISysConfigService
             return true;
         }
         return Convert.toBool(captchaEnabled);
+    }
+
+    /**
+     * 获取 H5 端登录开关
+     *
+     * @return true 正常登录，false 关闭登录
+     */
+    @Override
+    public boolean selectH5LoginEnabled()
+    {
+        return selectSwitchEnabled(PointsConstants.CONFIG_H5_LOGIN_ENABLED);
+    }
+
+    /**
+     * 获取 H5 端注册开关
+     *
+     * @return true 开放注册，false 关闭注册
+     */
+    @Override
+    public boolean selectH5RegisterEnabled()
+    {
+        return selectSwitchEnabled(PointsConstants.CONFIG_H5_REGISTER_ENABLED);
+    }
+
+    /**
+     * 读取布尔型开关参数：仅当配置值（忽略大小写与首尾空格）为 true 时开启，
+     * 未配置、空值、false 及其他任何取值一律视为关闭。
+     *
+     * @param configKey 参数键名
+     * @return true 开启，false 关闭
+     */
+    private boolean selectSwitchEnabled(String configKey)
+    {
+        String value = selectConfigByKey(configKey);
+        return StringUtils.isNotEmpty(value) && Boolean.parseBoolean(value.trim());
     }
 
     /**

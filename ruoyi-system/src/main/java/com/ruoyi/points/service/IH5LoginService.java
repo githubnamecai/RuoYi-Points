@@ -3,15 +3,11 @@ package com.ruoyi.points.service;
 import com.ruoyi.points.domain.H5User;
 
 /**
- * H5 端登录/验证码服务
+ * H5 端登录服务
  */
 public interface IH5LoginService
 {
-    /** 发送验证码（mock 输出到日志） */
-    void sendSmsCode(String phone);
-
-    /** 校验验证码 + 自动注册 + 颁发 token */
-    String loginByCode(String phone, String code, String loginIp);
+    /** 密码登录（图形验证码在控制器层校验），返回 token */
     String loginByPassword(String phone, String password, String loginIp);
 
     /** 注册新用户（手机号 + 密码） */

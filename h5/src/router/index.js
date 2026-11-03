@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { useAppStore } from '@/stores/app'
 import { showToast } from 'vant'
 
 const routes = [
@@ -26,9 +27,19 @@ const router = createRouter({
   routes
 })
 
-// 全局守卫：未登录跳转登录页
-router.beforeEach((to, from, next) => {
+// 全局守卫：未登录跳转登录页；后台关闭注册时禁止进入注册页
+router.beforeEach(async (to, from, next) => {
   document.title = to.meta.title || '金山好物'
+  const appStore = useAppStore()
+  // 拉取后台开关配置（进程内只请求一次）
+  await appStore.loadH5Config()
+  if (to.path === '/register' && (!appStore.registerEnabled || !appStore.loginEnabled)) {
+    showToast({
+      message: '系统未开启注册功能',
+      className: 'my-toast'
+    })
+    return next({ path: '/login', query: to.query.redirect ? { redirect: to.query.redirect } : {} })
+  }
   if (to.meta.public) return next()
   const userStore = useUserStore()
   if (!userStore.token) {

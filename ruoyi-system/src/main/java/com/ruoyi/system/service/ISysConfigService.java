@@ -34,6 +34,20 @@ public interface ISysConfigService
     public boolean selectCaptchaEnabled();
 
     /**
+     * 获取 H5 端登录开关
+     *
+     * @return true 正常登录，false 关闭登录
+     */
+    public boolean selectH5LoginEnabled();
+
+    /**
+     * 获取 H5 端注册开关
+     *
+     * @return true 开放注册，false 关闭注册
+     */
+    public boolean selectH5RegisterEnabled();
+
+    /**
      * 查询参数配置列表
      * 
      * @param config 参数配置信息

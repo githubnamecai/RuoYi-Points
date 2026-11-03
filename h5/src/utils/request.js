@@ -46,10 +46,13 @@ service.interceptors.response.use(res => {
     }
     return Promise.reject(data)
   }
-  showToast({
-  message: data.msg || '请求异常',
-  className: 'my-toast'
-})
+  // silent: true 时不弹出全局错误提示（如后台开关配置等静默请求）
+  if (res.config.silent !== true) {
+    showToast({
+      message: data.msg || '请求异常',
+      className: 'my-toast'
+    })
+  }
   return Promise.reject(data)
 }, err => {
   loadingCount = 0
@@ -62,10 +65,12 @@ service.interceptors.response.use(res => {
       router.replace({ path: '/login', query: { redirect: router.currentRoute.value.fullPath } })
     }
   }
-  showToast({
-  message: err.response?.data?.msg || err.message || '网络错误',
-  className: 'my-toast'
-})
+  if (err.config?.silent !== true) {
+    showToast({
+      message: err.response?.data?.msg || err.message || '网络错误',
+      className: 'my-toast'
+    })
+  }
   return Promise.reject(err)
 })
 

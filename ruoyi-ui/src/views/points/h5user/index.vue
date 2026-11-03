@@ -185,7 +185,12 @@ export default {
       resetPwdRules: {
         newPassword: [
           { required: true, message: "新密码不能为空", trigger: "blur" },
-          { min: 6, max: 20, message: "密码长度在6到20个字符之间", trigger: "blur" }
+          {
+            // 与后端 PasswordPolicy 保持一致：8 位以上，且同时包含小写、大写字母和数字
+            pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,20}$/,
+            message: "密码需8位以上并包含大小写字母和数字",
+            trigger: "blur"
+          }
         ],
         confirmPassword: [
           { required: true, message: "请再次输入新密码", trigger: "blur" },

@@ -1,6 +1,7 @@
 package com.ruoyi.web.core.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import com.ruoyi.common.config.RuoYiConfig;
@@ -13,10 +14,13 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 
 /**
  * Swagger2的接口配置
- * 
+ *
+ * 仅在 springdoc.api-docs.enabled=true 时才装配，避免关闭接口文档后仍生成 OpenAPI 描述对象
+ *
  * @author ruoyi
  */
 @Configuration
+@ConditionalOnProperty(prefix = "springdoc.api-docs", name = "enabled", havingValue = "true")
 public class SwaggerConfig
 {
     /** 系统基础配置 */
