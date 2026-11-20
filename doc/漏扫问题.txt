@@ -1,0 +1,3 @@
+存在CORS 跨域配置不当
+
+存在Spring Boot Actuator H2Console 未授权 JNDI RCE
